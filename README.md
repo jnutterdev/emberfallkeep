@@ -1,4 +1,4 @@
-# 🐉 Emberfall Keep
+# Emberfall Keep
 
 > *A campaign management site for Dungeons & Dragons — built for the fellowship, by the fellowship.*
 
@@ -15,6 +15,7 @@ Emberfall Keep is a self-hosted web platform for tracking D&D campaigns, charact
 | CI/CD | GitHub Actions |
 | Hosting | Self-hosted server |
 | Icons | [Font Awesome](https://fontawesome.com) (free) |
+| Fonts | [Bunny Fonts](https://fonts.bunny.net) (privacy-friendly Google Fonts mirror) |
 | Content | Markdown / MDX |
 
 ---
@@ -100,6 +101,7 @@ emberfall-keep/
 │       └── global.css          # Base styles and resets
 ├── tina/
 │   └── config.ts               # TinaCMS schema definition
+├── index.html                  # Single-page HTML/CSS mockup (pre-Astro)
 ├── astro.config.mjs
 ├── package.json
 └── README.md
@@ -164,24 +166,31 @@ CLOUDINARY_CLOUD_NAME=your_cloudinary_name
 
 ## Design System
 
-Full design details are documented in [`SITE_BRIEF.md`](./SITE_BRIEF.md). Quick reference:
+Full design details are documented in [`emberfall-keep-site-brief.md`](./emberfall-keep-site-brief.md). Quick reference:
 
 ### Colors
 
+Palette derived from CROM fantasy illustration — warm charcoal, cream line art, muted steel blue, ember salmon.
+
 ```css
---color-void:        #111010;   /* page background */
---color-surface:     #1a1918;   /* cards, nav */
---color-border:      #2e2c2a;   /* dividers */
---color-gold:        #e8c97a;   /* headings, display text */
---color-gold-mid:    #c8a84a;   /* secondary headings */
---color-gold-muted:  #a88a32;   /* labels, metadata */
---color-cyan:        #34b0c8;   /* active states, accents */
---color-cyan-deep:   #1a6878;   /* accent backgrounds */
+--void-deep:      #272524;   /* page background */
+--void-surface:   #302e2c;   /* cards, nav */
+--void-border:    #4a4845;   /* dividers */
+--mist-bright:    #ddd4b0;   /* headings, display text */
+--mist-mid:       #b8b098;   /* body text */
+--teal-mid:       #6898a8;   /* active states, accents */
+--mauve-bright:   #c88878;   /* fire/ember accents */
+--gold:           #c8b878;   /* ornamental accents */
 ```
 
 ### Fonts
 
+All fonts loaded via [Bunny Fonts](https://fonts.bunny.net) — a privacy-friendly, GDPR-compliant alternative to Google Fonts.
+
 ```css
+/* Identity (EK monogram) */
+font-family: 'Almendra Display', serif;   /* 700 only */
+
 /* Display */
 font-family: 'Cinzel Decorative', serif;
 
@@ -194,8 +203,6 @@ font-family: 'IM Fell English', serif;
 /* Stats / Code */
 font-family: monospace;
 ```
-
-All fonts loaded from Google Fonts. See `src/styles/tokens.css` for the full type scale.
 
 ---
 
