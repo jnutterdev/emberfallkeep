@@ -307,8 +307,6 @@ A narrative log of each session. Written in IM Fell English italic. Includes: da
 
 ### Astro Content Collections
 
-Suggested collection structure:
-
 ```
 src/content/
 ├── campaigns/        # One .md per campaign
@@ -320,11 +318,122 @@ src/content/
 └── maps/             # Map metadata (image paths + pin data)
 ```
 
-### TinaCMS Schema Notes
+### TinaCMS Collections
 
-- Characters, sessions, and campaign entries should all be editable via Tina
-- DM-only fields should be gated behind a `dmOnly: true` flag in the schema and hidden via a layout check
-- Image fields should accept uploads and store paths for duotone treatment at render time
+Each collection maps to a folder above. The Compendium is split into separate collections (NPCs, Factions, Items) so each type can have purpose-built fields — they are grouped under a "Compendium" label in the admin sidebar.
+
+#### Campaigns
+
+| Field | Type | Notes |
+|---|---|---|
+| `title` | string | Campaign name (isTitle) |
+| `status` | string (enum) | Active / Archived / Planned |
+| `tagline` | string | Short flavour line for cards |
+| `description` | text | Player-visible overview |
+| `startDate` | datetime | |
+| `lastSession` | datetime | |
+| `sessionCount` | number | |
+| `dungeonMaster` | string | |
+| `coverImage` | image | Banner / key art — duotone treated |
+| `setting` | string | World / region name |
+| `system` | string | e.g. D&D 5e |
+| `body` | rich-text | Extended campaign notes (isBody) |
+| `dmNotes` | rich-text | **DM only** — plot hooks, secrets, pacing |
+
+#### Fellowship (Characters)
+
+| Field | Type | Notes |
+|---|---|---|
+| `name` | string | Character name (isTitle) |
+| `player` | string | Player's name |
+| `campaign` | string | Parent campaign slug |
+| `active` | boolean | False for deceased / retired |
+| `portrait` | image | Duotone treated |
+| `race` | string | |
+| `characterClass` | string | |
+| `subclass` | string | |
+| `level` | number | |
+| `background` | string | |
+| `alignment` | string (enum) | Nine alignments |
+| `stats` | object | STR / DEX / CON / INT / WIS / CHA |
+| `combat` | object | Max HP, AC, Speed, Initiative, Hit Dice, Proficiency Bonus |
+| `xpTracking` | string (enum) | XP or Milestone |
+| `xp` | number | Current XP total |
+| `spellcasting` | object | Ability, Save DC, Attack Bonus, Slots (l1–l9) |
+| `personalityTraits` | text | |
+| `ideals` | text | |
+| `bonds` | text | |
+| `flaws` | text | |
+| `backstory` | rich-text | |
+| `body` | rich-text | Freeform notes & inventory (isBody) |
+
+#### Chronicles (Sessions)
+
+| Field | Type | Notes |
+|---|---|---|
+| `title` | string | e.g. "Session XIV — The Siege of Ashveil" (isTitle) |
+| `sessionNumber` | number | |
+| `campaign` | string | Parent campaign slug |
+| `date` | datetime | Date played |
+| `partyPresent` | string[] | Character names who attended |
+| `summary` | text | 1–2 sentence summary for index |
+| `rewards` | object | XP awarded, gold/treasure, notable loot (string[]) |
+| `body` | rich-text | Full narrative recap (isBody) |
+| `dmNotes` | rich-text | **DM only** — what worked, threads to follow |
+
+#### Compendium — NPCs
+
+| Field | Type | Notes |
+|---|---|---|
+| `name` | string | isTitle |
+| `title` | string | Role / epithet (e.g. High Priest of Mystra) |
+| `campaign` | string | Parent campaign slug |
+| `status` | string (enum) | Alive / Deceased / Unknown / Missing |
+| `disposition` | string (enum) | Friendly / Neutral / Hostile / Unknown |
+| `portrait` | image | Duotone treated |
+| `location` | string | Last known location |
+| `affiliation` | string | Faction or organisation |
+| `description` | text | Physical description |
+| `body` | rich-text | Player-visible history & interactions (isBody) |
+| `dmNotes` | rich-text | **DM only** — true motives, secrets, plot role |
+
+#### Compendium — Factions
+
+| Field | Type | Notes |
+|---|---|---|
+| `name` | string | isTitle |
+| `type` | string (enum) | Guild / Religious Order / Noble House / Criminal / Military / Political / Other |
+| `motto` | string | |
+| `emblem` | image | Duotone treated |
+| `alignment` | string (enum) | Nine alignments |
+| `partyRelationship` | string (enum) | Allied / Friendly / Neutral / Tense / Hostile / Unknown |
+| `headquarters` | string | |
+| `notableMembers` | string[] | Names or NPC slugs |
+| `description` | text | Brief overview |
+| `body` | rich-text | History & lore (isBody) |
+| `dmNotes` | rich-text | **DM only** — true goals, internal conflicts, plot hooks |
+
+#### Compendium — Items
+
+| Field | Type | Notes |
+|---|---|---|
+| `name` | string | isTitle |
+| `type` | string (enum) | Weapon / Armor / Wondrous Item / Ring / Rod / Staff / Wand / Potion / Scroll / Artifact / Other |
+| `rarity` | string (enum) | Common / Uncommon / Rare / Very Rare / Legendary / Artifact / Unknown |
+| `requiresAttunement` | boolean | |
+| `attunementNote` | string | e.g. "by a spellcaster" |
+| `currentHolder` | string | Character name or "Party Stash" |
+| `foundIn` | string | Session title or location |
+| `image` | image | Duotone treated |
+| `properties` | text | Stats, bonuses, charges, effects |
+| `body` | rich-text | Lore & history (isBody) |
+| `dmNotes` | rich-text | **DM only** — true history, curses, plot significance |
+
+#### General Schema Notes
+
+- All `dmNotes` fields are suppressed at render time via a layout check — never exposed on player-facing pages
+- All `image` fields store paths for duotone treatment at render time via CSS `mix-blend-mode` or Sharp
+- Filenames are auto-slugified from the primary name/title field
 
 ---
 
