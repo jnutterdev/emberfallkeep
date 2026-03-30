@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emberfall Keep</title>
+
+  <link rel="preconnect" href="https://fonts.bunny.net">
+  <link href="https://fonts.bunny.net/css?family=cinzel:400,600,700|cinzel-decorative:700|almendra-display:700|im-fell-english:400,400i|texturina:400,400i&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    /* ─── Tokens ─────────────────────────────────────────────────── */
+    :root {
+      /* Warm charcoal — CROM illustration background */
+      --void-deep:      #272524;
+      --void-surface:   #302e2c;
+      --void-raised:    #3a3836;
+      --void-border:    #4a4845;
+      /* Cream/ivory — line art outlines */
+      --mist-bright:    #ddd4b0;
+      --mist-mid:       #b8b098;
+      --mist-deep:      #807868;
+      /* Muted steel blue — armour */
+      --teal-bright:    #a0c0c8;
+      --teal-mid:       #6898a8;
+      --teal-deep:      #3a6070;
+      --teal-tint:      #141e22;
+      /* Salmon/peach — fire */
+      --mauve-bright:   #c88878;
+      --mauve-mid:      #905848;
+      /* Warm cream-gold — book spines */
+      --gold:           #c8b878;
+      --text-primary:   #ddd4b0;
+      --text-body:      #a8a090;
+      --text-muted:     #706858;
+      --text-dim:       #504848;
+      --border-default: #4a4845;
+      --border-accent:  rgba(104, 152, 168, 0.4);
+      --border-mist:    rgba(221, 212, 176, 0.2);
+    }
+
+    /* ─── Reset ──────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--void-deep);
+      /* Vignette: faint salmon top-left, faint steel bottom-right */
+      background-image:
+        radial-gradient(ellipse 70% 50% at 0%   0%,   rgba(180, 100, 80, 0.07)  0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(104, 152, 168, 0.07) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 60% at 50%  50%,  transparent 50%, rgba(20, 18, 18, 0.4) 100%);
+      background-attachment: fixed;
+      color: var(--text-body);
+      font-family: 'IM Fell English', serif;
+      font-size: 15px;
+      line-height: 1.75;
+      min-height: 100vh;
+    }
+
+    img { display: block; width: 100%; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--void-deep); }
+    ::-webkit-scrollbar-thumb { background: var(--void-border); border-radius: 3px; }
+
+    /* ─── Nav ────────────────────────────────────────────────────── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 52px;
+      background: rgba(39, 37, 36, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(74, 72, 69, 0.5);
+    }
+    .nav-brand {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mist-mid);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .nav-brand i { color: var(--teal-mid); }
+    .nav-links {
+      display: flex;
+      gap: 0;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 0.4rem 0.9rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--mist-bright); }
+    .nav-discord { color: #7289da !important; }
+    .nav-discord:hover { color: #99aaf0 !important; }
+
+    /* ─── Section headings ───────────────────────────────────────── */
+    .section-label {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 700;
+      color: var(--mist-bright);
+      line-height: 1;
+      letter-spacing: 0.02em;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ─── Content wrapper ────────────────────────────────────────── */
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2.5rem;
+    }
+
+    /* ─── HERO ───────────────────────────────────────────────────── */
+    .hero {
+      margin-top: 52px;
+      position: relative;
+      height: 88vh;
+      min-height: 520px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    /* Placeholder art — duotone style */
+    .hero-art {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to bottom, transparent 35%, var(--void-deep) 100%),
+        radial-gradient(ellipse 60% 70% at 30% 60%, rgba(180, 100, 80, 0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 75% 40%, rgba(104, 152, 168, 0.14) 0%, transparent 55%),
+        linear-gradient(135deg, #1e1c1c 0%, #2e2a28 40%, #1c1a18 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* ─── Monogram ───────────────────────────────────────────────── */
+    .monogram-hero {
+      position: absolute;
+      right: 8%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 280px;
+      height: 280px;
+      color: rgba(104, 152, 168, 0.13);
+    }
+    .monogram-nav {
+      width: 30px;
+      height: 30px;
+      color: var(--teal-mid);
+      flex-shrink: 0;
+    }
+    /* Grain */
+    .hero-art::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      padding: 0 2.5rem 3.5rem;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .hero-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(40px, 7vw, 80px);
+      font-weight: 700;
+      color: var(--mist-bright);
+      line-height: 1.0;
+      letter-spacing: 0.01em;
+      text-shadow: 0 2px 40px rgba(0,0,0,0.6);
+    }
+
+    .hero-right {
+      text-align: right;
+      max-width: 280px;
+      padding-bottom: 0.4rem;
+    }
+    .hero-tagline {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: var(--mist-mid);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: flex-end;
+    }
+    .hero-link {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--teal-mid);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(104, 152, 168, 0.4);
+      padding-bottom: 1px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .hero-link:hover { color: var(--teal-bright); border-color: var(--teal-bright); }
+
+    .pill-active {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 2px;
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      background: rgba(104, 152, 168, 0.1);
+      border: 1px solid rgba(104, 152, 168, 0.4);
+      color: var(--teal-bright);
+      margin-bottom: 0.75rem;
+    }
+    .pill-active::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--teal-bright);
+    }
+
+    /* ─── THE CAMPAIGN ───────────────────────────────────────────── */
+    .campaign {
+      padding: 6rem 0 5rem;
+      border-bottom: 1px solid var(--border-default);
+      background: linear-gradient(160deg, rgba(180, 100, 80, 0.05) 0%, transparent 50%);
+    }
+    .campaign-inner {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    .campaign-image {
+      aspect-ratio: 3/4;
+      background: var(--void-raised);
+      border: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(104, 152, 168, 0.15);
+      font-size: 64px;
+      position: relative;
+      overflow: hidden;
+    }
+    .campaign-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(39,37,36,0.6) 0%, transparent 50%);
+    }
+    .campaign-text {}
+    .campaign-meta {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 1.25rem;
+    }
+    .campaign-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--mist-bright);
+      line-height: 1.15;
+      margin-bottom: 0.25rem;
+    }
+    .campaign-subtitle {
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+    .campaign-desc {
+      font-style: italic;
+      font-size: 15px;
+      color: var(--text-body);
+      line-height: 1.85;
+      margin-bottom: 1.5rem;
+    }
+    .campaign-callout {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(16px, 2.5vw, 22px);
+      color: var(--mist-mid);
+      line-height: 1.3;
+      margin: 2rem 0;
+      max-width: 420px;
+    }
+    .campaign-stats {
+      display: flex;
+      gap: 2rem;
+      padding: 1.25rem 0;
+      border-top: 1px solid var(--border-default);
+      border-bottom: 1px solid var(--border-default);
+      margin-bottom: 1.5rem;
+    }
+    .campaign-stat .lbl {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      display: block;
+    }
+    .campaign-stat .val {
+      font-family: monospace;
+      font-size: 14px;
+      color: var(--teal-mid);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.5rem 1.1rem;
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-radius: 2px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+      border: 1px solid transparent;
+      margin-right: 0.5rem;
+    }
+    .btn-primary {
+      background: var(--teal-deep);
+      border-color: rgba(104, 152, 168, 0.4);
+      color: var(--teal-bright);
+    }
+    .btn-primary:hover { background: var(--teal-mid); color: var(--void-deep); }
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--border-default);
+      color: var(--text-muted);
+    }
+    .btn-ghost:hover { border-color: rgba(221,212,176,0.3); color: var(--mist-bright); }
+
+    /* ─── THE FELLOWSHIP (5-across) ─────────────────────────────── */
+    .fellowship {
+      padding: 6rem 0 5rem;
+      border-bottom: 1px solid var(--border-default);
+      background: linear-gradient(180deg, rgba(104, 152, 168, 0.05) 0%, transparent 60%);
+    }
+    .fellowship-intro {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 2.5rem;
+      gap: 2rem;
+    }
+    .fellowship-tagline {
+      font-style: italic;
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 260px;
+      text-align: right;
+      line-height: 1.65;
+      padding-top: 0.5rem;
+    }
+
+    .portraits {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: 1rem;
+    }
+    .portrait {
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+    }
+    .portrait-img {
+      aspect-ratio: 2/3;
+      background: var(--void-raised);
+      border: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: rgba(104, 152, 168, 0.2);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.25s;
+    }
+    /* Duotone teal overlay */
+    .portrait-img::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--teal-tint);
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+    .portrait:hover .portrait-img {
+      border-color: rgba(104, 152, 168, 0.5);
+    }
+    .portrait-caption {
+      padding: 0.6rem 0 0;
+    }
+    .portrait-name {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--mist-mid);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .portrait-class {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+    }
+
+    .portraits-nav {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+    .portraits-nav button {
+      width: 32px; height: 32px;
+      border: 1px solid var(--border-default);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .portraits-nav button:hover {
+      color: var(--mist-bright);
+      border-color: rgba(221, 212, 176, 0.3);
+    }
+
+    /* ─── CHRONICLES (numbered sessions) ────────────────────────── */
+    .chronicles {
+      padding: 6rem 0 5rem;
+      border-bottom: 1px solid var(--border-default);
+      background: linear-gradient(200deg, rgba(180, 100, 80, 0.04) 0%, transparent 45%),
+                  linear-gradient(to bottom, transparent 60%, rgba(104, 152, 168, 0.04) 100%);
+    }
+    .chronicles-inner {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 5rem;
+      align-items: start;
+    }
+    .chronicles-image {
+      aspect-ratio: 3/4;
+      background: var(--void-raised);
+      border: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      color: rgba(200, 136, 120, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+    .chronicles-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(39,37,36,0.7) 0%, transparent 60%);
+    }
+    .chronicles-list {
+      list-style: none;
+      padding-top: 0.5rem;
+    }
+    .chronicles-list li {
+      border-bottom: 1px solid var(--border-default);
+      padding: 1.25rem 0;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .chronicles-list li:first-child { border-top: 1px solid var(--border-default); }
+    .chronicles-list li:hover .ch-title { color: var(--mist-bright); }
+    .ch-num {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--teal-mid);
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+    .ch-title {
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--mist-mid);
+      margin-bottom: 0.3rem;
+      transition: color 0.2s;
+      letter-spacing: 0.04em;
+    }
+    .ch-desc {
+      font-style: italic;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .ch-meta {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-top: 0.5rem;
+    }
+
+    /* ─── COMPENDIUM ─────────────────────────────────────────────── */
+    .compendium {
+      padding: 6rem 0 5rem;
+      border-bottom: 1px solid var(--border-default);
+      background: linear-gradient(160deg, rgba(104, 152, 168, 0.05) 0%, transparent 50%),
+                  linear-gradient(to bottom right, transparent 50%, rgba(180, 100, 80, 0.04) 100%);
+    }
+    .compendium-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: start;
+    }
+    .compendium-info {}
+    .compendium-tagline {
+      font-style: italic;
+      font-size: 22px;
+      color: var(--mist-mid);
+      font-family: 'Cinzel Decorative', serif;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 2rem;
+      max-width: 340px;
+    }
+    .compendium-counts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem 2rem;
+    }
+    .comp-count-item .n {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 32px;
+      color: var(--teal-mid);
+      line-height: 1;
+      margin-bottom: 0.2rem;
+    }
+    .comp-count-item .lbl {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .compendium-entries {}
+    .comp-entry {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border-default);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .comp-entry:first-child { border-top: 1px solid var(--border-default); }
+    .comp-entry:hover .comp-entry-title { color: var(--mist-bright); }
+    .comp-entry-icon {
+      width: 32px; height: 32px; flex-shrink: 0;
+      border: 1px solid var(--border-default);
+      background: var(--void-raised);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--teal-mid);
+      font-size: 13px;
+      border-radius: 2px;
+      margin-top: 2px;
+    }
+    .comp-entry-body {}
+    .comp-entry-title {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--mist-mid);
+      margin-bottom: 0.15rem;
+      transition: color 0.2s;
+      letter-spacing: 0.04em;
+    }
+    .comp-entry-desc {
+      font-style: italic;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .comp-entry-count {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-top: 0.25rem;
+    }
+
+    /* ─── Footer ─────────────────────────────────────────────────── */
+    .footer {
+      padding: 3.5rem 2.5rem 2.5rem;
+      text-align: center;
+      border-top: 1px solid var(--border-default);
+    }
+    .footer-brand {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 18px;
+      color: var(--mist-mid);
+      display: block;
+      margin-bottom: 0.75rem;
+    }
+    .footer-links {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .footer-links a {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--mist-mid); }
+    .footer-discord { color: #7289da !important; }
+    .footer-discord:hover { color: #99aaf0 !important; }
+    .footer-motto {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* ─── Responsive ─────────────────────────────────────────────── */
+    @media (max-width: 800px) {
+      .nav-links { display: none; }
+      .hero-content { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+      .hero-right { text-align: left; }
+      .hero-actions { justify-content: flex-start; }
+      .campaign-inner { grid-template-columns: 1fr; }
+      .campaign-image { aspect-ratio: 16/9; }
+      .fellowship-intro { flex-direction: column; }
+      .fellowship-tagline { text-align: left; max-width: 100%; }
+      .portraits { grid-template-columns: repeat(3, 1fr); }
+      .portraits .portrait:nth-child(n+4) { display: none; }
+      .chronicles-inner { grid-template-columns: 1fr; }
+      .chronicles-image { aspect-ratio: 16/9; }
+      .compendium-inner { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 500px) {
+      .wrap { padding: 0 1.25rem; }
+      .portraits { grid-template-columns: repeat(2, 1fr); }
+      .portraits .portrait:nth-child(n+3) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <a href="#" class="nav-brand">
+      <svg class="monogram-nav" viewBox="0 0 60 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text x="30" y="33" text-anchor="middle"
+              font-family="Almendra Display, serif"
+              font-size="28" font-weight="700"
+              fill="currentColor">EK</text>
+      </svg>
+      Emberfall Keep
+    </a>
+    <ul class="nav-links">
+      <li><a href="#campaign">Campaign</a></li>
+      <li><a href="#fellowship">Fellowship</a></li>
+      <li><a href="#chronicles">Chronicles</a></li>
+      <li><a href="#compendium">Compendium</a></li>
+      <li><a href="https://discord.gg/dTRaBUNY" target="_blank" rel="noopener" class="nav-discord"><i class="fa-brands fa-discord"></i> Discord</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── HERO ───────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-art">
+      <svg class="monogram-hero" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Cardinal diamonds -->
+        <polygon points="140,4  144,12 140,20 136,12" fill="currentColor" opacity="0.5"/>
+        <polygon points="140,180 144,188 140,196 136,188" fill="currentColor" opacity="0.5"/>
+        <polygon points="4,100  12,104 20,100 12,96"   fill="currentColor" opacity="0.5"/>
+        <polygon points="260,100 268,104 276,100 268,96" fill="currentColor" opacity="0.5"/>
+        <!-- Thin horizontal rule through centre -->
+        <line x1="4" y1="100" x2="276" y2="100" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+        <!-- EK letterform -->
+        <text x="140" y="150"
+              text-anchor="middle"
+              font-family="Almendra Display, serif"
+              font-size="130" font-weight="700"
+              fill="currentColor" opacity="0.9">EK</text>
+      </svg>
+    </div>
+    <div class="hero-content wrap">
+      <div>
+        <div class="pill-active">Active Campaign</div>
+        <h1 class="hero-title">The Shattered<br>Crown</h1>
+      </div>
+      <div class="hero-right">
+        <p class="hero-tagline">A kingdom in ruin. Three factions. One crown that should not exist.</p>
+        <div class="hero-actions">
+          <a href="#chronicles" class="hero-link">Latest Session</a>
+          <a href="#campaign" class="hero-link">Campaign Detail</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── THE CAMPAIGN ───────────────────────────────────────────── -->
+  <section class="campaign" id="campaign">
+    <div class="wrap">
+      <h2 class="section-label">The Campaign</h2>
+      <div class="campaign-inner">
+
+        <div class="campaign-image">
+          <i class="fa-solid fa-map"></i>
+        </div>
+
+        <div class="campaign-text">
+          <p class="campaign-meta"><i class="fa-solid fa-compass"></i> &nbsp; Valdris &nbsp;&middot;&nbsp; Session XVII &nbsp;&middot;&nbsp; Level 7</p>
+          <h3 class="campaign-title">The Shattered Crown</h3>
+          <p class="campaign-subtitle">A campaign of intrigue, ruin, and reckoning</p>
+
+          <p class="campaign-desc">
+            The war-torn kingdom of Valdris has gone silent. Three factions vie for the pieces of
+            a crown that should not exist — and the party stands at the centre of it all, unaware
+            that the shards are already calling to one of their own.
+          </p>
+
+          <p class="campaign-callout">
+            Where campaigns are forged<br>and legends remembered.
+          </p>
+
+          <div class="campaign-stats">
+            <div class="campaign-stat">
+              <span class="lbl">Sessions</span>
+              <span class="val">XVII</span>
+            </div>
+            <div class="campaign-stat">
+              <span class="lbl">Last Played</span>
+              <span class="val">22 Mar 2026</span>
+            </div>
+            <div class="campaign-stat">
+              <span class="lbl">Party Size</span>
+              <span class="val">5</span>
+            </div>
+            <div class="campaign-stat">
+              <span class="lbl">Locations</span>
+              <span class="val">14</span>
+            </div>
+          </div>
+
+          <a href="#" class="btn btn-primary"><i class="fa-solid fa-scroll"></i> Latest Session</a>
+          <a href="#" class="btn btn-ghost"><i class="fa-solid fa-dungeon"></i> Full Campaign</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── THE FELLOWSHIP ─────────────────────────────────────────── -->
+  <section class="fellowship" id="fellowship">
+    <div class="wrap">
+      <div class="fellowship-intro">
+        <h2 class="section-label">The Fellowship</h2>
+        <p class="fellowship-tagline">
+          Five adventurers. One table. More arguments about loot than any dragon has ever caused.
+        </p>
+      </div>
+
+      <div class="portraits">
+
+        <div class="portrait">
+          <div class="portrait-img"><i class="fa-solid fa-shield-halved"></i></div>
+          <div class="portrait-caption">
+            <p class="portrait-name">Korrath Ironveil</p>
+            <p class="portrait-class">Fighter · Lvl 7</p>
+          </div>
+        </div>
+
+        <div class="portrait">
+          <div class="portrait-img"><i class="fa-solid fa-wand-sparkles"></i></div>
+          <div class="portrait-caption">
+            <p class="portrait-name">Caelindra</p>
+            <p class="portrait-class">Wizard · Lvl 7</p>
+          </div>
+        </div>
+
+        <div class="portrait">
+          <div class="portrait-img"><i class="fa-solid fa-music"></i></div>
+          <div class="portrait-caption">
+            <p class="portrait-name">Orryn Thistlewick</p>
+            <p class="portrait-class">Bard · Lvl 7</p>
+          </div>
+        </div>
+
+        <div class="portrait">
+          <div class="portrait-img"><i class="fa-solid fa-leaf"></i></div>
+          <div class="portrait-caption">
+            <p class="portrait-name">Sereveth</p>
+            <p class="portrait-class">Druid · Lvl 7</p>
+          </div>
+        </div>
+
+        <div class="portrait">
+          <div class="portrait-img"><i class="fa-solid fa-skull"></i></div>
+          <div class="portrait-caption">
+            <p class="portrait-name">Mira Ashvale</p>
+            <p class="portrait-class">Rogue · Lvl 7</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="portraits-nav">
+        <button><i class="fa-solid fa-chevron-left"></i></button>
+        <button><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CHRONICLES ─────────────────────────────────────────────── -->
+  <section class="chronicles" id="chronicles">
+    <div class="wrap">
+      <h2 class="section-label">Chronicles</h2>
+      <div class="chronicles-inner">
+
+        <div class="chronicles-image">
+          <i class="fa-solid fa-book-open"></i>
+        </div>
+
+        <ul class="chronicles-list">
+          <li>
+            <span class="ch-num">Session XVII</span>
+            <p class="ch-title">The Ashenveil Accord</p>
+            <p class="ch-desc">The party arrived in Ashenveil just as the funeral pyres were lit. Halveth's amulet surfaced. Korrath did not hesitate.</p>
+            <p class="ch-meta">22 Mar 2026 &nbsp;&middot;&nbsp; 650 XP &nbsp;&middot;&nbsp; 2 Encounters</p>
+          </li>
+          <li>
+            <span class="ch-num">Session XVI</span>
+            <p class="ch-title">The Silence of Duskgate</p>
+            <p class="ch-desc">A town that had stopped speaking. The wells were dry. The temple doors were open but no one was inside.</p>
+            <p class="ch-meta">8 Mar 2026 &nbsp;&middot;&nbsp; 500 XP &nbsp;&middot;&nbsp; 1 Encounter</p>
+          </li>
+          <li>
+            <span class="ch-num">Session XV</span>
+            <p class="ch-title">Blood on the Meridian Road</p>
+            <p class="ch-desc">An ambush that should have been routine. The insignia on the attackers' armour changed everything.</p>
+            <p class="ch-meta">22 Feb 2026 &nbsp;&middot;&nbsp; 700 XP &nbsp;&middot;&nbsp; 3 Encounters</p>
+          </li>
+          <li>
+            <span class="ch-num">Session XIV</span>
+            <p class="ch-title">The Cartographer's Confession</p>
+            <p class="ch-desc">He had been mapping a place that wasn't on any chart. And he had been there more than once.</p>
+            <p class="ch-meta">8 Feb 2026 &nbsp;&middot;&nbsp; 450 XP &nbsp;&middot;&nbsp; 0 Encounters</p>
+          </li>
+        </ul>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── COMPENDIUM ─────────────────────────────────────────────── -->
+  <section class="compendium" id="compendium">
+    <div class="wrap">
+      <h2 class="section-label">Compendium</h2>
+      <div class="compendium-inner">
+
+        <div class="compendium-info">
+          <p class="compendium-tagline">
+            A living record of the world the party is unravelling.
+          </p>
+          <div class="compendium-counts">
+            <div class="comp-count-item">
+              <p class="n">34</p>
+              <p class="lbl">NPCs</p>
+            </div>
+            <div class="comp-count-item">
+              <p class="n">8</p>
+              <p class="lbl">Factions</p>
+            </div>
+            <div class="comp-count-item">
+              <p class="n">19</p>
+              <p class="lbl">Items & Artifacts</p>
+            </div>
+            <div class="comp-count-item">
+              <p class="n">14</p>
+              <p class="lbl">Named Locations</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="compendium-entries">
+          <div class="comp-entry">
+            <div class="comp-entry-icon"><i class="fa-solid fa-person-walking"></i></div>
+            <div class="comp-entry-body">
+              <p class="comp-entry-title">NPCs</p>
+              <p class="comp-entry-desc">Named figures of Valdris — allies, enemies, and those whose allegiances have yet to be determined.</p>
+              <p class="comp-entry-count">34 entries &nbsp;&middot;&nbsp; 6 added this arc</p>
+            </div>
+          </div>
+          <div class="comp-entry">
+            <div class="comp-entry-icon"><i class="fa-solid fa-flag"></i></div>
+            <div class="comp-entry-body">
+              <p class="comp-entry-title">Factions</p>
+              <p class="comp-entry-desc">The Obsidian Court, the Thornguard, the Pale Collegium — and those who serve no master.</p>
+              <p class="comp-entry-count">8 factions &nbsp;&middot;&nbsp; 2 allegiances shifted</p>
+            </div>
+          </div>
+          <div class="comp-entry">
+            <div class="comp-entry-icon"><i class="fa-solid fa-gem"></i></div>
+            <div class="comp-entry-body">
+              <p class="comp-entry-title">Items & Artifacts</p>
+              <p class="comp-entry-desc">Relics found, traded, and buried. Some objects have histories longer than the kingdoms that forged them.</p>
+              <p class="comp-entry-count">19 entries &nbsp;&middot;&nbsp; Halveth's Seal recently added</p>
+            </div>
+          </div>
+          <div class="comp-entry">
+            <div class="comp-entry-icon"><i class="fa-solid fa-map"></i></div>
+            <div class="comp-entry-body">
+              <p class="comp-entry-title">Maps</p>
+              <p class="comp-entry-desc">Valdris world map, Ashenveil region, and three dungeon maps — with named pins and lore annotations.</p>
+              <p class="comp-entry-count">3 maps &nbsp;&middot;&nbsp; 14 pinned locations</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <span class="footer-brand">Emberfall Keep</span>
+    <ul class="footer-links">
+      <li><a href="#campaign">Campaign</a></li>
+      <li><a href="#fellowship">Fellowship</a></li>
+      <li><a href="#chronicles">Chronicles</a></li>
+      <li><a href="#compendium">Compendium</a></li>
+      <li><a href="https://discord.gg/dTRaBUNY" target="_blank" rel="noopener" class="footer-discord"><i class="fa-brands fa-discord"></i> Discord</a></li>
+    </ul>
+    <p class="footer-motto">In Omnia Paratus &middot; Est. 2026</p>
+  </footer>
+
+</body>
+</html>
