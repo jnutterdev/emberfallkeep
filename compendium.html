@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Compendium — Emberfall Keep</title>
+        <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+        <link rel="preconnect" href="https://fonts.bunny.net" />
+        <link
+            href="https://fonts.bunny.net/css?family=cinzel:400,600,700|cinzel-decorative:700|almendra-sc:400|im-fell-english:400,400i|texturina:400,400i&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        />
+
+        <style>
+            /* ─── Tokens ─────────────────────────────────────────────────── */
+            :root {
+                --void-deep:      #272524;
+                --void-surface:   #302e2c;
+                --void-raised:    #3a3836;
+                --void-border:    #4a4845;
+                --mist-bright:    #ddd4b0;
+                --mist-mid:       #b8b098;
+                --mist-deep:      #807868;
+                --teal-bright:    #a0c0c8;
+                --teal-mid:       #6898a8;
+                --teal-deep:      #3a6070;
+                --teal-tint:      #141e22;
+                --mauve-bright:   #c88878;
+                --mauve-mid:      #905848;
+                --gold:           #c8b878;
+                --text-primary:   #ddd4b0;
+                --text-body:      #a8a090;
+                --text-muted:     #b09888;
+                --text-dim:       #9a8c7e;
+                --border-default: #4a4845;
+                --border-accent:  rgba(104, 152, 168, 0.4);
+                --border-mist:    rgba(221, 212, 176, 0.2);
+            }
+
+            *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+            html { scroll-behavior: smooth; }
+
+            body {
+                background-color: var(--void-deep);
+                background-image:
+                    radial-gradient(ellipse 70% 50% at 0% 0%, rgba(180,100,80,0.07) 0%, transparent 60%),
+                    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(104,152,168,0.07) 0%, transparent 55%),
+                    radial-gradient(ellipse 80% 60% at 50% 50%, transparent 50%, rgba(20,18,18,0.4) 100%);
+                background-attachment: fixed;
+                color: var(--text-body);
+                font-family: "IM Fell English", serif;
+                font-size: 15px;
+                line-height: 1.75;
+                min-height: 100vh;
+            }
+
+            img { display: block; width: 100%; }
+            ::-webkit-scrollbar { width: 5px; }
+            ::-webkit-scrollbar-track { background: var(--void-deep); }
+            ::-webkit-scrollbar-thumb { background: var(--void-border); border-radius: 3px; }
+
+            /* ─── Nav ────────────────────────────────────────────────────── */
+            .nav {
+                position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+                display: flex; align-items: center; justify-content: space-between;
+                padding: 0 2.5rem; height: 52px;
+                background: rgba(39,37,36,0.92);
+                backdrop-filter: blur(8px);
+                border-bottom: 1px solid rgba(74,72,69,0.5);
+            }
+            .nav-brand {
+                font-family: "Cinzel", serif; font-size: 11px; font-weight: 600;
+                letter-spacing: 0.2em; text-transform: uppercase;
+                color: var(--mist-mid); text-decoration: none;
+                display: flex; align-items: center; gap: 0.5rem;
+            }
+            .monogram-nav { width: 30px; height: 30px; color: var(--teal-mid); flex-shrink: 0; }
+            .nav-links { display: flex; gap: 0; list-style: none; }
+            .nav-links a {
+                font-family: "Cinzel", serif; font-size: 10px;
+                letter-spacing: 0.15em; text-transform: uppercase;
+                color: var(--text-dim); padding: 0.4rem 0.9rem;
+                text-decoration: none; transition: color 0.2s;
+            }
+            .nav-links a:hover, .nav-links a.active { color: var(--mist-bright); }
+            .nav-discord { color: #7289da !important; }
+            .nav-discord:hover { color: #99aaf0 !important; }
+
+            /* ─── Utilities ──────────────────────────────────────────────── */
+            .wrap { max-width: 1100px; margin: 0 auto; padding: 0 2.5rem; }
+
+            .btn {
+                display: inline-flex; align-items: center; gap: 0.45rem;
+                padding: 0.5rem 1.1rem;
+                font-family: "Cinzel", serif; font-size: 10px; font-weight: 600;
+                letter-spacing: 0.12em; text-transform: uppercase;
+                border-radius: 2px; cursor: pointer; text-decoration: none;
+                transition: background 0.2s, color 0.2s, border-color 0.2s;
+                border: 1px solid transparent;
+            }
+            .btn-primary { background: var(--teal-deep); border-color: var(--border-accent); color: var(--teal-bright); }
+            .btn-primary:hover { background: var(--teal-mid); color: var(--void-deep); }
+            .btn-ghost { background: transparent; border-color: var(--border-default); color: var(--text-muted); }
+            .btn-ghost:hover { border-color: var(--border-mist); color: var(--mist-bright); }
+
+            /* ─── PAGE HEADER ────────────────────────────────────────────── */
+            .page-header {
+                margin-top: 52px;
+                padding: 4rem 0 0;
+                border-bottom: 1px solid var(--border-default);
+                background: linear-gradient(180deg, rgba(104,152,168,0.05) 0%, transparent 100%);
+            }
+            .page-header-inner {
+                max-width: 1100px; margin: 0 auto; padding: 0 2.5rem 2.5rem;
+                display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem;
+            }
+            .page-back {
+                display: inline-flex; align-items: center; gap: 0.5rem;
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.18em; text-transform: uppercase;
+                color: var(--text-dim); text-decoration: none;
+                margin-bottom: 1rem; transition: color 0.2s; display: block;
+            }
+            .page-back:hover { color: var(--mist-mid); }
+            .page-title {
+                font-family: "Cinzel Decorative", serif;
+                font-size: clamp(32px, 5vw, 56px);
+                font-weight: 700; color: var(--mist-bright);
+                line-height: 1; margin-bottom: 0.5rem;
+            }
+            .page-subtitle {
+                font-family: "Cinzel", serif; font-size: 12px;
+                letter-spacing: 0.08em; color: var(--text-muted);
+            }
+            .page-header-right {
+                display: flex; gap: 0.6rem; padding-bottom: 0.25rem; flex-shrink: 0;
+            }
+
+            /* Count strip */
+            .count-strip {
+                border-top: 1px solid var(--border-default);
+                background: var(--void-surface);
+            }
+            .count-strip-inner {
+                max-width: 1100px; margin: 0 auto; padding: 0 2.5rem;
+                display: flex;
+            }
+            .count-item {
+                flex: 1; padding: 0.9rem 1.25rem;
+                border-right: 1px solid var(--border-default);
+                display: flex; align-items: center; gap: 0.75rem;
+                cursor: pointer; transition: background 0.15s;
+                text-decoration: none;
+            }
+            .count-item:last-child { border-right: none; }
+            .count-item:hover { background: rgba(255,255,255,0.02); }
+            .count-item.active { background: rgba(104,152,168,0.06); }
+            .count-icon {
+                width: 28px; height: 28px; flex-shrink: 0;
+                display: flex; align-items: center; justify-content: center;
+                color: var(--teal-mid); font-size: 13px;
+            }
+            .count-item.active .count-icon { color: var(--teal-bright); }
+            .count-text {}
+            .count-n {
+                font-family: "Cinzel Decorative", serif;
+                font-size: 18px; color: var(--mist-mid); line-height: 1;
+                display: block;
+            }
+            .count-item.active .count-n { color: var(--mist-bright); }
+            .count-lbl {
+                font-family: "Cinzel", serif; font-size: 8px;
+                letter-spacing: 0.18em; text-transform: uppercase;
+                color: var(--text-dim); display: block;
+            }
+
+            /* ─── MAIN LAYOUT ────────────────────────────────────────────── */
+            .main { padding: 3.5rem 0 5rem; }
+            .main-layout {
+                display: grid;
+                grid-template-columns: 220px 1fr;
+                gap: 3rem;
+                align-items: start;
+            }
+
+            /* ─── LEFT NAV ───────────────────────────────────────────────── */
+            .left-nav { position: sticky; top: 104px; }
+            .left-nav-section { margin-bottom: 2rem; }
+            .left-nav-heading {
+                font-family: "Cinzel", serif; font-size: 8px;
+                letter-spacing: 0.22em; text-transform: uppercase;
+                color: var(--text-dim); padding: 0 0 0.5rem;
+                border-bottom: 1px solid var(--border-default);
+                margin-bottom: 0.5rem; display: block;
+            }
+            .left-nav-link {
+                display: flex; align-items: center; justify-content: space-between;
+                padding: 0.4rem 0.6rem; border-radius: 2px;
+                font-family: "Cinzel", serif; font-size: 10px;
+                letter-spacing: 0.1em;
+                color: var(--text-dim); text-decoration: none;
+                transition: color 0.2s, background 0.2s;
+                cursor: pointer; border: none; background: none; width: 100%; text-align: left;
+            }
+            .left-nav-link:hover { color: var(--mist-mid); background: rgba(255,255,255,0.03); }
+            .left-nav-link.active { color: var(--teal-bright); background: rgba(104,152,168,0.08); }
+            .left-nav-count {
+                font-family: monospace; font-size: 11px; color: var(--text-dim);
+            }
+            .left-nav-link.active .left-nav-count { color: var(--teal-deep); }
+
+            /* Search */
+            .search-wrap {
+                position: relative; margin-bottom: 1.5rem;
+            }
+            .search-input {
+                width: 100%; background: var(--void-surface);
+                border: 1px solid var(--border-default); border-radius: 2px;
+                padding: 0.5rem 0.75rem 0.5rem 2rem;
+                font-family: "Cinzel", serif; font-size: 10px;
+                letter-spacing: 0.1em; color: var(--mist-mid);
+                outline: none; transition: border-color 0.2s;
+            }
+            .search-input::placeholder { color: var(--text-dim); }
+            .search-input:focus { border-color: var(--border-accent); }
+            .search-icon {
+                position: absolute; left: 0.65rem; top: 50%;
+                transform: translateY(-50%);
+                color: var(--text-dim); font-size: 11px; pointer-events: none;
+            }
+
+            /* ─── CONTENT PANELS ─────────────────────────────────────────── */
+            .panel { display: none; }
+            .panel.active { display: block; }
+
+            .panel-header {
+                display: flex; align-items: center; justify-content: space-between;
+                margin-bottom: 1.75rem;
+            }
+            .panel-title {
+                font-family: "Cinzel Decorative", serif;
+                font-size: 22px; color: var(--mist-bright); font-weight: 700;
+            }
+            .panel-count {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.15em; text-transform: uppercase;
+                color: var(--text-dim);
+            }
+
+            /* ─── ENTRY CARDS (NPCs, Items) ──────────────────────────────── */
+            .entry-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1px;
+                background: var(--border-default);
+                border: 1px solid var(--border-default);
+                margin-bottom: 2rem;
+            }
+            .entry-card {
+                background: var(--void-surface);
+                padding: 1.25rem;
+                cursor: pointer;
+                transition: background 0.15s;
+                display: flex; gap: 1rem; align-items: flex-start;
+                text-decoration: none;
+            }
+            .entry-card:hover { background: var(--void-raised); }
+            .entry-card:hover .entry-name { color: var(--mist-bright); }
+
+            .entry-portrait {
+                width: 48px; height: 48px; flex-shrink: 0;
+                background: var(--void-raised);
+                border: 1px solid var(--border-default);
+                display: flex; align-items: center; justify-content: center;
+                color: rgba(104,152,168,0.3); font-size: 18px;
+                position: relative; overflow: hidden;
+            }
+            .entry-portrait::after {
+                content: ""; position: absolute; inset: 0;
+                background: var(--teal-tint); mix-blend-mode: multiply;
+            }
+            .entry-portrait.faction-icon {
+                background: var(--void-raised);
+                color: var(--teal-mid);
+            }
+            .entry-portrait.faction-icon::after { display: none; }
+
+            .entry-body { flex: 1; min-width: 0; }
+            .entry-name {
+                font-family: "Cinzel", serif; font-size: 13px; font-weight: 600;
+                color: var(--mist-mid); letter-spacing: 0.04em;
+                margin-bottom: 0.15rem; transition: color 0.2s;
+            }
+            .entry-sub {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.08em; text-transform: uppercase;
+                color: var(--text-dim); margin-bottom: 0.35rem;
+            }
+            .entry-desc {
+                font-style: italic; font-size: 12px;
+                color: var(--text-muted); line-height: 1.55;
+            }
+            .entry-badges {
+                display: flex; gap: 0.35rem; margin-top: 0.5rem; flex-wrap: wrap;
+            }
+            .badge {
+                font-family: "Cinzel", serif; font-size: 8px;
+                letter-spacing: 0.1em; text-transform: uppercase;
+                padding: 0.15rem 0.4rem; border-radius: 2px;
+                border: 1px solid var(--border-default); color: var(--text-dim);
+            }
+            .badge.friendly { border-color: rgba(104,152,168,0.4); color: var(--teal-mid); }
+            .badge.hostile { border-color: rgba(200,136,120,0.4); color: var(--mauve-bright); }
+            .badge.neutral { border-color: rgba(184,176,152,0.3); color: var(--mist-deep); }
+            .badge.unknown { border-color: var(--border-default); color: var(--text-dim); }
+            .badge.alive { border-color: rgba(104,152,168,0.3); color: var(--teal-mid); }
+            .badge.deceased { border-color: rgba(200,136,120,0.3); color: var(--mauve-bright); }
+            .badge.magic { border-color: rgba(104,152,168,0.4); color: var(--teal-mid); }
+            .badge.artifact { border-color: rgba(200,184,120,0.4); color: var(--gold); }
+            .badge.rare { border-color: rgba(104,152,168,0.3); color: var(--teal-bright); }
+
+            /* ─── FACTION CARDS ──────────────────────────────────────────── */
+            .faction-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1px;
+                background: var(--border-default);
+                border: 1px solid var(--border-default);
+            }
+            .faction-card {
+                background: var(--void-surface);
+                padding: 1.5rem;
+                cursor: pointer;
+                transition: background 0.15s;
+                text-decoration: none;
+            }
+            .faction-card:hover { background: var(--void-raised); }
+            .faction-card:hover .faction-name { color: var(--mist-bright); }
+
+            .faction-header {
+                display: flex; align-items: flex-start;
+                justify-content: space-between; gap: 1rem;
+                margin-bottom: 1rem;
+            }
+            .faction-name {
+                font-family: "Cinzel", serif; font-size: 15px; font-weight: 600;
+                color: var(--mist-mid); letter-spacing: 0.04em;
+                margin-bottom: 0.2rem; transition: color 0.2s;
+            }
+            .faction-type {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
+            }
+            .faction-rel {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.12em; text-transform: uppercase;
+                padding: 0.2rem 0.55rem; border-radius: 2px;
+                border: 1px solid var(--border-default); flex-shrink: 0;
+            }
+            .faction-rel.allied { border-color: rgba(104,152,168,0.4); color: var(--teal-bright); background: rgba(104,152,168,0.08); }
+            .faction-rel.hostile { border-color: rgba(200,136,120,0.4); color: var(--mauve-bright); background: rgba(200,136,120,0.06); }
+            .faction-rel.neutral { border-color: rgba(184,176,152,0.3); color: var(--mist-deep); }
+            .faction-rel.unknown { border-color: var(--border-default); color: var(--text-dim); }
+
+            .faction-desc {
+                font-style: italic; font-size: 13px;
+                color: var(--text-muted); line-height: 1.65;
+                margin-bottom: 1rem;
+            }
+            .faction-motto {
+                font-family: "Cinzel Decorative", serif; font-size: 11px;
+                color: var(--text-dim); margin-bottom: 1rem;
+            }
+            .faction-members {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.1em; text-transform: uppercase;
+                color: var(--text-dim); border-top: 1px solid var(--border-default);
+                padding-top: 0.75rem; margin-top: 0.75rem;
+            }
+            .faction-members span { color: var(--text-muted); font-family: "IM Fell English", serif;
+                font-style: italic; letter-spacing: 0; text-transform: none; font-size: 12px;
+            }
+
+            /* ─── Footer ─────────────────────────────────────────────────── */
+            .footer {
+                padding: 3.5rem 2.5rem 2.5rem; text-align: center;
+                border-top: 1px solid var(--border-default);
+            }
+            .footer-brand {
+                font-family: "Cinzel Decorative", serif; font-size: 18px;
+                color: var(--mist-mid); display: block; margin-bottom: 0.75rem;
+            }
+            .footer-links {
+                list-style: none; display: flex; justify-content: center;
+                gap: 2rem; margin-bottom: 1.5rem;
+            }
+            .footer-links a {
+                font-family: "Cinzel", serif; font-size: 10px;
+                letter-spacing: 0.15em; text-transform: uppercase;
+                color: var(--text-dim); text-decoration: none; transition: color 0.2s;
+            }
+            .footer-links a:hover { color: var(--mist-mid); }
+            .footer-discord { color: #7289da !important; }
+            .footer-discord:hover { color: #99aaf0 !important; }
+            .footer-motto {
+                font-family: "IM Fell English", serif; font-style: italic;
+                font-size: 12px; color: var(--text-dim);
+            }
+
+            /* ─── Responsive ─────────────────────────────────────────────── */
+            @media (max-width: 900px) {
+                .main-layout { grid-template-columns: 1fr; }
+                .left-nav { position: static; display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+                .left-nav-section { margin-bottom: 0; }
+                .left-nav-heading { display: none; }
+                .left-nav-link { border: 1px solid var(--border-default); border-radius: 2px; padding: 0.3rem 0.7rem; }
+                .entry-grid, .faction-grid { grid-template-columns: 1fr; }
+                .count-strip-inner { flex-wrap: wrap; }
+                .count-item { flex: 1 1 45%; }
+            }
+            @media (max-width: 600px) {
+                .nav-links { display: none; }
+                .page-header-inner { flex-direction: column; align-items: flex-start; }
+                .page-header-right { flex-direction: row; }
+            }
+        </style>
+    </head>
+    <body>
+
+        <!-- ── NAV ───────────────────────────────────────────────────── -->
+        <nav class="nav">
+            <a href="index.html" class="nav-brand">
+                <svg class="monogram-nav" viewBox="0 0 60 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <text x="30" y="33" text-anchor="middle"
+                          font-family="Almendra SC, serif"
+                          font-size="28" font-weight="400"
+                          fill="currentColor">EK</text>
+                </svg>
+                Emberfall Keep
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#campaign">Campaign</a></li>
+                <li><a href="index.html#fellowship">Fellowship</a></li>
+                <li><a href="chronicles.html">Chronicles</a></li>
+                <li><a href="compendium.html" class="active">Compendium</a></li>
+                <li><a href="https://discord.gg/dTRaBUNY" target="_blank" rel="noopener" class="nav-discord"><i class="fa-brands fa-discord"></i> Discord</a></li>
+            </ul>
+        </nav>
+
+        <!-- ── PAGE HEADER ───────────────────────────────────────────── -->
+        <header class="page-header">
+            <div class="page-header-inner">
+                <div>
+                    <a href="campaign-detail.html" class="page-back">
+                        <i class="fa-solid fa-chevron-left"></i> The Shattered Crown
+                    </a>
+                    <h1 class="page-title">Compendium</h1>
+                    <p class="page-subtitle">NPCs, factions, and items encountered across the campaign.</p>
+                </div>
+                <div class="page-header-right">
+                    <a href="#" class="btn btn-ghost"><i class="fa-solid fa-plus"></i> Add Entry</a>
+                </div>
+            </div>
+            <div class="count-strip">
+                <div class="count-strip-inner">
+                    <a class="count-item active" data-panel="npcs">
+                        <div class="count-icon"><i class="fa-solid fa-users"></i></div>
+                        <div class="count-text">
+                            <span class="count-n">31</span>
+                            <span class="count-lbl">NPCs</span>
+                        </div>
+                    </a>
+                    <a class="count-item" data-panel="factions">
+                        <div class="count-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div class="count-text">
+                            <span class="count-n">4</span>
+                            <span class="count-lbl">Factions</span>
+                        </div>
+                    </a>
+                    <a class="count-item" data-panel="items">
+                        <div class="count-icon"><i class="fa-solid fa-gem"></i></div>
+                        <div class="count-text">
+                            <span class="count-n">12</span>
+                            <span class="count-lbl">Items</span>
+                        </div>
+                    </a>
+                    <a class="count-item" data-panel="locations">
+                        <div class="count-icon"><i class="fa-solid fa-map-pin"></i></div>
+                        <div class="count-text">
+                            <span class="count-n">14</span>
+                            <span class="count-lbl">Locations</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- ── MAIN ──────────────────────────────────────────────────── -->
+        <main class="main">
+            <div class="wrap">
+                <div class="main-layout">
+
+                    <!-- Left nav -->
+                    <aside class="left-nav">
+                        <div class="search-wrap">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" class="search-input" placeholder="Search entries…" />
+                        </div>
+
+                        <div class="left-nav-section">
+                            <span class="left-nav-heading">NPCs</span>
+                            <button class="left-nav-link active" data-filter="all-npcs">All <span class="left-nav-count">31</span></button>
+                            <button class="left-nav-link" data-filter="alive">Alive <span class="left-nav-count">26</span></button>
+                            <button class="left-nav-link" data-filter="deceased">Deceased <span class="left-nav-count">3</span></button>
+                            <button class="left-nav-link" data-filter="unknown">Unknown <span class="left-nav-count">2</span></button>
+                        </div>
+                        <div class="left-nav-section">
+                            <span class="left-nav-heading">Disposition</span>
+                            <button class="left-nav-link" data-filter="friendly">Friendly <span class="left-nav-count">11</span></button>
+                            <button class="left-nav-link" data-filter="hostile">Hostile <span class="left-nav-count">8</span></button>
+                            <button class="left-nav-link" data-filter="neutral">Neutral <span class="left-nav-count">9</span></button>
+                        </div>
+                        <div class="left-nav-section">
+                            <span class="left-nav-heading">Factions</span>
+                            <button class="left-nav-link" data-filter="dawnsworn">The Dawnsworn <span class="left-nav-count">4</span></button>
+                            <button class="left-nav-link" data-filter="covenant">Iron Covenant <span class="left-nav-count">7</span></button>
+                            <button class="left-nav-link" data-filter="maerath">House Maerath <span class="left-nav-count">5</span></button>
+                        </div>
+                    </aside>
+
+                    <!-- Content -->
+                    <div class="content">
+
+                        <!-- NPCs Panel -->
+                        <div class="panel active" id="panel-npcs">
+                            <div class="panel-header">
+                                <h2 class="panel-title">NPCs</h2>
+                                <span class="panel-count">31 entries</span>
+                            </div>
+                            <div class="entry-grid">
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait"><i class="fa-solid fa-user"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">Halveth Duskmore</p>
+                                        <p class="entry-sub">High Warden &nbsp;·&nbsp; The Dawnsworn</p>
+                                        <p class="entry-desc">Keeper of the vault for thirty years. Knows considerably more than he has admitted to the party.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge alive">Alive</span>
+                                            <span class="badge friendly">Friendly</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait"><i class="fa-solid fa-user"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">Lady Thessira Maerath</p>
+                                        <p class="entry-sub">Emissary &nbsp;·&nbsp; House Maerath</p>
+                                        <p class="entry-desc">Arrived in Thornwall before the party did. Unnervingly well-informed. Plays the long game.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge alive">Alive</span>
+                                            <span class="badge neutral">Neutral</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait"><i class="fa-solid fa-user"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">Covenant Agent "Rook"</p>
+                                        <p class="entry-sub">Field Agent &nbsp;·&nbsp; Iron Covenant</p>
+                                        <p class="entry-desc">Sole survivor of the Meridian Road ambush. Refused to stop smiling throughout interrogation.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge alive">Alive</span>
+                                            <span class="badge hostile">Hostile</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait"><i class="fa-solid fa-skull"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">Elder Voss</p>
+                                        <p class="entry-sub">Village Elder &nbsp;·&nbsp; Ashenveil</p>
+                                        <p class="entry-desc">Sent the original contract. His letter was dated three days after his death. His body was not at the pyres.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge deceased">Deceased</span>
+                                            <span class="badge unknown">Unknown</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait"><i class="fa-solid fa-user"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">Brother Edwick</p>
+                                        <p class="entry-sub">Junior Archivist &nbsp;·&nbsp; The Dawnsworn</p>
+                                        <p class="entry-desc">Gave the party the vault map. Has not slept since. Carries a cipher key he claims he doesn't understand.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge alive">Alive</span>
+                                            <span class="badge friendly">Friendly</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait"><i class="fa-solid fa-user"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">Seran of the Mill</p>
+                                        <p class="entry-sub">Villager &nbsp;·&nbsp; Duskgate</p>
+                                        <p class="entry-desc">Last person known to have spoken before Duskgate fell silent. No one has found her since.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge unknown">Missing</span>
+                                            <span class="badge neutral">Neutral</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait"><i class="fa-solid fa-user"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">Captain Drev Hollan</p>
+                                        <p class="entry-sub">Captain &nbsp;·&nbsp; Thornwall Guard</p>
+                                        <p class="entry-desc">Ostensibly cooperative. Someone in his command is reporting party movements. May not be him.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge alive">Alive</span>
+                                            <span class="badge unknown">Unknown</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait"><i class="fa-solid fa-user"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">Tavin Maerath</p>
+                                        <p class="entry-sub">Younger Brother &nbsp;·&nbsp; House Maerath</p>
+                                        <p class="entry-desc">Cut out of the succession. The letter from Thornwall was in his hand, not Thessira's. His angle is his own.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge alive">Alive</span>
+                                            <span class="badge unknown">Unknown</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                            </div>
+                            <p style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);text-align:center">Showing 8 of 31 entries</p>
+                        </div>
+
+                        <!-- Factions Panel -->
+                        <div class="panel" id="panel-factions">
+                            <div class="panel-header">
+                                <h2 class="panel-title">Factions</h2>
+                                <span class="panel-count">4 entries</span>
+                            </div>
+                            <div class="faction-grid">
+
+                                <a href="#" class="faction-card">
+                                    <div class="faction-header">
+                                        <div>
+                                            <p class="faction-name">The Iron Covenant</p>
+                                            <p class="faction-type">Military Order</p>
+                                        </div>
+                                        <span class="faction-rel hostile">Hostile</span>
+                                    </div>
+                                    <p class="faction-desc">A militant order that believes the Shattered Crown must be reassembled to restore order to Valdris — by any means necessary. Their agents are everywhere the party has been.</p>
+                                    <p class="faction-motto">"Order through strength. Strength through unity."</p>
+                                    <p class="faction-members">Notable: <span>Rook (captured), Three unnamed agents (deceased)</span></p>
+                                </a>
+
+                                <a href="#" class="faction-card">
+                                    <div class="faction-header">
+                                        <div>
+                                            <p class="faction-name">The Dawnsworn</p>
+                                            <p class="faction-type">Religious Order</p>
+                                        </div>
+                                        <span class="faction-rel allied">Allied</span>
+                                    </div>
+                                    <p class="faction-desc">Keepers of the old seals. They have guarded the first shard for three centuries and are beginning to doubt whether their mandate to protect it still holds.</p>
+                                    <p class="faction-motto">"What is sealed shall remain sealed."</p>
+                                    <p class="faction-members">Notable: <span>Halveth Duskmore, Brother Edwick</span></p>
+                                </a>
+
+                                <a href="#" class="faction-card">
+                                    <div class="faction-header">
+                                        <div>
+                                            <p class="faction-name">House Maerath</p>
+                                            <p class="faction-type">Noble House</p>
+                                        </div>
+                                        <span class="faction-rel neutral">Neutral</span>
+                                    </div>
+                                    <p class="faction-desc">One of three surviving noble houses. Playing all sides with practiced patience. Their interest in the crown is dynastic, not religious — whoever holds it rules Valdris.</p>
+                                    <p class="faction-motto">"We endure."</p>
+                                    <p class="faction-members">Notable: <span>Lady Thessira Maerath, Tavin Maerath</span></p>
+                                </a>
+
+                                <a href="#" class="faction-card">
+                                    <div class="faction-header">
+                                        <div>
+                                            <p class="faction-name">Thornwall City Guard</p>
+                                            <p class="faction-type">Municipal Military</p>
+                                        </div>
+                                        <span class="faction-rel unknown">Unknown</span>
+                                    </div>
+                                    <p class="faction-desc">Ostensibly neutral city law enforcement. Someone within their ranks is reporting the party's movements to an unknown party. Captain Hollan may not be aware.</p>
+                                    <p class="faction-motto">&mdash;</p>
+                                    <p class="faction-members">Notable: <span>Captain Drev Hollan</span></p>
+                                </a>
+
+                            </div>
+                        </div>
+
+                        <!-- Items Panel -->
+                        <div class="panel" id="panel-items">
+                            <div class="panel-header">
+                                <h2 class="panel-title">Items</h2>
+                                <span class="panel-count">12 entries</span>
+                            </div>
+                            <div class="entry-grid">
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait faction-icon"><i class="fa-solid fa-gem"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">The First Shard</p>
+                                        <p class="entry-sub">Artifact &nbsp;·&nbsp; Caelindra</p>
+                                        <p class="entry-desc">A fragment of the Shattered Crown. Warm to the touch. Hums when near the second shard.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge artifact">Artifact</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait faction-icon"><i class="fa-solid fa-gem"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">The Second Shard</p>
+                                        <p class="entry-sub">Artifact &nbsp;·&nbsp; Caelindra</p>
+                                        <p class="entry-desc">Recovered in Ashenveil. Colder than the first. Will not share a bag with it without iron between them.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge artifact">Artifact</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait faction-icon"><i class="fa-solid fa-circle"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">Halveth's Amulet</p>
+                                        <p class="entry-sub">Wondrous Item &nbsp;·&nbsp; Party Stash</p>
+                                        <p class="entry-desc">A binding seal worn without knowledge of its purpose. Now confirmed as a key to something unfound.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge magic">Magic</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait faction-icon"><i class="fa-solid fa-wand-sparkles"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">Rod of the Covenant</p>
+                                        <p class="entry-sub">Rod &nbsp;·&nbsp; Very Rare &nbsp;·&nbsp; Mira</p>
+                                        <p class="entry-desc">Taken from the Meridian ambush leader. Iron Covenant insignia. Three charges remaining.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge rare">Very Rare</span>
+                                            <span class="badge magic">Magic</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait faction-icon"><i class="fa-solid fa-book"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">The Archivist's Cipher</p>
+                                        <p class="entry-sub">Wondrous Item &nbsp;·&nbsp; Orryn</p>
+                                        <p class="entry-desc">A codebook in Edwick's hand. Translates a dead script found on the vault walls. Translation ongoing.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge magic">Magic</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait faction-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">Ashenveil Longsword +1</p>
+                                        <p class="entry-sub">Weapon &nbsp;·&nbsp; Uncommon &nbsp;·&nbsp; Korrath</p>
+                                        <p class="entry-desc">Forged in Ashenveil. Bears a maker's mark that Halveth recognised but refused to explain.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge magic">Magic</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                            </div>
+                            <p style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);text-align:center">Showing 6 of 12 entries</p>
+                        </div>
+
+                        <!-- Locations Panel -->
+                        <div class="panel" id="panel-locations">
+                            <div class="panel-header">
+                                <h2 class="panel-title">Locations</h2>
+                                <span class="panel-count">14 entries</span>
+                            </div>
+                            <div class="entry-grid">
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait faction-icon"><i class="fa-solid fa-map"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">Thornwall</p>
+                                        <p class="entry-sub">City &nbsp;·&nbsp; Central Valdris</p>
+                                        <p class="entry-desc">Largest surviving city in Valdris. Nominally independent. Three factions operate openly within its walls.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge neutral">Neutral</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait faction-icon"><i class="fa-solid fa-map"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">Ashenveil</p>
+                                        <p class="entry-sub">Village &nbsp;·&nbsp; Eastern Pass</p>
+                                        <p class="entry-desc">A quiet village in the Ashenveil Pass. Six died under unclear circumstances. The party's contract originated here.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge unknown">Unstable</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait faction-icon"><i class="fa-solid fa-dungeon"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">The Dawnsworn Vault</p>
+                                        <p class="entry-sub">Dungeon &nbsp;·&nbsp; Greyvast Monastery</p>
+                                        <p class="entry-desc">A chamber sealed since the Founding Wars. The first shard was held here for three centuries. Now empty.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge neutral">Explored</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="entry-card">
+                                    <div class="entry-portrait faction-icon"><i class="fa-solid fa-map"></i></div>
+                                    <div class="entry-body">
+                                        <p class="entry-name">Duskgate</p>
+                                        <p class="entry-sub">Town &nbsp;·&nbsp; Northern Valdris</p>
+                                        <p class="entry-desc">A town that stopped speaking. Wells dry. Temple open. Seran of the Mill was the last to speak — and is now gone.</p>
+                                        <div class="entry-badges">
+                                            <span class="badge hostile">Abandoned</span>
+                                        </div>
+                                    </div>
+                                </a>
+
+                            </div>
+                            <p style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);text-align:center">Showing 4 of 14 entries</p>
+                        </div>
+
+                    </div><!-- /content -->
+                </div>
+            </div>
+        </main>
+
+        <!-- ── FOOTER ─────────────────────────────────────────────────── -->
+        <footer class="footer">
+            <span class="footer-brand">Emberfall Keep</span>
+            <ul class="footer-links">
+                <li><a href="index.html#campaign">Campaign</a></li>
+                <li><a href="index.html#fellowship">Fellowship</a></li>
+                <li><a href="chronicles.html">Chronicles</a></li>
+                <li><a href="compendium.html">Compendium</a></li>
+                <li><a href="https://discord.gg/dTRaBUNY" target="_blank" rel="noopener" class="footer-discord"><i class="fa-brands fa-discord"></i> Discord</a></li>
+            </ul>
+            <p class="footer-motto">In Omnia Paratus &middot; Est. 2026</p>
+        </footer>
+
+        <script>
+            // Count strip tabs
+            document.querySelectorAll('.count-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = item.dataset.panel;
+                    document.querySelectorAll('.count-item').forEach(i => i.classList.remove('active'));
+                    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                    item.classList.add('active');
+                    document.getElementById('panel-' + target).classList.add('active');
+                });
+            });
+
+            // Left nav filters (visual only — would filter entries in production)
+            document.querySelectorAll('.left-nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    document.querySelectorAll('.left-nav-link').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                });
+            });
+        </script>
+    </body>
+</html>

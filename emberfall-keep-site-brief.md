@@ -56,7 +56,7 @@ Images and illustrations should be treated as near-grayscale with a warm cream-t
 
 ### Identity Mark
 
-The site uses an **EK monogram** in place of a traditional logo — the initials rendered in Almendra Display at 700 weight. In the hero, the letterform is accompanied by cardinal diamond ornaments and a thin horizontal rule. In the nav, it appears as a compact wordmark alongside the site name.
+The site uses an **EK monogram** in place of a traditional logo — the initials rendered in Almendra SC at 400 weight (the only weight available). In the hero, the letterform is accompanied by cardinal diamond ornaments and a thin horizontal rule. In the nav, it appears as a compact wordmark alongside the site name.
 
 ---
 
@@ -117,7 +117,8 @@ Salmon/ember — the fire and warmth color in the palette. Used sparingly.
 Background layers:   #272524 → #302e2c → #3a3836
 Text primary:        #ddd4b0  (cream)
 Text secondary:      #b8b098  (mist mid)
-Text muted:          #807868  (mist deep)
+Text muted:          #9a8878
+Text dim:            #7a6e62
 Accent / active:     #6898a8  (teal mid)
 Borders default:     #4a4845
 Borders accent:      rgba(104, 152, 168, 0.4)
@@ -131,18 +132,18 @@ Borders mist:        rgba(221, 212, 176, 0.2)
 Four typefaces. All free via **Bunny Fonts** (`fonts.bunny.net`) — a privacy-friendly, GDPR-compliant mirror of Google Fonts.
 
 ```html
-<link href="https://fonts.bunny.net/css?family=cinzel:400,600,700|cinzel-decorative:700|almendra-display:700|im-fell-english:400,400i|texturina:400,400i&display=swap" rel="stylesheet">
+<link href="https://fonts.bunny.net/css?family=cinzel:400,600,700|cinzel-decorative:700|almendra-sc:400|im-fell-english:400,400i|texturina:400,400i&display=swap" rel="stylesheet">
 ```
 
-### Identity — Almendra Display
+### Identity — Almendra SC
 
 ```
-font-family: 'Almendra Display', serif;
-font-weight: 700;
+font-family: 'Almendra SC', serif;
+font-weight: 400;
 color: var(--mist-bright);
 ```
 
-Use for: the **EK monogram** (nav and hero SVG). Heavy, ornate, ceremonial. Not used for navigation labels or body text.
+Use for: the **EK monogram** (nav and hero SVG). Small-caps serif, ornate and ceremonial. Only available at 400 weight. Not used for navigation labels or body text.
 
 ### Display — Cinzel Decorative
 
@@ -199,7 +200,7 @@ Use for: stat blocks (`STR 18 · DEX 14`), dice notation (`2d6 + 4`), map coordi
 
 | Element | Family | Size | Weight | Color |
 |---|---|---|---|---|
-| EK monogram | Almendra Display | SVG-scaled | 700 | `--mist-bright` |
+| EK monogram | Almendra SC | SVG-scaled | 400 | `--mist-bright` |
 | Site name | Cinzel Decorative | 32–48px | 700 | `--mist-bright` |
 | Page title | Cinzel Decorative | 24–32px | 700 | `--mist-bright` |
 | Section heading | Cinzel | 18–22px | 600 | `--mist-bright` |

@@ -1,0 +1,1035 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>The Shattered Crown — Emberfall Keep</title>
+        <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+        <link rel="preconnect" href="https://fonts.bunny.net" />
+        <link
+            href="https://fonts.bunny.net/css?family=cinzel:400,600,700|cinzel-decorative:700|almendra-sc:400|im-fell-english:400,400i|texturina:400,400i&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        />
+
+        <style>
+            /* ─── Tokens ─────────────────────────────────────────────────── */
+            :root {
+                --void-deep:      #272524;
+                --void-surface:   #302e2c;
+                --void-raised:    #3a3836;
+                --void-border:    #4a4845;
+                --mist-bright:    #ddd4b0;
+                --mist-mid:       #b8b098;
+                --mist-deep:      #807868;
+                --teal-bright:    #a0c0c8;
+                --teal-mid:       #6898a8;
+                --teal-deep:      #3a6070;
+                --teal-tint:      #141e22;
+                --mauve-bright:   #c88878;
+                --mauve-mid:      #905848;
+                --gold:           #c8b878;
+                --text-primary:   #ddd4b0;
+                --text-body:      #a8a090;
+                --text-muted:     #b09888;
+                --text-dim:       #9a8c7e;
+                --border-default: #4a4845;
+                --border-accent:  rgba(104, 152, 168, 0.4);
+                --border-mist:    rgba(221, 212, 176, 0.2);
+            }
+
+            /* ─── Reset ──────────────────────────────────────────────────── */
+            *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+            html { scroll-behavior: smooth; }
+
+            body {
+                background-color: var(--void-deep);
+                background-image:
+                    radial-gradient(ellipse 70% 50% at 0% 0%, rgba(180,100,80,0.07) 0%, transparent 60%),
+                    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(104,152,168,0.07) 0%, transparent 55%),
+                    radial-gradient(ellipse 80% 60% at 50% 50%, transparent 50%, rgba(20,18,18,0.4) 100%);
+                background-attachment: fixed;
+                color: var(--text-body);
+                font-family: "IM Fell English", serif;
+                font-size: 15px;
+                line-height: 1.75;
+                min-height: 100vh;
+            }
+
+            img { display: block; width: 100%; }
+
+            ::-webkit-scrollbar { width: 5px; }
+            ::-webkit-scrollbar-track { background: var(--void-deep); }
+            ::-webkit-scrollbar-thumb { background: var(--void-border); border-radius: 3px; }
+
+            /* ─── Nav ────────────────────────────────────────────────────── */
+            .nav {
+                position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+                display: flex; align-items: center; justify-content: space-between;
+                padding: 0 2.5rem; height: 52px;
+                background: rgba(39,37,36,0.92);
+                backdrop-filter: blur(8px);
+                border-bottom: 1px solid rgba(74,72,69,0.5);
+            }
+            .nav-brand {
+                font-family: "Cinzel", serif; font-size: 11px; font-weight: 600;
+                letter-spacing: 0.2em; text-transform: uppercase;
+                color: var(--mist-mid); text-decoration: none;
+                display: flex; align-items: center; gap: 0.5rem;
+            }
+            .monogram-nav { width: 30px; height: 30px; color: var(--teal-mid); flex-shrink: 0; }
+            .nav-links { display: flex; gap: 0; list-style: none; }
+            .nav-links a {
+                font-family: "Cinzel", serif; font-size: 10px;
+                letter-spacing: 0.15em; text-transform: uppercase;
+                color: var(--text-dim); padding: 0.4rem 0.9rem;
+                text-decoration: none; transition: color 0.2s;
+            }
+            .nav-links a:hover { color: var(--mist-bright); }
+            .nav-discord { color: #7289da !important; }
+            .nav-discord:hover { color: #99aaf0 !important; }
+
+            /* ─── Shared utilities ───────────────────────────────────────── */
+            .wrap { max-width: 1100px; margin: 0 auto; padding: 0 2.5rem; }
+
+            .btn {
+                display: inline-flex; align-items: center; gap: 0.45rem;
+                padding: 0.5rem 1.1rem;
+                font-family: "Cinzel", serif; font-size: 10px; font-weight: 600;
+                letter-spacing: 0.12em; text-transform: uppercase;
+                border-radius: 2px; cursor: pointer; text-decoration: none;
+                transition: background 0.2s, color 0.2s, border-color 0.2s;
+                border: 1px solid transparent; margin-right: 0.5rem;
+            }
+            .btn-primary { background: var(--teal-deep); border-color: rgba(104,152,168,0.4); color: var(--teal-bright); }
+            .btn-primary:hover { background: var(--teal-mid); color: var(--void-deep); }
+            .btn-ghost { background: transparent; border-color: var(--border-default); color: var(--text-muted); }
+            .btn-ghost:hover { border-color: rgba(221,212,176,0.3); color: var(--mist-bright); }
+
+            .pill {
+                display: inline-flex; align-items: center; gap: 0.4rem;
+                padding: 0.2rem 0.65rem; border-radius: 2px;
+                font-family: "Cinzel", serif; font-size: 9px; font-weight: 600;
+                letter-spacing: 0.18em; text-transform: uppercase;
+            }
+            .pill-active {
+                background: rgba(104,152,168,0.1); border: 1px solid rgba(104,152,168,0.4);
+                color: var(--teal-bright);
+            }
+            .pill-active::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--teal-bright); }
+            .pill-archived { background: rgba(80,72,72,0.4); border: 1px solid var(--border-default); color: var(--text-muted); }
+
+            /* ─── CAMPAIGN BANNER ────────────────────────────────────────── */
+            .campaign-banner {
+                margin-top: 52px;
+                position: relative;
+                height: 42vh;
+                min-height: 300px;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+            }
+            .banner-art {
+                position: absolute; inset: 0;
+                background:
+                    linear-gradient(to bottom, rgba(39,37,36,0.2) 0%, transparent 40%, var(--void-deep) 100%),
+                    radial-gradient(ellipse 60% 80% at 30% 50%, rgba(180,100,80,0.12) 0%, transparent 60%),
+                    linear-gradient(135deg, #1e1c1c 0%, #2e2a28 40%, #1c1a18 100%);
+                filter: saturate(0.3) sepia(0.4);
+            }
+            .banner-content {
+                position: relative; z-index: 2;
+                padding: 0 2.5rem 2.5rem;
+                max-width: 1100px; width: 100%; margin: 0 auto;
+            }
+            .banner-back {
+                display: inline-flex; align-items: center; gap: 0.5rem;
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.18em; text-transform: uppercase;
+                color: var(--text-dim); text-decoration: none;
+                margin-bottom: 1rem;
+                transition: color 0.2s;
+            }
+            .banner-back:hover { color: var(--mist-mid); }
+            .banner-eyebrow {
+                display: flex; align-items: center; gap: 0.75rem;
+                margin-bottom: 0.6rem;
+            }
+            .banner-title {
+                font-family: "Cinzel Decorative", serif;
+                font-size: clamp(28px, 5vw, 56px);
+                font-weight: 700; color: var(--mist-bright);
+                line-height: 1; letter-spacing: 0.01em;
+                text-shadow: 0 2px 30px rgba(0,0,0,0.7);
+            }
+            .banner-subtitle {
+                font-family: "Cinzel", serif; font-size: 12px;
+                letter-spacing: 0.08em; color: var(--text-muted);
+                margin-top: 0.4rem;
+            }
+
+            /* ─── TABS ───────────────────────────────────────────────────── */
+            .tabs-bar {
+                border-bottom: 1px solid var(--border-default);
+                background: rgba(39,37,36,0.6);
+                backdrop-filter: blur(6px);
+                position: sticky; top: 52px; z-index: 50;
+            }
+            .tabs-inner {
+                max-width: 1100px; margin: 0 auto;
+                padding: 0 2.5rem;
+                display: flex; gap: 0;
+            }
+            .tab-btn {
+                font-family: "Cinzel", serif; font-size: 10px;
+                letter-spacing: 0.15em; text-transform: uppercase;
+                color: var(--text-dim); background: none; border: none;
+                padding: 0.85rem 1.1rem; cursor: pointer;
+                border-bottom: 2px solid transparent;
+                margin-bottom: -1px;
+                transition: color 0.2s, border-color 0.2s;
+            }
+            .tab-btn:hover { color: var(--mist-mid); }
+            .tab-btn.active { color: var(--teal-bright); border-bottom-color: var(--teal-mid); }
+
+            /* ─── TAB PANELS ─────────────────────────────────────────────── */
+            .tab-panel { display: none; }
+            .tab-panel.active { display: block; }
+
+            /* ─── OVERVIEW TAB ───────────────────────────────────────────── */
+            .overview {
+                padding: 4rem 0 5rem;
+                background: linear-gradient(160deg, rgba(180,100,80,0.04) 0%, transparent 40%);
+            }
+            .overview-grid {
+                display: grid;
+                grid-template-columns: 1fr 320px;
+                gap: 5rem;
+                align-items: start;
+            }
+
+            /* Stats bar */
+            .stat-bar {
+                display: flex; gap: 0;
+                border: 1px solid var(--border-default);
+                border-radius: 2px;
+                overflow: hidden;
+                margin-bottom: 2.5rem;
+            }
+            .stat-bar-item {
+                flex: 1;
+                padding: 0.9rem 1.1rem;
+                border-right: 1px solid var(--border-default);
+            }
+            .stat-bar-item:last-child { border-right: none; }
+            .stat-bar-item .lbl {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.18em; text-transform: uppercase;
+                color: var(--text-dim); display: block; margin-bottom: 0.2rem;
+            }
+            .stat-bar-item .val {
+                font-family: monospace; font-size: 15px; color: var(--teal-mid);
+            }
+
+            /* Body text */
+            .overview-body h3 {
+                font-family: "Cinzel", serif; font-size: 11px;
+                letter-spacing: 0.18em; text-transform: uppercase;
+                color: var(--text-dim); margin: 2rem 0 0.6rem;
+            }
+            .overview-body h3:first-child { margin-top: 0; }
+            .overview-body p {
+                font-style: italic; color: var(--text-body);
+                line-height: 1.85; margin-bottom: 1rem;
+            }
+            .overview-body p:last-child { margin-bottom: 0; }
+
+            /* Sidebar */
+            .overview-sidebar {}
+            .sidebar-block {
+                background: var(--void-surface);
+                border: 1px solid var(--border-default);
+                border-radius: 2px;
+                padding: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+            .sidebar-block-title {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.2em; text-transform: uppercase;
+                color: var(--text-dim); margin-bottom: 0.9rem;
+                padding-bottom: 0.6rem;
+                border-bottom: 1px solid var(--border-default);
+            }
+            .sidebar-row {
+                display: flex; justify-content: space-between; align-items: baseline;
+                padding: 0.35rem 0;
+                border-bottom: 1px solid rgba(74,72,69,0.4);
+                font-size: 13px;
+            }
+            .sidebar-row:last-child { border-bottom: none; }
+            .sidebar-row .k {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.1em; text-transform: uppercase;
+                color: var(--text-dim);
+            }
+            .sidebar-row .v { color: var(--mist-mid); font-style: italic; }
+            .sidebar-row .v.mono { font-family: monospace; font-style: normal; color: var(--teal-mid); font-size: 13px; }
+
+            .tag-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+            .tag {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.12em; text-transform: uppercase;
+                padding: 0.2rem 0.5rem;
+                border: 1px solid var(--border-default);
+                color: var(--text-muted); border-radius: 2px;
+            }
+
+            /* ─── PARTY TAB ──────────────────────────────────────────────── */
+            .party { padding: 4rem 0 5rem; }
+            .party-grid {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 6px;
+                margin-bottom: 3rem;
+            }
+            .party-card { display: flex; flex-direction: column; cursor: pointer; }
+            .party-portrait {
+                aspect-ratio: 2/3;
+                background: var(--void-raised);
+                border: 1px solid var(--border-default);
+                display: flex; align-items: center; justify-content: center;
+                font-size: 40px; color: rgba(104,152,168,0.2);
+                position: relative; overflow: hidden;
+                transition: border-color 0.25s;
+            }
+            .party-portrait::after {
+                content: ""; position: absolute; inset: 0;
+                background: var(--teal-tint);
+                mix-blend-mode: multiply; pointer-events: none;
+            }
+            .party-card:hover .party-portrait { border-color: rgba(104,152,168,0.5); }
+            .party-caption { padding: 0.6rem 0 0; }
+            .party-name {
+                font-family: "Cinzel", serif; font-size: 11px; font-weight: 600;
+                color: var(--mist-mid); letter-spacing: 0.04em;
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            }
+            .party-class {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.06em; color: var(--text-dim);
+            }
+
+            /* ─── CHRONICLES TAB ─────────────────────────────────────────── */
+            .tab-chronicles { padding: 4rem 0 5rem; }
+            .chronicles-layout {
+                display: grid;
+                grid-template-columns: 1fr 280px;
+                gap: 4rem;
+                align-items: start;
+            }
+            .session-list { list-style: none; }
+            .session-item {
+                display: grid;
+                grid-template-columns: 48px 1fr;
+                gap: 1.25rem;
+                padding: 1.5rem 0;
+                border-bottom: 1px solid var(--border-default);
+                cursor: pointer;
+            }
+            .session-item:first-child { border-top: 1px solid var(--border-default); }
+            .session-item:hover .session-title { color: var(--mist-bright); }
+            .session-num {
+                font-family: "Cinzel Decorative", serif;
+                font-size: 20px; color: var(--teal-deep);
+                line-height: 1; padding-top: 3px; text-align: right;
+            }
+            .session-num-label {
+                font-family: "Cinzel", serif; font-size: 8px;
+                letter-spacing: 0.12em; text-transform: uppercase;
+                color: var(--text-dim); text-align: right; display: block;
+            }
+            .session-title {
+                font-family: "Cinzel", serif; font-size: 14px; font-weight: 600;
+                color: var(--mist-mid); letter-spacing: 0.04em;
+                margin-bottom: 0.3rem;
+                transition: color 0.2s;
+            }
+            .session-desc {
+                font-style: italic; font-size: 13px;
+                color: var(--text-muted); line-height: 1.6;
+                margin-bottom: 0.4rem;
+            }
+            .session-meta {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.1em; color: var(--text-dim);
+            }
+
+            /* Chronicles sidebar */
+            .chronicles-sidebar {}
+            .recent-highlight {
+                background: var(--void-surface);
+                border: 1px solid var(--border-default);
+                border-top: 2px solid var(--teal-deep);
+                padding: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+            .rh-label {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.2em; text-transform: uppercase;
+                color: var(--teal-mid); margin-bottom: 0.6rem; display: block;
+            }
+            .rh-title {
+                font-family: "Cinzel", serif; font-size: 14px; font-weight: 600;
+                color: var(--mist-mid); margin-bottom: 0.5rem;
+            }
+            .rh-desc {
+                font-style: italic; font-size: 13px;
+                color: var(--text-muted); line-height: 1.6; margin-bottom: 0.75rem;
+            }
+
+            /* ─── COMPENDIUM TAB ─────────────────────────────────────────── */
+            .tab-compendium { padding: 4rem 0 5rem; }
+            .comp-tabs {
+                display: flex; gap: 0;
+                border-bottom: 1px solid var(--border-default);
+                margin-bottom: 2.5rem;
+            }
+            .comp-tab {
+                font-family: "Cinzel", serif; font-size: 10px;
+                letter-spacing: 0.15em; text-transform: uppercase;
+                color: var(--text-dim); background: none; border: none;
+                padding: 0.65rem 1rem; cursor: pointer;
+                border-bottom: 2px solid transparent; margin-bottom: -1px;
+                transition: color 0.2s, border-color 0.2s;
+            }
+            .comp-tab:hover { color: var(--mist-mid); }
+            .comp-tab.active { color: var(--mist-bright); border-bottom-color: var(--mist-deep); }
+
+            .comp-panel { display: none; }
+            .comp-panel.active { display: block; }
+
+            .entry-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1px;
+                background: var(--border-default);
+                border: 1px solid var(--border-default);
+            }
+            .entry-card {
+                background: var(--void-surface);
+                padding: 1.25rem;
+                cursor: pointer;
+                transition: background 0.15s;
+                display: flex; gap: 0.9rem; align-items: flex-start;
+            }
+            .entry-card:hover { background: var(--void-raised); }
+            .entry-card-icon {
+                width: 32px; height: 32px; flex-shrink: 0;
+                border: 1px solid var(--border-default);
+                background: var(--void-raised);
+                display: flex; align-items: center; justify-content: center;
+                color: var(--teal-mid); font-size: 13px;
+                border-radius: 2px; margin-top: 2px;
+            }
+            .entry-card-name {
+                font-family: "Cinzel", serif; font-size: 12px; font-weight: 600;
+                color: var(--mist-mid); letter-spacing: 0.04em; margin-bottom: 0.2rem;
+            }
+            .entry-card-sub {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.08em; text-transform: uppercase;
+                color: var(--text-dim);
+            }
+            .entry-card-desc {
+                font-style: italic; font-size: 12px;
+                color: var(--text-muted); line-height: 1.55; margin-top: 0.25rem;
+            }
+
+            /* ─── MAPS TAB ───────────────────────────────────────────────── */
+            .tab-maps { padding: 4rem 0 5rem; }
+            .maps-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1px;
+                background: var(--border-default);
+                border: 1px solid var(--border-default);
+                margin-bottom: 1.5rem;
+            }
+            .map-thumb {
+                background: var(--void-raised);
+                aspect-ratio: 4/3;
+                display: flex; flex-direction: column;
+                align-items: center; justify-content: center;
+                gap: 0.5rem;
+                cursor: pointer;
+                transition: background 0.15s;
+                position: relative; overflow: hidden;
+            }
+            .map-thumb:hover { background: var(--void-border); }
+            .map-thumb i { font-size: 32px; color: rgba(104,152,168,0.2); }
+            .map-thumb-label {
+                font-family: "Cinzel", serif; font-size: 10px;
+                letter-spacing: 0.12em; text-transform: uppercase;
+                color: var(--text-dim);
+            }
+            .map-thumb-type {
+                font-family: "Cinzel", serif; font-size: 8px;
+                letter-spacing: 0.1em; text-transform: uppercase;
+                color: rgba(104,152,168,0.4);
+            }
+
+            /* ─── Footer ─────────────────────────────────────────────────── */
+            .footer {
+                padding: 3.5rem 2.5rem 2.5rem;
+                text-align: center;
+                border-top: 1px solid var(--border-default);
+            }
+            .footer-brand {
+                font-family: "Cinzel Decorative", serif; font-size: 18px;
+                color: var(--mist-mid); display: block; margin-bottom: 0.75rem;
+            }
+            .footer-links {
+                list-style: none; display: flex; justify-content: center;
+                gap: 2rem; margin-bottom: 1.5rem;
+            }
+            .footer-links a {
+                font-family: "Cinzel", serif; font-size: 10px;
+                letter-spacing: 0.15em; text-transform: uppercase;
+                color: var(--text-dim); text-decoration: none; transition: color 0.2s;
+            }
+            .footer-links a:hover { color: var(--mist-mid); }
+            .footer-discord { color: #7289da !important; }
+            .footer-discord:hover { color: #99aaf0 !important; }
+            .footer-motto {
+                font-family: "IM Fell English", serif; font-style: italic;
+                font-size: 12px; color: var(--text-dim);
+            }
+
+            /* ─── Responsive ─────────────────────────────────────────────── */
+            @media (max-width: 900px) {
+                .overview-grid { grid-template-columns: 1fr; }
+                .overview-sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+                .chronicles-layout { grid-template-columns: 1fr; }
+                .chronicles-sidebar { display: none; }
+                .party-grid { grid-template-columns: repeat(3, 1fr); }
+                .party-card:nth-child(n+4) .party-portrait { aspect-ratio: 2/3; }
+                .entry-grid { grid-template-columns: 1fr 1fr; }
+                .maps-grid { grid-template-columns: 1fr 1fr; }
+            }
+            @media (max-width: 600px) {
+                .nav-links { display: none; }
+                .stat-bar { flex-wrap: wrap; }
+                .stat-bar-item { flex: 1 1 45%; }
+                .party-grid { grid-template-columns: repeat(2, 1fr); }
+                .entry-grid { grid-template-columns: 1fr; }
+                .maps-grid { grid-template-columns: 1fr; }
+                .overview-sidebar { grid-template-columns: 1fr; }
+                .comp-tabs { flex-wrap: wrap; }
+            }
+        </style>
+    </head>
+    <body>
+
+        <!-- ── NAV ───────────────────────────────────────────────────── -->
+        <nav class="nav">
+            <a href="index.html" class="nav-brand">
+                <svg class="monogram-nav" viewBox="0 0 60 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <text x="30" y="33" text-anchor="middle"
+                          font-family="Almendra SC, serif"
+                          font-size="28" font-weight="400"
+                          fill="currentColor">EK</text>
+                </svg>
+                Emberfall Keep
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#campaign">Campaign</a></li>
+                <li><a href="index.html#fellowship">Fellowship</a></li>
+                <li><a href="index.html#chronicles">Chronicles</a></li>
+                <li><a href="index.html#compendium">Compendium</a></li>
+                <li><a href="https://discord.gg/dTRaBUNY" target="_blank" rel="noopener" class="nav-discord"><i class="fa-brands fa-discord"></i> Discord</a></li>
+            </ul>
+        </nav>
+
+        <!-- ── CAMPAIGN BANNER ───────────────────────────────────────── -->
+        <section class="campaign-banner">
+            <div class="banner-art"></div>
+            <div class="banner-content">
+                <a href="index.html" class="banner-back">
+                    <i class="fa-solid fa-chevron-left"></i> All Campaigns
+                </a>
+                <div class="banner-eyebrow">
+                    <span class="pill pill-active">Active Campaign</span>
+                    <span style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim)">D&amp;D 5e &nbsp;&middot;&nbsp; Session XVII</span>
+                </div>
+                <h1 class="banner-title">The Shattered Crown</h1>
+                <p class="banner-subtitle">A campaign of intrigue, ruin, and reckoning &nbsp;&middot;&nbsp; Valdris</p>
+            </div>
+        </section>
+
+        <!-- ── TABS BAR ───────────────────────────────────────────────── -->
+        <div class="tabs-bar">
+            <div class="tabs-inner">
+                <button class="tab-btn active" data-tab="overview">Overview</button>
+                <button class="tab-btn" data-tab="party">Party</button>
+                <button class="tab-btn" data-tab="chronicles">Chronicles</button>
+                <button class="tab-btn" data-tab="compendium">Compendium</button>
+                <button class="tab-btn" data-tab="maps">Maps</button>
+            </div>
+        </div>
+
+        <!-- ── OVERVIEW ──────────────────────────────────────────────── -->
+        <div class="tab-panel active" id="tab-overview">
+            <section class="overview">
+                <div class="wrap">
+                    <div class="stat-bar">
+                        <div class="stat-bar-item">
+                            <span class="lbl">Sessions</span>
+                            <span class="val">XVII</span>
+                        </div>
+                        <div class="stat-bar-item">
+                            <span class="lbl">Last Played</span>
+                            <span class="val">22 Mar 2026</span>
+                        </div>
+                        <div class="stat-bar-item">
+                            <span class="lbl">Party Level</span>
+                            <span class="val">7</span>
+                        </div>
+                        <div class="stat-bar-item">
+                            <span class="lbl">Party Size</span>
+                            <span class="val">5</span>
+                        </div>
+                        <div class="stat-bar-item">
+                            <span class="lbl">Locations</span>
+                            <span class="val">14</span>
+                        </div>
+                        <div class="stat-bar-item">
+                            <span class="lbl">NPCs Met</span>
+                            <span class="val">31</span>
+                        </div>
+                    </div>
+
+                    <div class="overview-grid">
+                        <div class="overview-body">
+                            <h3>The Story So Far</h3>
+                            <p>The war-torn kingdom of Valdris has gone silent. Three factions vie for the pieces of a crown that should not exist — and the party stands at the centre of it all, unaware that the shards are already calling to one of their own.</p>
+                            <p>What began as a simple escort contract through the Ashenveil Pass has spiralled into a conspiracy that reaches back three centuries to a king who should have stayed dead. The Iron Covenant wants the crown reassembled. The Dawnsworn want it destroyed. And House Maerath simply wants to be the one holding it when the dust settles.</p>
+
+                            <h3>Current Situation</h3>
+                            <p>Following the events in Ashenveil, the party has recovered the second shard and returned it to Caelindra's custody — a decision that is beginning to show cracks. Halveth's amulet, now confirmed as a binding seal, is responding to the shard in ways none of the party fully understand.</p>
+                            <p>A missive from Thornwall arrived the morning after the funeral pyres burned out. Someone in that city knows they were in Ashenveil. Someone was watching.</p>
+
+                            <h3>Dungeon Master</h3>
+                            <p>Orryn's player. Running since January 2026.</p>
+
+                            <div style="margin-top:2rem;">
+                                <a href="#" class="btn btn-primary"><i class="fa-solid fa-scroll"></i> Latest Session</a>
+                                <a href="#" class="btn btn-ghost"><i class="fa-solid fa-map"></i> View Maps</a>
+                            </div>
+                        </div>
+
+                        <aside class="overview-sidebar">
+                            <div class="sidebar-block">
+                                <p class="sidebar-block-title">Campaign Details</p>
+                                <div class="sidebar-row"><span class="k">System</span><span class="v">D&amp;D 5e</span></div>
+                                <div class="sidebar-row"><span class="k">Setting</span><span class="v">Valdris</span></div>
+                                <div class="sidebar-row"><span class="k">Started</span><span class="v">Jan 2026</span></div>
+                                <div class="sidebar-row"><span class="k">Status</span><span class="v">Active</span></div>
+                                <div class="sidebar-row"><span class="k">XP Tracking</span><span class="v">Milestone</span></div>
+                                <div class="sidebar-row"><span class="k">Sessions</span><span class="v mono">XVII</span></div>
+                            </div>
+
+                            <div class="sidebar-block">
+                                <p class="sidebar-block-title">Factions</p>
+                                <div class="sidebar-row"><span class="k">Iron Covenant</span><span class="v" style="color:var(--mauve-bright)">Hostile</span></div>
+                                <div class="sidebar-row"><span class="k">The Dawnsworn</span><span class="v" style="color:var(--teal-bright)">Allied</span></div>
+                                <div class="sidebar-row"><span class="k">House Maerath</span><span class="v" style="color:var(--mist-deep)">Neutral</span></div>
+                                <div class="sidebar-row"><span class="k">Thornwall Guard</span><span class="v" style="color:var(--text-muted)">Unknown</span></div>
+                            </div>
+
+                            <div class="sidebar-block">
+                                <p class="sidebar-block-title">Tags</p>
+                                <div class="tag-list">
+                                    <span class="tag">Intrigue</span>
+                                    <span class="tag">Political</span>
+                                    <span class="tag">Mystery</span>
+                                    <span class="tag">High Fantasy</span>
+                                    <span class="tag">Urban</span>
+                                    <span class="tag">Dungeon Delve</span>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ── PARTY ─────────────────────────────────────────────────── -->
+        <div class="tab-panel" id="tab-party">
+            <section class="party">
+                <div class="wrap">
+                    <div class="party-grid">
+                        <div class="party-card">
+                            <div class="party-portrait"><i class="fa-solid fa-shield-halved"></i></div>
+                            <div class="party-caption">
+                                <p class="party-name">Korrath Ironveil</p>
+                                <p class="party-class">Fighter · Battle Master · Lvl 7</p>
+                            </div>
+                        </div>
+                        <div class="party-card">
+                            <div class="party-portrait"><i class="fa-solid fa-wand-sparkles"></i></div>
+                            <div class="party-caption">
+                                <p class="party-name">Caelindra</p>
+                                <p class="party-class">Wizard · Abjuration · Lvl 7</p>
+                            </div>
+                        </div>
+                        <div class="party-card">
+                            <div class="party-portrait"><i class="fa-solid fa-music"></i></div>
+                            <div class="party-caption">
+                                <p class="party-name">Orryn Thistlewick</p>
+                                <p class="party-class">Bard · College of Lore · Lvl 7</p>
+                            </div>
+                        </div>
+                        <div class="party-card">
+                            <div class="party-portrait"><i class="fa-solid fa-leaf"></i></div>
+                            <div class="party-caption">
+                                <p class="party-name">Sereveth</p>
+                                <p class="party-class">Druid · Circle of the Moon · Lvl 7</p>
+                            </div>
+                        </div>
+                        <div class="party-card">
+                            <div class="party-portrait"><i class="fa-solid fa-skull"></i></div>
+                            <div class="party-caption">
+                                <p class="party-name">Mira Ashvale</p>
+                                <p class="party-class">Rogue · Arcane Trickster · Lvl 7</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ── CHRONICLES ─────────────────────────────────────────────── -->
+        <div class="tab-panel" id="tab-chronicles">
+            <section class="tab-chronicles">
+                <div class="wrap">
+                    <div class="chronicles-layout">
+                        <ul class="session-list">
+                            <li class="session-item">
+                                <div>
+                                    <span class="session-num">XVII</span>
+                                    <span class="session-num-label">Session</span>
+                                </div>
+                                <div>
+                                    <p class="session-title">The Ashenveil Accord</p>
+                                    <p class="session-desc">The party arrived in Ashenveil just as the funeral pyres were lit. Halveth's amulet surfaced. Korrath did not hesitate.</p>
+                                    <p class="session-meta">22 Mar 2026 &nbsp;&middot;&nbsp; 650 XP &nbsp;&middot;&nbsp; 2 Encounters &nbsp;&middot;&nbsp; 5 players</p>
+                                </div>
+                            </li>
+                            <li class="session-item">
+                                <div>
+                                    <span class="session-num">XVI</span>
+                                    <span class="session-num-label">Session</span>
+                                </div>
+                                <div>
+                                    <p class="session-title">The Silence of Duskgate</p>
+                                    <p class="session-desc">A town that had stopped speaking. The wells were dry. The temple doors were open but no one was inside.</p>
+                                    <p class="session-meta">8 Mar 2026 &nbsp;&middot;&nbsp; 500 XP &nbsp;&middot;&nbsp; 1 Encounter &nbsp;&middot;&nbsp; 4 players</p>
+                                </div>
+                            </li>
+                            <li class="session-item">
+                                <div>
+                                    <span class="session-num">XV</span>
+                                    <span class="session-num-label">Session</span>
+                                </div>
+                                <div>
+                                    <p class="session-title">Blood on the Meridian Road</p>
+                                    <p class="session-desc">An ambush that was not random. Three Covenant agents, one survivor. He wouldn't stop smiling even after Mira broke his fingers.</p>
+                                    <p class="session-meta">22 Feb 2026 &nbsp;&middot;&nbsp; 700 XP &nbsp;&middot;&nbsp; 3 Encounters &nbsp;&middot;&nbsp; 5 players</p>
+                                </div>
+                            </li>
+                            <li class="session-item">
+                                <div>
+                                    <span class="session-num">XIV</span>
+                                    <span class="session-num-label">Session</span>
+                                </div>
+                                <div>
+                                    <p class="session-title">The Dawnsworn Vault</p>
+                                    <p class="session-desc">Beneath the monastery: a chamber sealed since the Founding Wars. The first shard was exactly where the texts said it would be. That was the problem.</p>
+                                    <p class="session-meta">8 Feb 2026 &nbsp;&middot;&nbsp; 800 XP &nbsp;&middot;&nbsp; 2 Encounters &nbsp;&middot;&nbsp; 5 players</p>
+                                </div>
+                            </li>
+                            <li class="session-item">
+                                <div>
+                                    <span class="session-num">XIII</span>
+                                    <span class="session-num-label">Session</span>
+                                </div>
+                                <div>
+                                    <p class="session-title">Ravens Over Thornwall</p>
+                                    <p class="session-desc">The city was louder than expected. House Maerath's emissary was already there, and she knew Sereveth's name.</p>
+                                    <p class="session-meta">25 Jan 2026 &nbsp;&middot;&nbsp; 450 XP &nbsp;&middot;&nbsp; 0 Encounters &nbsp;&middot;&nbsp; 4 players</p>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <aside class="chronicles-sidebar">
+                            <div class="recent-highlight">
+                                <span class="rh-label"><i class="fa-solid fa-scroll"></i> &nbsp; Latest Session</span>
+                                <p class="rh-title">The Ashenveil Accord</p>
+                                <p class="rh-desc">The party arrived in Ashenveil just as the funeral pyres were lit. Halveth's amulet surfaced. Korrath did not hesitate.</p>
+                                <a href="#" class="btn btn-primary" style="margin-right:0"><i class="fa-solid fa-book-open"></i> Read Full</a>
+                            </div>
+                            <div class="sidebar-block">
+                                <p class="sidebar-block-title">Chronicle Stats</p>
+                                <div class="sidebar-row"><span class="k">Sessions</span><span class="v mono">17</span></div>
+                                <div class="sidebar-row"><span class="k">Total XP</span><span class="v mono">9,450</span></div>
+                                <div class="sidebar-row"><span class="k">Encounters</span><span class="v mono">24</span></div>
+                                <div class="sidebar-row"><span class="k">Span</span><span class="v">Jan–Mar 2026</span></div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ── COMPENDIUM ─────────────────────────────────────────────── -->
+        <div class="tab-panel" id="tab-compendium">
+            <section class="tab-compendium">
+                <div class="wrap">
+                    <div class="comp-tabs">
+                        <button class="comp-tab active" data-comp="npcs">NPCs <span style="color:var(--text-dim);margin-left:0.3rem">31</span></button>
+                        <button class="comp-tab" data-comp="factions">Factions <span style="color:var(--text-dim);margin-left:0.3rem">4</span></button>
+                        <button class="comp-tab" data-comp="items">Items <span style="color:var(--text-dim);margin-left:0.3rem">12</span></button>
+                    </div>
+
+                    <!-- NPCs -->
+                    <div class="comp-panel active" id="comp-npcs">
+                        <div class="entry-grid">
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-user"></i></div>
+                                <div>
+                                    <p class="entry-card-name">Halveth Duskmore</p>
+                                    <p class="entry-card-sub">The Dawnsworn &nbsp;·&nbsp; Alive</p>
+                                    <p class="entry-card-desc">High Warden of the Dawnsworn vault. Knows more about the crown than he has admitted.</p>
+                                </div>
+                            </div>
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-user"></i></div>
+                                <div>
+                                    <p class="entry-card-name">Lady Thessira Maerath</p>
+                                    <p class="entry-card-sub">House Maerath &nbsp;·&nbsp; Alive</p>
+                                    <p class="entry-card-desc">Emissary of House Maerath. Unnervingly well-informed. Arrived in Thornwall before the party did.</p>
+                                </div>
+                            </div>
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-user"></i></div>
+                                <div>
+                                    <p class="entry-card-name">Covenant Agent "Rook"</p>
+                                    <p class="entry-card-sub">Iron Covenant &nbsp;·&nbsp; Alive</p>
+                                    <p class="entry-card-desc">Sole survivor of the Meridian Road ambush. Refused to stop smiling throughout interrogation.</p>
+                                </div>
+                            </div>
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-skull"></i></div>
+                                <div>
+                                    <p class="entry-card-name">Elder Voss</p>
+                                    <p class="entry-card-sub">Ashenveil Village &nbsp;·&nbsp; Deceased</p>
+                                    <p class="entry-card-desc">Village elder who sent the original contract. His letter was dated three days after his death.</p>
+                                </div>
+                            </div>
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-user"></i></div>
+                                <div>
+                                    <p class="entry-card-name">Seran of the Mill</p>
+                                    <p class="entry-card-sub">Duskgate &nbsp;·&nbsp; Unknown</p>
+                                    <p class="entry-card-desc">The last person known to have spoken before Duskgate fell silent. No one has found her since.</p>
+                                </div>
+                            </div>
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-user"></i></div>
+                                <div>
+                                    <p class="entry-card-name">Brother Edwick</p>
+                                    <p class="entry-card-sub">The Dawnsworn &nbsp;·&nbsp; Alive</p>
+                                    <p class="entry-card-desc">Junior archivist. Gave the party the vault map. Has not slept since.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Factions -->
+                    <div class="comp-panel" id="comp-factions">
+                        <div class="entry-grid" style="grid-template-columns: repeat(2, 1fr)">
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                                <div>
+                                    <p class="entry-card-name">The Iron Covenant</p>
+                                    <p class="entry-card-sub">Military &nbsp;·&nbsp; Hostile</p>
+                                    <p class="entry-card-desc">A militant order that believes the crown must be reassembled to restore order to Valdris — by any means necessary.</p>
+                                </div>
+                            </div>
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-sun"></i></div>
+                                <div>
+                                    <p class="entry-card-name">The Dawnsworn</p>
+                                    <p class="entry-card-sub">Religious Order &nbsp;·&nbsp; Allied</p>
+                                    <p class="entry-card-desc">Keepers of the old seals. They have guarded the first shard for three centuries and are beginning to doubt their mandate.</p>
+                                </div>
+                            </div>
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-crown"></i></div>
+                                <div>
+                                    <p class="entry-card-name">House Maerath</p>
+                                    <p class="entry-card-sub">Noble House &nbsp;·&nbsp; Neutral</p>
+                                    <p class="entry-card-desc">One of the three surviving noble houses. Playing all sides. Their interest in the crown is dynastic, not religious.</p>
+                                </div>
+                            </div>
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-question"></i></div>
+                                <div>
+                                    <p class="entry-card-name">Thornwall City Guard</p>
+                                    <p class="entry-card-sub">Military &nbsp;·&nbsp; Unknown</p>
+                                    <p class="entry-card-desc">Ostensibly neutral city law enforcement. Someone within their ranks is reporting party movements to an unknown party.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Items -->
+                    <div class="comp-panel" id="comp-items">
+                        <div class="entry-grid">
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-gem"></i></div>
+                                <div>
+                                    <p class="entry-card-name">The First Shard</p>
+                                    <p class="entry-card-sub">Artifact &nbsp;·&nbsp; Caelindra</p>
+                                    <p class="entry-card-desc">A fragment of the Shattered Crown. Warm to the touch. Has begun humming when Halveth's amulet is near.</p>
+                                </div>
+                            </div>
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-gem"></i></div>
+                                <div>
+                                    <p class="entry-card-name">The Second Shard</p>
+                                    <p class="entry-card-sub">Artifact &nbsp;·&nbsp; Caelindra</p>
+                                    <p class="entry-card-desc">Recovered in Ashenveil. Colder than the first. The two shards will not sit in the same bag without a layer of iron between them.</p>
+                                </div>
+                            </div>
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-circle"></i></div>
+                                <div>
+                                    <p class="entry-card-name">Halveth's Amulet</p>
+                                    <p class="entry-card-sub">Wondrous Item &nbsp;·&nbsp; Party Stash</p>
+                                    <p class="entry-card-desc">A binding seal worn for years without knowledge of its purpose. Now confirmed as a key to something the party hasn't found yet.</p>
+                                </div>
+                            </div>
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-wand-sparkles"></i></div>
+                                <div>
+                                    <p class="entry-card-name">Rod of the Covenant</p>
+                                    <p class="entry-card-sub">Rod &nbsp;·&nbsp; Very Rare &nbsp;·&nbsp; Mira</p>
+                                    <p class="entry-card-desc">Taken from the Meridian Road ambush leader. Iron Covenant insignia. Three charges remaining.</p>
+                                </div>
+                            </div>
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-book"></i></div>
+                                <div>
+                                    <p class="entry-card-name">The Archivist's Cipher</p>
+                                    <p class="entry-card-sub">Wondrous Item &nbsp;·&nbsp; Orryn</p>
+                                    <p class="entry-card-desc">A codebook in Brother Edwick's hand. Translates a dead script found on the vault walls. Translation ongoing.</p>
+                                </div>
+                            </div>
+                            <div class="entry-card">
+                                <div class="entry-card-icon"><i class="fa-solid fa-sword"></i></div>
+                                <div>
+                                    <p class="entry-card-name">Ashveil Longsword +1</p>
+                                    <p class="entry-card-sub">Weapon &nbsp;·&nbsp; Uncommon &nbsp;·&nbsp; Korrath</p>
+                                    <p class="entry-card-desc">Forged in Ashenveil before the wars. Bears a maker's mark that Halveth recognised but refused to explain.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ── MAPS ───────────────────────────────────────────────────── -->
+        <div class="tab-panel" id="tab-maps">
+            <section class="tab-maps">
+                <div class="wrap">
+                    <div class="maps-grid">
+                        <div class="map-thumb">
+                            <i class="fa-solid fa-map"></i>
+                            <span class="map-thumb-label">The Kingdom of Valdris</span>
+                            <span class="map-thumb-type">World Map</span>
+                        </div>
+                        <div class="map-thumb">
+                            <i class="fa-solid fa-map"></i>
+                            <span class="map-thumb-label">Thornwall</span>
+                            <span class="map-thumb-type">City Map</span>
+                        </div>
+                        <div class="map-thumb">
+                            <i class="fa-solid fa-map"></i>
+                            <span class="map-thumb-label">The Dawnsworn Vault</span>
+                            <span class="map-thumb-type">Dungeon Map</span>
+                        </div>
+                        <div class="map-thumb">
+                            <i class="fa-solid fa-map"></i>
+                            <span class="map-thumb-label">Ashenveil Village</span>
+                            <span class="map-thumb-type">Region Map</span>
+                        </div>
+                        <div class="map-thumb">
+                            <i class="fa-solid fa-map"></i>
+                            <span class="map-thumb-label">The Meridian Road</span>
+                            <span class="map-thumb-type">Region Map</span>
+                        </div>
+                        <div class="map-thumb">
+                            <i class="fa-solid fa-map"></i>
+                            <span class="map-thumb-label">Duskgate</span>
+                            <span class="map-thumb-type">City Map</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ── FOOTER ─────────────────────────────────────────────────── -->
+        <footer class="footer">
+            <span class="footer-brand">Emberfall Keep</span>
+            <ul class="footer-links">
+                <li><a href="index.html#campaign">Campaign</a></li>
+                <li><a href="index.html#fellowship">Fellowship</a></li>
+                <li><a href="index.html#chronicles">Chronicles</a></li>
+                <li><a href="index.html#compendium">Compendium</a></li>
+                <li><a href="https://discord.gg/dTRaBUNY" target="_blank" rel="noopener" class="footer-discord"><i class="fa-brands fa-discord"></i> Discord</a></li>
+            </ul>
+            <p class="footer-motto">In Omnia Paratus &middot; Est. 2026</p>
+        </footer>
+
+        <script>
+            // ── Main tabs ────────────────────────────────────────────────
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.dataset.tab;
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById('tab-' + target).classList.add('active');
+                });
+            });
+
+            // ── Compendium sub-tabs ──────────────────────────────────────
+            document.querySelectorAll('.comp-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.dataset.comp;
+                    document.querySelectorAll('.comp-tab').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.comp-panel').forEach(p => p.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById('comp-' + target).classList.add('active');
+                });
+            });
+        </script>
+    </body>
+</html>

@@ -4,10 +4,11 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Emberfall Keep</title>
+        <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 
         <link rel="preconnect" href="https://fonts.bunny.net" />
         <link
-            href="https://fonts.bunny.net/css?family=cinzel:400,600,700|cinzel-decorative:700|almendra-display:700|im-fell-english:400,400i|texturina:400,400i&display=swap"
+            href="https://fonts.bunny.net/css?family=cinzel:400,600,700|cinzel-decorative:700|almendra-sc:400|im-fell-english:400,400i|texturina:400,400i&display=swap"
             rel="stylesheet"
         />
         <link
@@ -39,8 +40,8 @@
                 --gold: #c8b878;
                 --text-primary: #ddd4b0;
                 --text-body: #a8a090;
-                --text-muted: #706858;
-                --text-dim: #504848;
+                --text-muted: #b09888;
+                --text-dim: #9a8c7e;
                 --border-default: #4a4845;
                 --border-accent: rgba(104, 152, 168, 0.4);
                 --border-mist: rgba(221, 212, 176, 0.2);
@@ -187,35 +188,36 @@
                 justify-content: flex-end;
             }
 
-            /* Placeholder art — duotone style */
+            /* Hero image with duotone overlay */
             .hero-art {
                 position: absolute;
                 inset: 0;
                 background:
                     linear-gradient(
                         to bottom,
-                        transparent 35%,
+                        rgba(39, 37, 36, 0.3) 0%,
+                        transparent 30%,
+                        transparent 50%,
                         var(--void-deep) 100%
                     ),
                     radial-gradient(
                         ellipse 60% 70% at 30% 60%,
-                        rgba(180, 100, 80, 0.18) 0%,
+                        rgba(180, 100, 80, 0.15) 0%,
                         transparent 60%
                     ),
                     radial-gradient(
                         ellipse 50% 60% at 75% 40%,
-                        rgba(104, 152, 168, 0.14) 0%,
+                        rgba(104, 152, 168, 0.12) 0%,
                         transparent 55%
                     ),
-                    linear-gradient(
-                        135deg,
-                        #1e1c1c 0%,
-                        #2e2a28 40%,
-                        #1c1a18 100%
-                    );
+                    url("hero-image.jpg");
+                background-size: cover;
+                background-position: center top;
+                background-repeat: no-repeat;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                filter: saturate(0.3) sepia(0.4);
             }
             /* ─── Monogram ───────────────────────────────────────────────── */
             .monogram-hero {
@@ -225,7 +227,7 @@
                 transform: translateY(-50%);
                 width: 280px;
                 height: 280px;
-                color: rgba(104, 152, 168, 0.13);
+                color: rgba(104, 152, 168, 0.35);
             }
             .monogram-nav {
                 width: 30px;
@@ -886,9 +888,9 @@
                         x="30"
                         y="33"
                         text-anchor="middle"
-                        font-family="Almendra Display, serif"
+                        font-family="Almendra SC, serif"
                         font-size="28"
-                        font-weight="700"
+                        font-weight="400"
                         fill="currentColor"
                     >
                         EK
@@ -922,45 +924,26 @@
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                 >
-                    <!-- Cardinal diamonds -->
-                    <polygon
-                        points="140,4  144,12 140,20 136,12"
-                        fill="currentColor"
-                        opacity="0.5"
+                    <!-- Outer ring -->
+                    <circle
+                        cx="140" cy="100" r="96"
+                        stroke="currentColor" stroke-width="0.8"
+                        opacity="0.4" fill="none"
                     />
-                    <polygon
-                        points="140,180 144,188 140,196 136,188"
-                        fill="currentColor"
-                        opacity="0.5"
-                    />
-                    <polygon
-                        points="4,100  12,104 20,100 12,96"
-                        fill="currentColor"
-                        opacity="0.5"
-                    />
-                    <polygon
-                        points="260,100 268,104 276,100 268,96"
-                        fill="currentColor"
-                        opacity="0.5"
-                    />
-                    <!-- Thin horizontal rule through centre -->
-                    <line
-                        x1="4"
-                        y1="100"
-                        x2="276"
-                        y2="100"
-                        stroke="currentColor"
-                        stroke-width="0.5"
-                        opacity="0.2"
+                    <!-- Inner ring -->
+                    <circle
+                        cx="140" cy="100" r="90"
+                        stroke="currentColor" stroke-width="0.8"
+                        opacity="0.4" fill="none"
                     />
                     <!-- EK letterform -->
                     <text
                         x="140"
                         y="150"
                         text-anchor="middle"
-                        font-family="Almendra Display, serif"
+                        font-family="Almendra SC, serif"
                         font-size="130"
-                        font-weight="700"
+                        font-weight="400"
                         fill="currentColor"
                         opacity="0.9"
                     >

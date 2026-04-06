@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Session XVII — The Ashenveil Accord — Emberfall Keep</title>
+        <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+        <link rel="preconnect" href="https://fonts.bunny.net" />
+        <link
+            href="https://fonts.bunny.net/css?family=cinzel:400,600,700|cinzel-decorative:700|almendra-sc:400|im-fell-english:400,400i|texturina:400,400i&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        />
+
+        <style>
+            /* ─── Tokens ─────────────────────────────────────────────────── */
+            :root {
+                --void-deep:      #272524;
+                --void-surface:   #302e2c;
+                --void-raised:    #3a3836;
+                --void-border:    #4a4845;
+                --mist-bright:    #ddd4b0;
+                --mist-mid:       #b8b098;
+                --mist-deep:      #807868;
+                --teal-bright:    #a0c0c8;
+                --teal-mid:       #6898a8;
+                --teal-deep:      #3a6070;
+                --teal-tint:      #141e22;
+                --mauve-bright:   #c88878;
+                --mauve-mid:      #905848;
+                --gold:           #c8b878;
+                --text-primary:   #ddd4b0;
+                --text-body:      #a8a090;
+                --text-muted:     #b09888;
+                --text-dim:       #9a8c7e;
+                --border-default: #4a4845;
+                --border-accent:  rgba(104, 152, 168, 0.4);
+                --border-mist:    rgba(221, 212, 176, 0.2);
+            }
+
+            *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+            html { scroll-behavior: smooth; }
+
+            body {
+                background-color: var(--void-deep);
+                background-image:
+                    radial-gradient(ellipse 70% 50% at 0% 0%, rgba(180,100,80,0.07) 0%, transparent 60%),
+                    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(104,152,168,0.07) 0%, transparent 55%),
+                    radial-gradient(ellipse 80% 60% at 50% 50%, transparent 50%, rgba(20,18,18,0.4) 100%);
+                background-attachment: fixed;
+                color: var(--text-body);
+                font-family: "IM Fell English", serif;
+                font-size: 15px;
+                line-height: 1.75;
+                min-height: 100vh;
+            }
+
+            img { display: block; width: 100%; }
+            ::-webkit-scrollbar { width: 5px; }
+            ::-webkit-scrollbar-track { background: var(--void-deep); }
+            ::-webkit-scrollbar-thumb { background: var(--void-border); border-radius: 3px; }
+
+            /* ─── Nav ────────────────────────────────────────────────────── */
+            .nav {
+                position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+                display: flex; align-items: center; justify-content: space-between;
+                padding: 0 2.5rem; height: 52px;
+                background: rgba(39,37,36,0.92);
+                backdrop-filter: blur(8px);
+                border-bottom: 1px solid rgba(74,72,69,0.5);
+            }
+            .nav-brand {
+                font-family: "Cinzel", serif; font-size: 11px; font-weight: 600;
+                letter-spacing: 0.2em; text-transform: uppercase;
+                color: var(--mist-mid); text-decoration: none;
+                display: flex; align-items: center; gap: 0.5rem;
+            }
+            .monogram-nav { width: 30px; height: 30px; color: var(--teal-mid); flex-shrink: 0; }
+            .nav-links { display: flex; gap: 0; list-style: none; }
+            .nav-links a {
+                font-family: "Cinzel", serif; font-size: 10px;
+                letter-spacing: 0.15em; text-transform: uppercase;
+                color: var(--text-dim); padding: 0.4rem 0.9rem;
+                text-decoration: none; transition: color 0.2s;
+            }
+            .nav-links a:hover, .nav-links a.active { color: var(--mist-bright); }
+            .nav-discord { color: #7289da !important; }
+            .nav-discord:hover { color: #99aaf0 !important; }
+
+            /* ─── Utilities ──────────────────────────────────────────────── */
+            .wrap { max-width: 1100px; margin: 0 auto; padding: 0 2.5rem; }
+
+            .btn {
+                display: inline-flex; align-items: center; gap: 0.45rem;
+                padding: 0.5rem 1.1rem;
+                font-family: "Cinzel", serif; font-size: 10px; font-weight: 600;
+                letter-spacing: 0.12em; text-transform: uppercase;
+                border-radius: 2px; cursor: pointer; text-decoration: none;
+                transition: background 0.2s, color 0.2s, border-color 0.2s;
+                border: 1px solid transparent;
+            }
+            .btn-primary { background: var(--teal-deep); border-color: var(--border-accent); color: var(--teal-bright); }
+            .btn-primary:hover { background: var(--teal-mid); color: var(--void-deep); }
+            .btn-ghost { background: transparent; border-color: var(--border-default); color: var(--text-muted); }
+            .btn-ghost:hover { border-color: var(--border-mist); color: var(--mist-bright); }
+
+            /* ─── BANNER ─────────────────────────────────────────────────── */
+            .banner {
+                margin-top: 52px;
+                padding: 4rem 0 3rem;
+                border-bottom: 1px solid var(--border-default);
+                background: linear-gradient(180deg, rgba(180,100,80,0.06) 0%, transparent 100%);
+            }
+            .banner-inner { max-width: 1100px; margin: 0 auto; padding: 0 2.5rem; }
+            .breadcrumb {
+                display: flex; align-items: center; gap: 0.5rem;
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.15em; text-transform: uppercase;
+                color: var(--text-dim); margin-bottom: 1.5rem;
+            }
+            .breadcrumb a { color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
+            .breadcrumb a:hover { color: var(--mist-mid); }
+            .breadcrumb-sep { color: var(--border-default); }
+
+            .banner-eyebrow {
+                display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem;
+            }
+            .session-num-badge {
+                font-family: "Cinzel Decorative", serif; font-size: 13px;
+                color: var(--text-dim); letter-spacing: 0.04em;
+            }
+            .pill {
+                display: inline-flex; align-items: center; gap: 0.4rem;
+                padding: 0.2rem 0.65rem; border-radius: 2px;
+                font-family: "Cinzel", serif; font-size: 9px; font-weight: 600;
+                letter-spacing: 0.18em; text-transform: uppercase;
+            }
+            .pill-latest { background: rgba(104,152,168,0.1); border: 1px solid var(--border-accent); color: var(--teal-bright); }
+            .pill-latest::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--teal-bright); }
+
+            .banner-title {
+                font-family: "Cinzel Decorative", serif;
+                font-size: clamp(26px, 4vw, 48px);
+                font-weight: 700; color: var(--mist-bright);
+                line-height: 1.1; letter-spacing: 0.01em;
+                margin-bottom: 1.5rem;
+            }
+
+            /* Meta row */
+            .banner-meta {
+                display: flex; gap: 2rem; flex-wrap: wrap;
+                padding-top: 1.25rem;
+                border-top: 1px solid var(--border-default);
+            }
+            .meta-item { display: flex; flex-direction: column; gap: 0.15rem; }
+            .meta-item .lbl {
+                font-family: "Cinzel", serif; font-size: 8px;
+                letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim);
+            }
+            .meta-item .val {
+                font-family: "Cinzel", serif; font-size: 11px;
+                letter-spacing: 0.06em; color: var(--mist-mid);
+            }
+            .meta-item .val.mono { font-family: monospace; color: var(--teal-mid); }
+
+            /* ─── MAIN LAYOUT ────────────────────────────────────────────── */
+            .main { padding: 4rem 0 5rem; }
+            .main-layout {
+                display: grid;
+                grid-template-columns: 1fr 280px;
+                gap: 5rem;
+                align-items: start;
+            }
+
+            /* ─── PROSE ──────────────────────────────────────────────────── */
+            .prose {}
+            .prose-section { margin-bottom: 3rem; }
+
+            .drop-cap::first-letter {
+                font-family: "Cinzel Decorative", serif;
+                font-size: 4.5em; font-weight: 700;
+                float: left; line-height: 0.75;
+                margin: 0.08em 0.1em 0 0;
+                color: var(--mist-bright);
+            }
+
+            .prose p {
+                font-style: italic;
+                font-size: 16px;
+                color: var(--text-body);
+                line-height: 1.9;
+                margin-bottom: 1.25rem;
+            }
+            .prose p:last-child { margin-bottom: 0; }
+
+            .prose-heading {
+                font-family: "Cinzel", serif; font-size: 10px;
+                letter-spacing: 0.22em; text-transform: uppercase;
+                color: var(--text-dim);
+                padding-bottom: 0.5rem;
+                border-bottom: 1px solid var(--border-default);
+                margin: 3rem 0 1.25rem;
+            }
+
+            /* Pull quote */
+            .pull-quote {
+                border-left: 2px solid var(--teal-deep);
+                padding: 1rem 1.5rem;
+                margin: 2.5rem 0;
+                background: rgba(58,96,112,0.07);
+            }
+            .pull-quote p {
+                font-size: 18px !important;
+                color: var(--mist-mid) !important;
+                line-height: 1.65 !important;
+                margin-bottom: 0.5rem !important;
+            }
+            .pull-quote cite {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.15em; text-transform: uppercase;
+                color: var(--text-dim); font-style: normal;
+            }
+
+            /* Scene divider */
+            .scene-divider {
+                display: flex; align-items: center; gap: 1rem;
+                margin: 2.5rem 0;
+            }
+            .scene-divider::before,
+            .scene-divider::after {
+                content: ""; flex: 1;
+                height: 1px; background: var(--border-default);
+            }
+            .scene-divider span {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.2em; text-transform: uppercase;
+                color: var(--text-dim); white-space: nowrap;
+            }
+
+            /* ─── SIDEBAR ────────────────────────────────────────────────── */
+            .sidebar-block {
+                background: var(--void-surface);
+                border: 1px solid var(--border-default);
+                border-radius: 2px; padding: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+            .sidebar-block-title {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.2em; text-transform: uppercase;
+                color: var(--text-dim); margin-bottom: 0.9rem;
+                padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-default);
+            }
+            .sidebar-row {
+                display: flex; justify-content: space-between; align-items: baseline;
+                padding: 0.35rem 0; border-bottom: 1px solid rgba(74,72,69,0.4);
+                font-size: 13px;
+            }
+            .sidebar-row:last-child { border-bottom: none; }
+            .sidebar-row .k {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
+            }
+            .sidebar-row .v { color: var(--mist-mid); font-style: italic; }
+            .sidebar-row .v.mono { font-family: monospace; font-style: normal; color: var(--teal-mid); }
+
+            /* Party present */
+            .party-list { list-style: none; }
+            .party-list li {
+                display: flex; align-items: center; gap: 0.6rem;
+                padding: 0.4rem 0;
+                border-bottom: 1px solid rgba(74,72,69,0.4);
+                font-size: 13px;
+            }
+            .party-list li:last-child { border-bottom: none; }
+            .party-dot {
+                width: 6px; height: 6px; border-radius: 50%;
+                background: var(--teal-mid); flex-shrink: 0;
+            }
+            .party-char { color: var(--mist-mid); font-style: italic; }
+            .party-player {
+                font-family: "Cinzel", serif; font-size: 8px;
+                letter-spacing: 0.1em; text-transform: uppercase;
+                color: var(--text-dim); margin-left: auto;
+            }
+
+            /* Loot list */
+            .loot-list { list-style: none; }
+            .loot-item {
+                padding: 0.5rem 0;
+                border-bottom: 1px solid rgba(74,72,69,0.4);
+                font-size: 13px;
+            }
+            .loot-item:last-child { border-bottom: none; }
+            .loot-name { color: var(--mist-mid); font-style: italic; }
+            .loot-note {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.08em; text-transform: uppercase;
+                color: var(--text-dim); margin-top: 0.1rem;
+            }
+
+            /* Tags */
+            .tag-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+            .tag {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.1em; text-transform: uppercase;
+                padding: 0.2rem 0.5rem;
+                border: 1px solid var(--border-default);
+                color: var(--text-muted); border-radius: 2px;
+            }
+
+            /* ─── SESSION NAV ────────────────────────────────────────────── */
+            .session-nav {
+                display: flex; justify-content: space-between; align-items: center;
+                padding: 2rem 0;
+                border-top: 1px solid var(--border-default);
+                margin-top: 3rem;
+            }
+            .session-nav-link {
+                display: flex; flex-direction: column; gap: 0.25rem;
+                text-decoration: none; max-width: 280px;
+                transition: color 0.2s;
+            }
+            .session-nav-link:hover .snl-title { color: var(--mist-bright); }
+            .snl-dir {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.18em; text-transform: uppercase;
+                color: var(--text-dim); display: flex; align-items: center; gap: 0.4rem;
+            }
+            .snl-title {
+                font-family: "Cinzel", serif; font-size: 13px; font-weight: 600;
+                color: var(--mist-mid); transition: color 0.2s;
+            }
+            .snl-num {
+                font-family: "Cinzel", serif; font-size: 9px;
+                letter-spacing: 0.1em; color: var(--text-dim);
+            }
+            .session-nav-link.next { text-align: right; align-items: flex-end; }
+
+            /* ─── Footer ─────────────────────────────────────────────────── */
+            .footer {
+                padding: 3.5rem 2.5rem 2.5rem; text-align: center;
+                border-top: 1px solid var(--border-default);
+            }
+            .footer-brand {
+                font-family: "Cinzel Decorative", serif; font-size: 18px;
+                color: var(--mist-mid); display: block; margin-bottom: 0.75rem;
+            }
+            .footer-links {
+                list-style: none; display: flex; justify-content: center;
+                gap: 2rem; margin-bottom: 1.5rem;
+            }
+            .footer-links a {
+                font-family: "Cinzel", serif; font-size: 10px;
+                letter-spacing: 0.15em; text-transform: uppercase;
+                color: var(--text-dim); text-decoration: none; transition: color 0.2s;
+            }
+            .footer-links a:hover { color: var(--mist-mid); }
+            .footer-discord { color: #7289da !important; }
+            .footer-discord:hover { color: #99aaf0 !important; }
+            .footer-motto {
+                font-family: "IM Fell English", serif; font-style: italic;
+                font-size: 12px; color: var(--text-dim);
+            }
+
+            /* ─── Responsive ─────────────────────────────────────────────── */
+            @media (max-width: 900px) {
+                .main-layout { grid-template-columns: 1fr; }
+                .sidebar { order: -1; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+                .sidebar .sidebar-block:last-child { grid-column: span 2; }
+            }
+            @media (max-width: 600px) {
+                .nav-links { display: none; }
+                .banner-meta { gap: 1.25rem; }
+                .sidebar { grid-template-columns: 1fr; }
+                .sidebar .sidebar-block:last-child { grid-column: span 1; }
+                .session-nav { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+                .session-nav-link.next { align-items: flex-start; text-align: left; }
+            }
+        </style>
+    </head>
+    <body>
+
+        <!-- ── NAV ───────────────────────────────────────────────────── -->
+        <nav class="nav">
+            <a href="index.html" class="nav-brand">
+                <svg class="monogram-nav" viewBox="0 0 60 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <text x="30" y="33" text-anchor="middle"
+                          font-family="Almendra SC, serif"
+                          font-size="28" font-weight="400"
+                          fill="currentColor">EK</text>
+                </svg>
+                Emberfall Keep
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#campaign">Campaign</a></li>
+                <li><a href="index.html#fellowship">Fellowship</a></li>
+                <li><a href="chronicles.html" class="active">Chronicles</a></li>
+                <li><a href="index.html#compendium">Compendium</a></li>
+                <li><a href="https://discord.gg/dTRaBUNY" target="_blank" rel="noopener" class="nav-discord"><i class="fa-brands fa-discord"></i> Discord</a></li>
+            </ul>
+        </nav>
+
+        <!-- ── BANNER ────────────────────────────────────────────────── -->
+        <header class="banner">
+            <div class="banner-inner">
+                <div class="breadcrumb">
+                    <a href="campaign-detail.html">The Shattered Crown</a>
+                    <span class="breadcrumb-sep"><i class="fa-solid fa-chevron-right" style="font-size:8px"></i></span>
+                    <a href="chronicles.html">Chronicles</a>
+                    <span class="breadcrumb-sep"><i class="fa-solid fa-chevron-right" style="font-size:8px"></i></span>
+                    <span style="color:var(--text-muted)">Session XVII</span>
+                </div>
+                <div class="banner-eyebrow">
+                    <span class="session-num-badge">Session XVII</span>
+                    <span class="pill pill-latest">Latest</span>
+                </div>
+                <h1 class="banner-title">The Ashenveil Accord</h1>
+                <div class="banner-meta">
+                    <div class="meta-item">
+                        <span class="lbl">Date Played</span>
+                        <span class="val">22 March 2026</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="lbl">XP Awarded</span>
+                        <span class="val mono">650</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="lbl">Encounters</span>
+                        <span class="val mono">2</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="lbl">Players Present</span>
+                        <span class="val mono">5 / 5</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="lbl">Duration</span>
+                        <span class="val">~4 hours</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ── MAIN ──────────────────────────────────────────────────── -->
+        <main class="main">
+            <div class="wrap">
+                <div class="main-layout">
+
+                    <!-- Prose -->
+                    <article class="prose">
+                        <div class="prose-section">
+                            <p class="drop-cap">They smelled the pyres before they saw the village. Ashenveil sits in a low valley, and the smoke had nowhere to go — it hung over the rooftops like something that had given up trying to rise. Korrath said nothing when they crested the ridge. He'd smelled that particular kind of smoke before.</p>
+                            <p>The village square held six pyres. Elder Voss was not among the dead — a fact that Orryn noted carefully in his journal, writing only: <em>the man who sent for us is not here.</em> The villagers who remained were speaking, but only just, and only in answers. No one offered anything unprompted.</p>
+                            <p>Caelindra found the amulet on the body of a man who had died with his hands folded across his chest, the way soldiers are laid out, not the way villagers fall. The amulet was warm. It should not have been warm.</p>
+                        </div>
+
+                        <div class="pull-quote">
+                            <p>"He didn't ask questions. He just stepped in front of it. That's the only reason any of us are writing this down."</p>
+                            <cite>— Orryn Thistlewick, on Korrath's actions during the second encounter</cite>
+                        </div>
+
+                        <div class="scene-divider"><span>Second Watch</span></div>
+
+                        <div class="prose-section">
+                            <p>The attack came three hours after midnight. Two Covenant soldiers, which was expected — they'd found signs of a camp half a mile east. What was not expected was the third figure, who did not move like a soldier and did not bleed like one either, when Mira's blade finally found a gap in its guard.</p>
+                            <p>Korrath took a blow meant for Sereveth. The healers said four inches to the left and they would have been carrying him out. Korrath said nothing about this. He cleaned his sword and went back to watching the treeline.</p>
+                            <p>In the morning, Caelindra identified the amulet as a binding seal — old work, pre-Founding, the kind that the Dawnsworn records mentioned but never described in detail. She did not tell the others what she suspected it was bound to. Not yet.</p>
+                        </div>
+
+                        <div class="scene-divider"><span>Aftermath</span></div>
+
+                        <div class="prose-section">
+                            <p>The surviving villagers had no record of the man whose body held the amulet. He had arrived two days before the deaths. He had not given a name. He had been kind to the children, which was the only reason they remembered him at all.</p>
+                            <p>The party left Ashenveil before noon. No one looked back. Mira, who looks back at everything, did not look back.</p>
+                            <p>A letter was waiting at the waypost on the northern road. It was addressed to the party by name. It had been sent from Thornwall. The seal on it was House Maerath's — but the handwriting was not Lady Thessira's.</p>
+                        </div>
+
+                        <p class="prose-heading">DM Notes</p>
+                        <div class="prose-section" style="background:rgba(180,100,80,0.05);border:1px solid rgba(180,100,80,0.15);border-radius:2px;padding:1.25rem;">
+                            <p style="color:var(--text-dim);font-size:13px">The third attacker was a Wight — the party didn't identify this, and I'm not going to tell them yet. Korrath's player is starting to ask the right questions about the longsword. The Maerath letter is from Thessira's younger brother, who has been cut out of the succession and is playing his own angle. Next session: Thornwall arrival, the letter reveal, and possibly the first hint that one of the shards is responding to a party member.</p>
+                        </div>
+
+                        <!-- Prev / Next session nav -->
+                        <div class="session-nav">
+                            <a href="#" class="session-nav-link prev">
+                                <span class="snl-dir"><i class="fa-solid fa-arrow-left"></i> Previous</span>
+                                <span class="snl-num">Session XVI</span>
+                                <span class="snl-title">The Silence of Duskgate</span>
+                            </a>
+                            <a href="#" class="session-nav-link next">
+                                <span class="snl-dir">Next <i class="fa-solid fa-arrow-right"></i></span>
+                                <span class="snl-num">Session XVIII</span>
+                                <span class="snl-title">Not yet written</span>
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- Sidebar -->
+                    <aside class="sidebar">
+                        <div class="sidebar-block">
+                            <p class="sidebar-block-title">Party Present</p>
+                            <ul class="party-list">
+                                <li>
+                                    <span class="party-dot"></span>
+                                    <span class="party-char">Korrath Ironveil</span>
+                                    <span class="party-player">Marcus</span>
+                                </li>
+                                <li>
+                                    <span class="party-dot"></span>
+                                    <span class="party-char">Caelindra</span>
+                                    <span class="party-player">Priya</span>
+                                </li>
+                                <li>
+                                    <span class="party-dot"></span>
+                                    <span class="party-char">Orryn Thistlewick</span>
+                                    <span class="party-player">DM Alt</span>
+                                </li>
+                                <li>
+                                    <span class="party-dot"></span>
+                                    <span class="party-char">Sereveth</span>
+                                    <span class="party-player">Jordan</span>
+                                </li>
+                                <li>
+                                    <span class="party-dot"></span>
+                                    <span class="party-char">Mira Ashvale</span>
+                                    <span class="party-player">Sam</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="sidebar-block">
+                            <p class="sidebar-block-title">Rewards</p>
+                            <div class="sidebar-row"><span class="k">XP</span><span class="v mono">650</span></div>
+                            <div class="sidebar-row"><span class="k">Gold</span><span class="v mono">80 gp</span></div>
+                            <div class="sidebar-row"><span class="k">Total XP</span><span class="v mono">9,450</span></div>
+                        </div>
+
+                        <div class="sidebar-block">
+                            <p class="sidebar-block-title">Loot Found</p>
+                            <ul class="loot-list">
+                                <li class="loot-item">
+                                    <p class="loot-name">Halveth's Amulet</p>
+                                    <p class="loot-note">Binding Seal · Wondrous Item</p>
+                                </li>
+                                <li class="loot-item">
+                                    <p class="loot-name">The Second Shard</p>
+                                    <p class="loot-note">Artifact · Held by Caelindra</p>
+                                </li>
+                                <li class="loot-item">
+                                    <p class="loot-name">Covenant Soldier Insignia ×2</p>
+                                    <p class="loot-note">Quest Item</p>
+                                </li>
+                                <li class="loot-item">
+                                    <p class="loot-name">80 gp, mixed coin</p>
+                                    <p class="loot-note">Divided evenly</p>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="sidebar-block">
+                            <p class="sidebar-block-title">Tags</p>
+                            <div class="tag-list">
+                                <span class="tag">Combat</span>
+                                <span class="tag">Roleplay</span>
+                                <span class="tag">Mystery</span>
+                                <span class="tag">Ashenveil</span>
+                                <span class="tag">The Crown</span>
+                            </div>
+                        </div>
+
+                        <a href="chronicles.html" class="btn btn-ghost" style="width:100%;justify-content:center">
+                            <i class="fa-solid fa-list"></i> All Sessions
+                        </a>
+                    </aside>
+
+                </div>
+            </div>
+        </main>
+
+        <!-- ── FOOTER ─────────────────────────────────────────────────── -->
+        <footer class="footer">
+            <span class="footer-brand">Emberfall Keep</span>
+            <ul class="footer-links">
+                <li><a href="index.html#campaign">Campaign</a></li>
+                <li><a href="index.html#fellowship">Fellowship</a></li>
+                <li><a href="chronicles.html">Chronicles</a></li>
+                <li><a href="index.html#compendium">Compendium</a></li>
+                <li><a href="https://discord.gg/dTRaBUNY" target="_blank" rel="noopener" class="footer-discord"><i class="fa-brands fa-discord"></i> Discord</a></li>
+            </ul>
+            <p class="footer-motto">In Omnia Paratus &middot; Est. 2026</p>
+        </footer>
+
+    </body>
+</html>
