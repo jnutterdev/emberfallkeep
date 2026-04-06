@@ -8,15 +8,21 @@ import Base from '../layouts/Base.astro';
     <div class="not-found__inner">
 
       <svg class="not-found__monogram" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polygon points="140,4  144,12 140,20 136,12" fill="currentColor" opacity="0.4"/>
-        <polygon points="140,180 144,188 140,196 136,188" fill="currentColor" opacity="0.4"/>
-        <polygon points="4,100  12,104 20,100 12,96"   fill="currentColor" opacity="0.4"/>
-        <polygon points="260,100 268,104 276,100 268,96" fill="currentColor" opacity="0.4"/>
-        <line x1="4" y1="100" x2="276" y2="100" stroke="currentColor" stroke-width="0.5" opacity="0.15"/>
-        <text x="140" y="150" text-anchor="middle"
-              font-family="Almendra SC, serif"
-              font-size="130" font-weight="400"
-              fill="currentColor" opacity="0.9">EK</text>
+        <!-- Outer ring -->
+        <circle cx="140" cy="100" r="96" stroke="currentColor" stroke-width="0.8" opacity="0.4" fill="none" />
+        <!-- Inner ring -->
+        <circle cx="140" cy="100" r="90" stroke="currentColor" stroke-width="0.8" opacity="0.4" fill="none" />
+        <!-- EK letterform -->
+        <text
+          x="140"
+          y="150"
+          text-anchor="middle"
+          font-family="Almendra SC, serif"
+          font-size="130"
+          font-weight="400"
+          fill="currentColor"
+          opacity="0.9"
+        >EK</text>
       </svg>
 
       <p class="not-found__code">404</p>
