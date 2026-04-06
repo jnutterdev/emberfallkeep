@@ -30,5 +30,5 @@ Thumbs.db
 *.swp
 *.swo
 
-# Uploads (user media — tracked separately or via git-lfs)
-public/uploads/
+# Uploads are committed to git so they are available during CI builds.
+# Add public/uploads/ back here if you switch to external media (Cloudinary etc.)
