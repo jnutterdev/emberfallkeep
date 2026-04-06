@@ -547,7 +547,73 @@ export default defineConfig({
         ],
       },
 
-      // ── Maps ─────────────────────────────────────────────────────
+      // ── Gamemasters ───────────────────────────────────────────────────────
+      {
+        name: "gamemasters",
+        label: "Gamemasters",
+        path: "src/content/gamemasters",
+        format: "md",
+        fields: [
+          {
+            type: "string",
+            name: "name",
+            label: "Name",
+            isTitle: true,
+            required: true,
+          },
+          { type: "image", name: "portrait", label: "Portrait" },
+          {
+            type: "string",
+            name: "bio",
+            label: "Short Bio",
+            ui: { component: "textarea" },
+          },
+          {
+            type: "boolean",
+            name: "active",
+            label: "Currently Active",
+            ui: { defaultValue: true },
+          },
+          {
+            type: "string",
+            name: "favoriteSystem",
+            label: "Favourite System",
+          },
+          {
+            type: "object",
+            name: "campaigns",
+            label: "Campaigns Run",
+            list: true,
+            ui: {
+              itemProps: (item) => ({
+                label: item?.campaign
+                  ? item.campaign
+                      .split("/")
+                      .pop()
+                      ?.replace(/\.mdx?$/, "")
+                      .replace(/-/g, " ")
+                  : "Select campaign…",
+              }),
+            },
+            fields: [
+              {
+                type: "reference",
+                name: "campaign",
+                label: "Campaign",
+                collections: ["campaigns"],
+              },
+            ],
+          },
+          {
+            type: "rich-text",
+            name: "body",
+            label: "Full Bio",
+            isBody: true,
+          },
+        ],
+      },
+
+      // ── Maps ─────────────────────────────────────────────────────────────
       {
         name: "maps",
         label: "Maps",

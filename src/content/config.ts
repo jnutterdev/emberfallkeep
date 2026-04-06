@@ -207,6 +207,21 @@ const maps = defineCollection({
   }),
 });
 
+const gamemasters = defineCollection({
+  type: "content",
+  schema: z.object({
+    name: z.string(),
+    portrait: z.string().optional(),
+    bio: z.string().optional(),
+    active: z.boolean().default(true),
+    campaigns: z
+      .array(z.union([z.string(), z.object({ campaign: z.string() })]))
+      .default([]),
+    joinedDate: z.coerce.date().optional(),
+    favoriteSystem: z.string().optional(),
+  }),
+});
+
 export const collections = {
   campaigns,
   characters,
@@ -215,4 +230,5 @@ export const collections = {
   factions,
   items,
   maps,
+  gamemasters,
 };

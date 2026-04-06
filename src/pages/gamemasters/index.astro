@@ -1,0 +1,386 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
+
+const allGMs = await getCollection('gamemasters');
+const allCampaigns = await getCollection('campaigns');
+
+function resolveCampaign(ref: string | { campaign: string }): { title: string; slug: string | null } {
+  const path = typeof ref === 'object' && ref !== null ? ref.campaign : ref;
+  if (path.includes('/')) {
+    const slug = path.split('/').pop()?.replace(/\.mdx?$/, '') ?? path;
+    const match = allCampaigns.find(c => c.slug === slug);
+    if (match) return { title: match.data.title, slug: match.slug };
+    return { title: slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), slug };
+  }
+  return { title: path, slug: null };
+}
+const active   = allGMs.filter(gm => gm.data.active !== false);
+const inactive = allGMs.filter(gm => gm.data.active === false);
+---
+
+<Base title="Gamemasters" description="The Dungeon Masters behind the campaigns of Emberfall Keep.">
+
+  <!-- ── PAGE HEADER ─────────────────────────────────────────────────────── -->
+  <header class="page-header">
+    <div class="page-header-inner">
+      <div>
+        <a href="/" class="page-back">
+          <i class="fa-solid fa-chevron-left"></i> Emberfall Keep
+        </a>
+        <h1 class="page-title">Gamemasters</h1>
+        <p class="page-subtitle">
+          The architects of the worlds the fellowship inhabits.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── MAIN ────────────────────────────────────────────────────────────── -->
+  <main class="main">
+    <div class="wrap">
+
+      {active.length > 0 ? (
+        <div class="gm-list">
+          {active.map(async (gm) => {
+            const { Content } = await render(gm);
+            return (
+              <article class="gm-card">
+
+                <div class="gm-portrait-col">
+                  <div class="gm-portrait">
+                    {gm.data.portrait
+                      ? <Image
+                          src={gm.data.portrait}
+                          alt={gm.data.name}
+                          width={400}
+                          height={400}
+                          class="gm-portrait-img"
+                          loading="eager"
+                          fetchpriority="high"
+                        />
+                      : <i class="fa-solid fa-scroll"></i>
+                    }
+                  </div>
+                </div>
+
+                <div class="gm-body">
+                  <div class="gm-eyebrow">
+                    <span class="pill pill-active">
+                      <span class="pill-dot"></span>
+                      Active GM
+                    </span>
+                    {gm.data.favoriteSystem && (
+                      <span class="gm-system">{gm.data.favoriteSystem}</span>
+                    )}
+                  </div>
+
+                  <h2 class="gm-name">{gm.data.name}</h2>
+
+                  {gm.data.bio && (
+                    <p class="gm-bio">{gm.data.bio}</p>
+                  )}
+
+                  <div class="gm-rule"></div>
+
+                  <div class="gm-content prose">
+                    <Content />
+                  </div>
+
+                  {gm.data.campaigns && gm.data.campaigns.length > 0 && (
+                    <div class="gm-campaigns">
+                      <span class="gm-campaigns-label">
+                        <i class="fa-solid fa-scroll"></i> Campaigns Run
+                      </span>
+                      <div class="gm-campaign-tags">
+                        {gm.data.campaigns.map((c: string | { campaign: string }) => {
+                          const { title, slug } = resolveCampaign(c);
+                          return slug
+                            ? <a class="campaign-tag campaign-tag--link" href={`/campaigns/${slug}`}>{title}</a>
+                            : <span class="campaign-tag">{title}</span>;
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div class="empty-state">
+          <i class="fa-solid fa-scroll"></i>
+          <p>No gamemasters have been added yet.</p>
+        </div>
+      )}
+
+      {inactive.length > 0 && (
+        <>
+          <div class="section-rule"><span>Former Gamemasters</span></div>
+          <div class="gm-list gm-list--inactive">
+            {inactive.map(async (gm) => {
+              const { Content } = await render(gm);
+              return (
+                <article class="gm-card gm-card--inactive">
+                  <div class="gm-portrait-col">
+                    <div class="gm-portrait">
+                      {gm.data.portrait
+                        ? <Image
+                            src={gm.data.portrait}
+                            alt={gm.data.name}
+                            width={400}
+                            height={400}
+                            class="gm-portrait-img"
+                          />
+                        : <i class="fa-solid fa-scroll"></i>
+                      }
+                    </div>
+                  </div>
+                  <div class="gm-body">
+                    <h2 class="gm-name">{gm.data.name}</h2>
+                    {gm.data.bio && <p class="gm-bio">{gm.data.bio}</p>}
+                    <div class="gm-rule"></div>
+                    <div class="gm-content prose"><Content /></div>
+                    {gm.data.campaigns && gm.data.campaigns.length > 0 && (
+                      <div class="gm-campaigns">
+                        <span class="gm-campaigns-label">
+                          <i class="fa-solid fa-scroll"></i> Campaigns Run
+                        </span>
+                        <div class="gm-campaign-tags">
+                          {gm.data.campaigns.map((c: string | { campaign: string }) => {
+                            const { title, slug } = resolveCampaign(c);
+                            return slug
+                              ? <a class="campaign-tag campaign-tag--link" href={`/campaigns/${slug}`}>{title}</a>
+                              : <span class="campaign-tag">{title}</span>;
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+    </div>
+  </main>
+
+</Base>
+
+<style>
+  /* ── Page Header ──────────────────────────────────────────────────── */
+  .page-header {
+    margin-top: 52px;
+    padding: 4rem 0 2.5rem;
+    border-bottom: 1px solid var(--border-default);
+    background: linear-gradient(180deg, rgba(180,100,80,0.05) 0%, transparent 100%);
+  }
+  .page-header-inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 2.5rem;
+  }
+  .page-back {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); text-decoration: none;
+    margin-bottom: 1rem; transition: color 0.2s; display: block;
+  }
+  .page-back:hover { color: var(--mist-mid); }
+  .page-title {
+    font-family: "Cinzel Decorative", serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 700; color: var(--mist-bright);
+    line-height: 1; margin-bottom: 0.5rem;
+  }
+  .page-subtitle {
+    font-family: "Cinzel", serif; font-size: 14px;
+    letter-spacing: 0.08em; color: var(--text-muted);
+  }
+
+  /* ── Main ─────────────────────────────────────────────────────────── */
+  .main { padding: 4rem 0 6rem; }
+
+  /* ── GM List ──────────────────────────────────────────────────────── */
+  .gm-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border-default);
+    border: 1px solid var(--border-default);
+    margin-bottom: 3rem;
+  }
+  .gm-list--inactive { opacity: 0.7; }
+
+  /* ── GM Card ──────────────────────────────────────────────────────── */
+  .gm-card {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 0;
+    background: var(--void-surface);
+  }
+  .gm-card--inactive { background: var(--void-surface); }
+
+  /* Portrait column */
+  .gm-portrait-col {
+    border-right: 1px solid var(--border-default);
+  }
+  .gm-portrait {
+    aspect-ratio: 1/1;
+    background: var(--void-raised);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    color: rgba(104, 152, 168, 0.2);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+  }
+  .gm-portrait::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(to right, transparent 60%, var(--void-surface) 100%);
+    pointer-events: none;
+  }
+  .gm-portrait-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    filter: saturate(0.25) sepia(0.3);
+  }
+
+  /* Body column */
+  .gm-body {
+    padding: 2.5rem 3rem 2.5rem 5rem;
+  }
+  .gm-eyebrow {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .pill {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.2rem 0.65rem; border-radius: 2px;
+    font-family: "Cinzel", serif; font-size: 9px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase;
+  }
+  .pill-active {
+    background: rgba(104,152,168,0.1);
+    border: 1px solid rgba(104,152,168,0.4);
+    color: var(--teal-bright);
+  }
+  .pill-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%; background: var(--teal-bright);
+  }
+  .gm-system {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .gm-name {
+    font-family: "Cinzel Decorative", serif;
+    font-size: clamp(22px, 3vw, 36px);
+    font-weight: 700; color: var(--mist-bright);
+    line-height: 1.1; margin-bottom: 1rem;
+  }
+  .gm-bio {
+    font-family: "IM Fell English", serif;
+    font-style: italic;
+    font-size: 17px;
+    line-height: 1.75;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    max-width: 600px;
+  }
+  .gm-rule {
+    height: 1px;
+    background: var(--border-default);
+    margin-bottom: 1.5rem;
+  }
+
+  /* Prose body */
+  .prose :global(p) {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px; line-height: 1.8;
+    color: var(--text-body); margin-bottom: 1rem;
+  }
+  .prose :global(p:last-child) { margin-bottom: 0; }
+  .prose :global(h2) {
+    font-family: "Cinzel", serif; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-dim); padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-default);
+    margin-bottom: 1rem; margin-top: 2rem;
+  }
+
+  /* Campaigns */
+  .gm-campaigns {
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-default);
+  }
+  .gm-campaigns-label {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-dim); display: block; margin-bottom: 0.65rem;
+  }
+  .gm-campaigns-label i { color: var(--teal-mid); margin-right: 0.3rem; }
+  .gm-campaign-tags {
+    display: flex; flex-wrap: wrap; gap: 0.4rem;
+  }
+  .campaign-tag {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.2rem 0.6rem; border-radius: 2px;
+    border: 1px solid var(--border-accent);
+    color: var(--teal-mid);
+    background: rgba(104,152,168,0.06);
+    text-decoration: none;
+  }
+  .campaign-tag--link {
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .campaign-tag--link:hover {
+    background: rgba(104,152,168,0.14);
+    color: var(--teal-bright);
+    border-color: var(--teal-mid);
+  }
+
+  /* ── Section Rule ─────────────────────────────────────────────────── */
+  .section-rule {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 2rem; color: var(--text-dim);
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+  }
+  .section-rule::before, .section-rule::after {
+    content: ""; flex: 1; height: 1px; background: var(--border-default);
+  }
+
+  /* ── Empty State ──────────────────────────────────────────────────── */
+  .empty-state {
+    padding: 5rem 2rem; text-align: center;
+    border: 1px solid var(--border-default); background: var(--void-surface);
+  }
+  .empty-state i {
+    font-size: 2.5rem; color: var(--teal-deep);
+    margin-bottom: 1rem; display: block;
+  }
+  .empty-state p { font-style: italic; color: var(--text-dim); }
+
+  /* ── Responsive ───────────────────────────────────────────────────── */
+  @media (max-width: 800px) {
+    .gm-card { grid-template-columns: 1fr; }
+    .gm-portrait-col { border-right: none; border-bottom: 1px solid var(--border-default); }
+    .gm-portrait { aspect-ratio: 16/9; height: auto; }
+    .gm-portrait::after {
+      background: linear-gradient(to bottom, transparent 50%, var(--void-surface) 100%);
+    }
+    .gm-body { padding: 1.75rem 1.5rem; }
+  }
+</style>

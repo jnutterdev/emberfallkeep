@@ -1,0 +1,462 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+
+const gamemasters = await getCollection('gamemasters', gm => gm.data.active !== false);
+const allCampaigns = await getCollection('campaigns');
+
+function resolveCampaign(ref: string | { campaign: string }): string {
+  const path = typeof ref === 'object' && ref !== null ? ref.campaign : ref;
+  if (path.includes('/')) {
+    const slug = path.split('/').pop()?.replace(/\.mdx?$/, '') ?? path;
+    const match = allCampaigns.find(c => c.slug === slug);
+    if (match) return match.data.title;
+    return slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
+  return path;
+}
+---
+
+<Base
+  title="About"
+  description="Emberfall Keep is a website dedicated to chronicling the campaigns and characters from a small group of friends."
+>
+
+  <!-- ── PAGE HEADER ─────────────────────────────────────────────────────── -->
+  <header class="page-header">
+    <div class="page-header-inner">
+      <div>
+        <a href="/" class="page-back">
+          <i class="fa-solid fa-chevron-left"></i> Emberfall Keep
+        </a>
+        <h1 class="page-title">About</h1>
+        <p class="page-subtitle">What is Emberfall Keep?</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── MAIN ────────────────────────────────────────────────────────────── -->
+  <main class="main">
+    <div class="wrap">
+      <div class="about-layout">
+
+        <!-- Body -->
+        <article class="about-body">
+
+          <p class="about-lead">
+            Emberfall Keep is a home for stories that would otherwise live only
+            in memory — the campaigns, characters, and chronicles of a small
+            group of friends gathered around a table.
+          </p>
+
+          <div class="about-divider">
+            <span class="about-divider-diamond"></span>
+          </div>
+
+          <h2 class="about-heading">The Fellowship</h2>
+          <p>
+            Every campaign starts the same way: a handful of people, a set of
+            dice, and a world that does not yet exist. Over the course of
+            sessions, that world takes shape — cities are named, factions rise
+            and fall, characters are forged through fire and bad rolls, and
+            moments happen that no one at the table will ever quite forget.
+          </p>
+          <p>
+            Emberfall Keep was built to hold those moments. It is a record kept
+            by the fellowship, for the fellowship — a place where the sessions
+            are chronicled, the characters are remembered, and the lore of the
+            world is preserved beyond the edge of the last session note.
+          </p>
+
+          <h2 class="about-heading">What It Tracks</h2>
+          <p>
+            The site is organised around the things that matter most in a long
+            campaign. Active and archived campaigns each have their own space,
+            with session logs written in full, party members documented from
+            first level onward, and a growing compendium of the NPCs, factions,
+            and items the party has encountered along the way.
+          </p>
+          <p>
+            Maps — world maps, regional charts, dungeon layouts — are stored
+            with named location pins so that the geography of the world stays
+            legible between sessions. Nothing is worse than forgetting which
+            road led to the keep that burned down in Session VII.
+          </p>
+
+          <h2 class="about-heading">Built with Care</h2>
+          <p>
+            Emberfall Keep is a private site, built and maintained by the
+            group itself. Content is edited through a browser-based admin panel
+            — no code required — so every member of the party can keep their
+            own character sheet up to date, and the Dungeon Master can add a
+            session recap the morning after without touching a text editor.
+          </p>
+          <p>
+            The design takes its cues from the worlds it documents: dark,
+            ink-and-parchment typography, a palette drawn from old fantasy
+            illustration, and a structure built to last as long as the
+            campaigns do.
+          </p>
+
+          {gamemasters.length > 0 && (
+            <>
+              <div class="about-divider">
+                <span class="about-divider-diamond"></span>
+              </div>
+
+              <h2 class="about-heading">Behind the Screen</h2>
+              <p>
+                Every world needs someone to build it. The gamemasters of
+                Emberfall Keep are the architects behind the campaigns — the
+                voices of every NPC, the designers of every dungeon, and the
+                keepers of every secret the party hasn't uncovered yet.
+              </p>
+
+              <div class="gm-spotlight-list">
+                {gamemasters.map(gm => (
+                  <a class="gm-spotlight" href="/gamemasters">
+                    <div class="gm-spotlight-portrait">
+                      {gm.data.portrait
+                        ? <Image
+                            src={gm.data.portrait}
+                            alt={gm.data.name}
+                            width={300}
+                            height={300}
+                            class="gm-spotlight-img"
+                          />
+                        : <i class="fa-solid fa-scroll"></i>
+                      }
+                    </div>
+                    <div class="gm-spotlight-body">
+                      <p class="gm-spotlight-name">{gm.data.name}</p>
+                      <p class="gm-spotlight-link-label">
+                        Full profile <i class="fa-solid fa-arrow-right"></i>
+                      </p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </>
+          )}
+
+          <div class="about-divider">
+            <span class="about-divider-diamond"></span>
+          </div>
+
+          <p class="about-motto">
+            <em>In Omnia Paratus.</em> Ready for all things.
+          </p>
+
+        </article>
+
+        <!-- Sidebar -->
+        <aside class="about-sidebar">
+
+          <div class="sidebar-block">
+            <p class="sidebar-block-title">At a Glance</p>
+            <div class="sidebar-row">
+              <span class="k">Purpose</span>
+              <span class="v">Campaign chronicle</span>
+            </div>
+            <div class="sidebar-row">
+              <span class="k">Who</span>
+              <span class="v">A small group of friends</span>
+            </div>
+            <div class="sidebar-row">
+              <span class="k">System</span>
+              <span class="v">D&D 5e</span>
+            </div>
+            <div class="sidebar-row">
+              <span class="k">Est.</span>
+              <span class="v">2026</span>
+            </div>
+          </div>
+
+          <div class="sidebar-block">
+            <p class="sidebar-block-title">What's Inside</p>
+            <div class="sidebar-row">
+              <span class="k">Campaigns</span>
+              <span class="v">Active &amp; archived</span>
+            </div>
+            <div class="sidebar-row">
+              <span class="k">Chronicles</span>
+              <span class="v">Full session logs</span>
+            </div>
+            <div class="sidebar-row">
+              <span class="k">Fellowship</span>
+              <span class="v">Every character</span>
+            </div>
+            <div class="sidebar-row">
+              <span class="k">Compendium</span>
+              <span class="v">NPCs, factions, items</span>
+            </div>
+            <div class="sidebar-row">
+              <span class="k">Maps</span>
+              <span class="v">With named pins</span>
+            </div>
+          </div>
+
+          <div class="sidebar-block sidebar-block--discord">
+            <p class="sidebar-block-title">Join the Conversation</p>
+            <p class="sidebar-discord-text">
+              The fellowship has a Discord server for session scheduling,
+              between-game discussion, and the occasional loot argument.
+            </p>
+            <a
+              href="https://discord.gg/dTRaBUNY"
+              target="_blank"
+              rel="noopener"
+              class="discord-btn"
+            >
+              <i class="fa-brands fa-discord"></i> Join the Discord
+            </a>
+          </div>
+
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+</Base>
+
+<style>
+  /* ── Page Header ──────────────────────────────────────────────────── */
+  .page-header {
+    margin-top: 52px;
+    padding: 4rem 0 2.5rem;
+    border-bottom: 1px solid var(--border-default);
+    background: linear-gradient(180deg, rgba(104,152,168,0.05) 0%, transparent 100%);
+  }
+  .page-header-inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 2.5rem;
+  }
+  .page-back {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); text-decoration: none;
+    margin-bottom: 1rem; transition: color 0.2s; display: block;
+  }
+  .page-back:hover { color: var(--mist-mid); }
+  .page-title {
+    font-family: "Cinzel Decorative", serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 700; color: var(--mist-bright);
+    line-height: 1; margin-bottom: 0.5rem;
+  }
+  .page-subtitle {
+    font-family: "Cinzel", serif; font-size: 14px;
+    letter-spacing: 0.08em; color: var(--text-muted);
+  }
+
+  /* ── Main Layout ──────────────────────────────────────────────────── */
+  .main { padding: 4rem 0 6rem; }
+  .about-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 5rem;
+    align-items: start;
+  }
+
+  /* ── Body ─────────────────────────────────────────────────────────── */
+  .about-body { max-width: 640px; }
+
+  .about-lead {
+    font-family: "Cinzel Decorative", serif;
+    font-size: clamp(16px, 2vw, 21px);
+    color: var(--mist-mid);
+    line-height: 1.5;
+    margin-bottom: 2.5rem;
+  }
+
+  .about-heading {
+    font-family: "Cinzel", serif;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-default);
+    margin-bottom: 1rem;
+    margin-top: 2.5rem;
+  }
+
+  .about-body p:not(.gm-spotlight-name):not(.gm-spotlight-link-label) {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.85;
+    color: var(--text-body);
+    margin-bottom: 1.1rem;
+  }
+  .about-body p:not(.gm-spotlight-name):not(.gm-spotlight-link-label):last-child { margin-bottom: 0; }
+
+  .about-motto {
+    font-family: "IM Fell English", serif !important;
+    font-size: 18px !important;
+    color: var(--mist-mid) !important;
+    text-align: center;
+    padding: 1rem 0;
+  }
+
+  /* Decorative divider */
+  .about-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2.5rem 0;
+    gap: 1rem;
+  }
+  .about-divider::before,
+  .about-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border-default);
+  }
+  .about-divider-diamond {
+    width: 8px;
+    height: 8px;
+    background: var(--teal-deep);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  /* ── Sidebar ──────────────────────────────────────────────────────── */
+  .about-sidebar { position: sticky; top: calc(52px + 2rem); }
+
+  .sidebar-block {
+    background: var(--void-surface);
+    border: 1px solid var(--border-default);
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .sidebar-block-title {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 0.9rem;
+    padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-default);
+  }
+  .sidebar-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 0.35rem 0; border-bottom: 1px solid rgba(74,72,69,0.4);
+    font-size: 13px;
+  }
+  .sidebar-row:last-child { border-bottom: none; }
+  .sidebar-row .k {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
+  }
+  .sidebar-row .v { color: var(--mist-mid); font-style: italic; }
+
+  /* Discord block */
+  .sidebar-block--discord {
+    border-color: rgba(114, 137, 218, 0.3);
+    background: rgba(114, 137, 218, 0.04);
+  }
+  .sidebar-discord-text {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+  .discord-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.55rem 1rem;
+    font-family: "Cinzel", serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: rgba(114, 137, 218, 0.12);
+    border: 1px solid rgba(114, 137, 218, 0.4);
+    color: #7289da;
+    border-radius: 2px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .discord-btn:hover {
+    background: rgba(114, 137, 218, 0.22);
+    color: #99aaf0;
+  }
+
+  /* ── GM Spotlight ─────────────────────────────────────────────────── */
+  .gm-spotlight-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border-default);
+    border: 1px solid var(--border-default);
+    margin-top: 1.5rem;
+  }
+  .gm-spotlight {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 0;
+    background: var(--void-surface);
+    transition: background 0.15s;
+  }
+  .gm-spotlight:hover { background: var(--void-raised); }
+  .gm-spotlight-portrait {
+    position: relative;
+    overflow: hidden;
+    background: var(--void-raised);
+    border-right: 1px solid var(--border-default);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: rgba(104,152,168,0.2);
+    min-height: 120px;
+  }
+  .gm-spotlight-portrait::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(to right, transparent 50%, var(--void-surface) 100%);
+    pointer-events: none;
+  }
+  .gm-spotlight:hover .gm-spotlight-portrait::after {
+    background: linear-gradient(to right, transparent 50%, var(--void-raised) 100%);
+  }
+  .gm-spotlight-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    filter: saturate(0.25) sepia(0.3);
+  }
+  .gm-spotlight-body {
+    padding: 1.1rem 1.25rem;
+  }
+  .gm-spotlight-name {
+    font-family: "Cinzel Decorative", serif;
+    font-size: clamp(22px, 3vw, 36px);
+    font-weight: 700; color: var(--mist-bright);
+    line-height: 1.1; margin-bottom: 0;
+  }
+  .gm-spotlight-link-label {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--teal-mid); margin-top: 0.5rem;
+    transition: color 0.2s;
+  }
+  .gm-spotlight:hover .gm-spotlight-link-label { color: var(--teal-bright); }
+  .gm-spotlight-link-label i { font-size: 8px; margin-left: 0.2rem; }
+  .gm-spotlight { text-decoration: none; }
+
+  /* ── Responsive ───────────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .about-layout {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+    .about-sidebar { position: static; }
+    .about-body { max-width: 100%; }
+  }
+</style>
