@@ -10,7 +10,10 @@ function resolveCampaign(ref: string | { campaign: string }): string {
   const path = typeof ref === 'object' && ref !== null ? ref.campaign : ref;
   if (path.includes('/')) {
     const slug = path.split('/').pop()?.replace(/\.mdx?$/, '') ?? path;
-    const match = allCampaigns.find(c => c.slug === slug);
+    const slugLower = slug.toLowerCase();
+    // Case-insensitive match — Astro v5 lowercases slugs but stored
+    // reference paths may preserve the original filename casing.
+    const match = allCampaigns.find(c => c.slug.toLowerCase() === slugLower);
     if (match) return match.data.title;
     return slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   }

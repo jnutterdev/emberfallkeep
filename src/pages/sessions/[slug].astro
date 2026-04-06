@@ -25,11 +25,13 @@ function resolvePartyMember(ref: string | { character: string }): string {
   const path = typeof ref === 'object' && ref !== null ? ref.character : ref;
   // If it looks like a file path, extract the slug and look up the character name
   if (path.includes('/')) {
-    const slug = path.split('/').pop()?.replace(/\.mdx?$/, '') ?? path;
-    const match = allCharacters.find(c => c.slug === slug);
+    const slugLower = path.split('/').pop()?.replace(/\.mdx?$/, '').toLowerCase() ?? path;
+    // Case-insensitive match — Astro v5 lowercases slugs but stored
+    // reference paths may preserve the original filename casing.
+    const match = allCharacters.find(c => c.slug.toLowerCase() === slugLower);
     if (match) return match.data.name;
     // Slug not found — humanise the filename as a readable fallback
-    return slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return slugLower.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
   }
   // Already a plain display string (oldest legacy data)
   return path;
