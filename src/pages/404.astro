@@ -1,0 +1,174 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="404 — Page Not Found" description="The page you're looking for doesn't exist.">
+
+  <div class="not-found">
+    <div class="not-found__inner">
+
+      <svg class="not-found__monogram" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="140,4  144,12 140,20 136,12" fill="currentColor" opacity="0.4"/>
+        <polygon points="140,180 144,188 140,196 136,188" fill="currentColor" opacity="0.4"/>
+        <polygon points="4,100  12,104 20,100 12,96"   fill="currentColor" opacity="0.4"/>
+        <polygon points="260,100 268,104 276,100 268,96" fill="currentColor" opacity="0.4"/>
+        <line x1="4" y1="100" x2="276" y2="100" stroke="currentColor" stroke-width="0.5" opacity="0.15"/>
+        <text x="140" y="150" text-anchor="middle"
+              font-family="Almendra SC, serif"
+              font-size="130" font-weight="400"
+              fill="currentColor" opacity="0.9">EK</text>
+      </svg>
+
+      <p class="not-found__code">404</p>
+      <h1 class="not-found__title">Lost in the Dark</h1>
+      <p class="not-found__body">
+        The page you're looking for isn't here. It may have been moved,
+        deleted, or perhaps it never existed — much like that shortcut
+        through the Ashwood the party was so confident about.
+      </p>
+
+      <div class="not-found__divider">
+        <span class="not-found__diamond"></span>
+      </div>
+
+      <div class="not-found__actions">
+        <a href="/" class="not-found__btn not-found__btn--primary">
+          <i class="fa-solid fa-house"></i> Return to the Keep
+        </a>
+        <a href="/sessions" class="not-found__btn not-found__btn--ghost">
+          <i class="fa-solid fa-book-open"></i> Chronicles
+        </a>
+        <a href="/characters" class="not-found__btn not-found__btn--ghost">
+          <i class="fa-solid fa-users"></i> Fellowship
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</Base>
+
+<style>
+  .not-found {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(52px + 3rem) 2rem 4rem;
+    text-align: center;
+  }
+
+  .not-found__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 560px;
+  }
+
+  /* Monogram */
+  .not-found__monogram {
+    width: min(260px, 70vw);
+    color: var(--teal-mid);
+    opacity: 0.6;
+    margin-bottom: 1.5rem;
+  }
+
+  /* 404 label */
+  .not-found__code {
+    font-family: "Cinzel", serif;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--teal-mid);
+    margin-bottom: 0.75rem;
+  }
+
+  /* Title */
+  .not-found__title {
+    font-family: "Cinzel Decorative", serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    color: var(--mist-bright);
+    line-height: 1.1;
+    margin-bottom: 1.25rem;
+  }
+
+  /* Body */
+  .not-found__body {
+    font-family: "IM Fell English", serif;
+    font-style: italic;
+    font-size: 17px;
+    line-height: 1.8;
+    color: var(--text-muted);
+    margin-bottom: 0;
+    max-width: 440px;
+  }
+
+  /* Divider */
+  .not-found__divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 1rem;
+    margin: 2.5rem 0;
+  }
+  .not-found__divider::before,
+  .not-found__divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border-default);
+  }
+  .not-found__diamond {
+    width: 8px;
+    height: 8px;
+    background: var(--teal-deep);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  /* Action buttons */
+  .not-found__actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .not-found__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1.2rem;
+    font-family: "Cinzel", serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .not-found__btn--primary {
+    background: var(--teal-deep);
+    border-color: var(--border-accent);
+    color: var(--teal-bright);
+  }
+  .not-found__btn--primary:hover {
+    background: var(--teal-mid);
+    color: var(--void-deep);
+  }
+
+  .not-found__btn--ghost {
+    background: transparent;
+    border-color: var(--border-default);
+    color: var(--text-muted);
+  }
+  .not-found__btn--ghost:hover {
+    border-color: var(--border-mist);
+    color: var(--mist-bright);
+  }
+</style>
