@@ -1031,9 +1031,6 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
     .portraits {
       grid-template-columns: repeat(3, 1fr);
     }
-    .portraits .portrait:nth-child(n + 4) {
-      display: none;
-    }
     .chronicles-inner {
       grid-template-columns: 1fr;
     }
@@ -1049,8 +1046,78 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
     .portraits {
       grid-template-columns: repeat(2, 1fr);
     }
-    .portraits .portrait:nth-child(n + 3) {
-      display: none;
-    }
+  }
+
+  /* Nav hidden on desktop — JS shows it on mobile when there are multiple pages */
+  @media (min-width: 801px) {
+    .portraits-nav { display: none; }
+  }
+  .portraits-nav button:disabled {
+    opacity: 0.3;
+    cursor: default;
   }
 </style>
+
+<script>
+  (function () {
+    const grid    = document.querySelector('.portraits') as HTMLElement | null;
+    const prevBtn = document.querySelector('.portraits-nav button[aria-label="Previous"]') as HTMLButtonElement | null;
+    const nextBtn = document.querySelector('.portraits-nav button[aria-label="Next"]') as HTMLButtonElement | null;
+    const nav     = document.querySelector('.portraits-nav') as HTMLElement | null;
+
+    if (!grid || !prevBtn || !nextBtn || !nav) return;
+
+    const portraits = Array.from(grid.querySelectorAll('.portrait')) as HTMLElement[];
+    if (portraits.length === 0) return;
+
+    let currentPage = 0;
+
+    function getPerPage(): number {
+      if (window.innerWidth <= 500) return 2;
+      if (window.innerWidth <= 800) return 3;
+      return portraits.length; // desktop — show all
+    }
+
+    function render() {
+      const perPage    = getPerPage();
+      const isDesktop  = window.innerWidth > 800;
+      const totalPages = Math.ceil(portraits.length / perPage);
+
+      // Clamp page after resize
+      if (currentPage >= totalPages) currentPage = totalPages - 1;
+
+      portraits.forEach((p, i) => {
+        if (isDesktop) {
+          p.style.display = '';
+        } else {
+          const page = Math.floor(i / perPage);
+          p.style.display = page === currentPage ? '' : 'none';
+        }
+      });
+
+      // Only show nav on mobile when there's more than one page
+      nav.style.display = (!isDesktop && totalPages > 1) ? 'flex' : 'none';
+
+      prevBtn.disabled = currentPage === 0;
+      nextBtn.disabled = currentPage >= totalPages - 1;
+    }
+
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 0) { currentPage--; render(); }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      const totalPages = Math.ceil(portraits.length / getPerPage());
+      if (currentPage < totalPages - 1) { currentPage++; render(); }
+    });
+
+    // Recalculate on resize (debounced)
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => { currentPage = 0; render(); }, 150);
+    });
+
+    render();
+  })();
+</script>
