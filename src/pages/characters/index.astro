@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 
 const allCharacters = await getCollection('characters');
 const active    = allCharacters.filter(c => c.data.active !== false);
@@ -51,11 +52,11 @@ function classIcon(cls?: string): string {
       <!-- Active characters -->
       {active.length > 0 ? (
         <div class="roster-grid">
-          {active.map(c => (
+          {active.map((c, i) => (
             <a class="roster-card" href={`/characters/${c.slug}`}>
               <div class="roster-portrait">
                 {c.data.portrait
-                  ? <img src={c.data.portrait} alt={c.data.name} class="roster-img" />
+                  ? <Image src={c.data.portrait} alt={c.data.name} width={300} height={450} class="roster-img" loading={i < 5 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : 'auto'} />
                   : <i class={`fa-solid ${classIcon(c.data.characterClass)}`}></i>
                 }
               </div>
@@ -90,7 +91,7 @@ function classIcon(cls?: string): string {
               <a class="roster-card roster-card--inactive" href={`/characters/${c.slug}`}>
                 <div class="roster-portrait">
                   {c.data.portrait
-                    ? <img src={c.data.portrait} alt={c.data.name} class="roster-img" />
+                    ? <Image src={c.data.portrait} alt={c.data.name} width={300} height={450} class="roster-img" loading="lazy" />
                     : <i class={`fa-solid ${classIcon(c.data.characterClass)}`}></i>
                   }
                   <span class="roster-deceased-badge">

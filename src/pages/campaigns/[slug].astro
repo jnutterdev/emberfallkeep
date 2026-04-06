@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
 
 export async function getStaticPaths() {
   const campaigns = await getCollection('campaigns');
@@ -247,7 +248,7 @@ const totalXP = sessions.reduce((s, r) => s + (r.data.rewards?.xp ?? 0), 0);
               <a class="party-card" href={`/characters/${c.slug}`}>
                 <div class="party-portrait">
                   {c.data.portrait
-                    ? <img src={c.data.portrait} alt={c.data.name} class="party-portrait-img" />
+                    ? <Image src={c.data.portrait} alt={c.data.name} width={400} height={600} class="party-portrait-img" />
                     : <i class={`fa-solid ${classIcon(c.data.characterClass)}`}></i>
                   }
                 </div>
@@ -277,7 +278,7 @@ const totalXP = sessions.reduce((s, r) => s + (r.data.rewards?.xp ?? 0), 0);
                 <a class="party-card" href={`/characters/${c.slug}`}>
                   <div class="party-portrait">
                     {c.data.portrait
-                      ? <img src={c.data.portrait} alt={c.data.name} class="party-portrait-img" />
+                      ? <Image src={c.data.portrait} alt={c.data.name} width={400} height={600} class="party-portrait-img" />
                       : <i class={`fa-solid ${classIcon(c.data.characterClass)}`}></i>
                     }
                     <span class="party-deceased"><i class="fa-solid fa-skull"></i></span>
@@ -417,7 +418,7 @@ const totalXP = sessions.reduce((s, r) => s + (r.data.rewards?.xp ?? 0), 0);
                 <a class="entry-card" href={`/lore/npcs/${n.slug}`}>
                   <div class="entry-card-icon">
                     {n.data.portrait
-                      ? <img src={n.data.portrait} alt={n.data.name} style="width:100%;height:100%;object-fit:cover;border-radius:1px;" />
+                      ? <Image src={n.data.portrait} alt={n.data.name} width={64} height={64} style="width:100%;height:100%;object-fit:cover;border-radius:1px;" />
                       : <i class="fa-solid fa-user"></i>
                     }
                   </div>
@@ -497,7 +498,7 @@ const totalXP = sessions.reduce((s, r) => s + (r.data.rewards?.xp ?? 0), 0);
             {maps.map(m => (
               <a class="map-thumb" href="/maps">
                 {m.data.image
-                  ? <img src={m.data.image} alt={m.data.name} style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.5;" />
+                  ? <Image src={m.data.image} alt={m.data.name} width={800} height={600} style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.5;" />
                   : <i class="fa-solid fa-map"></i>
                 }
                 <span class="map-thumb-label">{m.data.name}</span>

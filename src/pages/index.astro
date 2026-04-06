@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function toRoman(num: number): string {
@@ -132,7 +133,7 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
 
           <div class="campaign-image">
             {activeCampaign.data.coverImage
-              ? <img src={activeCampaign.data.coverImage} alt={activeCampaign.data.title} class="campaign-cover-img" />
+              ? <Image src={activeCampaign.data.coverImage} alt={activeCampaign.data.title} width={560} height={740} class="campaign-cover-img" />
               : <i class="fa-solid fa-map"></i>
             }
           </div>
@@ -212,7 +213,7 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
             <a class="portrait" href={`/characters/${c.slug}`}>
               <div class="portrait-img">
                 {c.data.portrait
-                  ? <img src={c.data.portrait} alt={c.data.name} class="portrait-photo" />
+                  ? <Image src={c.data.portrait} alt={c.data.name} width={300} height={450} class="portrait-photo" />
                   : <i class={`fa-solid ${classIcon(c.data.characterClass)}`}></i>
                 }
               </div>
@@ -246,7 +247,7 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
       <div class="chronicles-inner">
 
         <div class="chronicles-image">
-          <img src="/uploads/top-view-beautiful-rpg-still-life-items.jpg" alt="Chronicles" class="chronicles-image-photo" />
+          <Image src="/uploads/top-view-beautiful-rpg-still-life-items.jpg" alt="Chronicles" width={560} height={740} class="chronicles-image-photo" />
         </div>
 
         {recentSessions.length > 0 ? (
