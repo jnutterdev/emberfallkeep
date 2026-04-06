@@ -1,0 +1,66 @@
+---
+interface Props {
+  title: string;
+  status: 'Active' | 'Archived' | 'Planned';
+  tagline?: string;
+  sessionCount?: number;
+  system?: string;
+  href: string;
+}
+const { title, status, tagline, sessionCount = 0, system = 'D&D 5e', href } = Astro.props;
+
+const statusClass = {
+  Active: 'badge-teal',
+  Archived: 'badge-muted',
+  Planned: 'badge-gold',
+}[status];
+---
+
+<a class="campaign-card" href={href}>
+  <div class="campaign-card__header">
+    <h2 class="campaign-card__title">{title}</h2>
+    <span class:list={['badge', statusClass]}>{status}</span>
+  </div>
+  {tagline && <p class="campaign-card__tagline">{tagline}</p>}
+  <div class="campaign-card__meta">
+    <span><i class="fa-solid fa-scroll"></i> {sessionCount} sessions</span>
+    <span><i class="fa-solid fa-dice-d20"></i> {system}</span>
+  </div>
+</a>
+
+<style>
+  .campaign-card {
+    display: block;
+    background: var(--void-surface);
+    border: 1px solid var(--border-default);
+    padding: 1.5rem;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .campaign-card:hover {
+    background: var(--void-raised);
+    border-color: var(--border-mist);
+  }
+  .campaign-card:hover .campaign-card__title { color: var(--mist-bright); }
+  .campaign-card__header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 1rem;
+    margin-bottom: 0.6rem;
+  }
+  .campaign-card__title {
+    font-family: "Cinzel", serif; font-size: 18px; font-weight: 600;
+    color: var(--mist-mid); letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  .campaign-card__tagline {
+    font-style: italic; font-size: 15px;
+    color: var(--text-muted); margin-bottom: 1rem;
+  }
+  .campaign-card__meta {
+    display: flex; gap: 1.5rem;
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .campaign-card__meta i { color: var(--teal-mid); margin-right: 0.3rem; }
+</style>

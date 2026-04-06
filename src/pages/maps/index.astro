@@ -1,0 +1,116 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { getCollection } from 'astro:content';
+
+const maps = await getCollection('maps');
+const worldMaps   = maps.filter(m => m.data.tier === 'World');
+const regionMaps  = maps.filter(m => m.data.tier === 'Region');
+const dungeonMaps = maps.filter(m => m.data.tier === 'Dungeon');
+---
+
+<Base title="Maps & Locations" description="Campaign maps for Emberfall Keep.">
+  <PageHeader
+    title="Maps & Locations"
+    subtitle="Navigate the known world — world maps, regional charts, and dungeon depths."
+  />
+
+  <!-- Tier tabs -->
+  <div class="tab-strip">
+    <div class="tab-strip__inner">
+      <button class="tab active" data-tab="world">
+        <i class="fa-solid fa-earth-americas"></i>
+        <span class="tab__n">{worldMaps.length}</span>
+        <span class="tab__lbl">World</span>
+      </button>
+      <button class="tab" data-tab="regions">
+        <i class="fa-solid fa-map"></i>
+        <span class="tab__n">{regionMaps.length}</span>
+        <span class="tab__lbl">Regions</span>
+      </button>
+      <button class="tab" data-tab="dungeons">
+        <i class="fa-solid fa-dungeon"></i>
+        <span class="tab__n">{dungeonMaps.length}</span>
+        <span class="tab__lbl">Dungeons</span>
+      </button>
+    </div>
+  </div>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="panel active" id="panel-world">
+        {worldMaps.map(m => (
+          <div class="map-card">
+            <div class="map-card__head">
+              <h2 class="map-card__title">{m.data.name}</h2>
+              <span class="badge badge-gold">World</span>
+            </div>
+            {m.data.description && <p class="map-card__desc">{m.data.description}</p>}
+            <div class="map-card__pins">
+              <span class="pins-label">Locations ({m.data.pins.length})</span>
+              <ul class="pins-list">
+                {m.data.pins.map(pin => (
+                  <li class:list={['pin-row', `pin-row--${pin.status}`]}>
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span>{pin.name}</span>
+                    <span class="pin-type">{pin.type}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ))}
+        {worldMaps.length === 0 && <p class="empty">No world maps uploaded yet.</p>}
+      </div>
+      <div class="panel" id="panel-regions">
+        {regionMaps.length === 0 ? <p class="empty">No region maps uploaded yet.</p> : regionMaps.map(m => <div class="map-card"><h2 class="map-card__title">{m.data.name}</h2><p class="map-card__desc">{m.data.description}</p></div>)}
+      </div>
+      <div class="panel" id="panel-dungeons">
+        {dungeonMaps.length === 0 ? <p class="empty">No dungeon maps uploaded yet.</p> : dungeonMaps.map(m => <div class="map-card"><h2 class="map-card__title">{m.data.name}</h2><p class="map-card__desc">{m.data.description}</p></div>)}
+      </div>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .main { padding: 3rem 0 5rem; }
+  .tab-strip { background: var(--void-surface); border-bottom: 1px solid var(--border-default); }
+  .tab-strip__inner { max-width: var(--content-max); margin: 0 auto; padding: 0 var(--content-pad); display: flex; }
+  .tab { flex: 1; padding: 0.9rem 1.25rem; border: none; border-right: 1px solid var(--border-default); display: flex; align-items: center; gap: 0.75rem; background: none; cursor: pointer; transition: background 0.15s; color: var(--text-dim); }
+  .tab:last-child { border-right: none; }
+  .tab:hover { background: rgba(255,255,255,0.02); }
+  .tab.active { background: rgba(104,152,168,0.06); }
+  .tab i { font-size: 13px; color: var(--teal-mid); }
+  .tab.active i { color: var(--teal-bright); }
+  .tab__n { font-family: "Cinzel Decorative", serif; font-size: 18px; color: var(--mist-mid); }
+  .tab.active .tab__n { color: var(--mist-bright); }
+  .tab__lbl { font-family: "Cinzel", serif; font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .map-card { background: var(--void-surface); border: 1px solid var(--border-default); padding: 2rem; margin-bottom: 1.5rem; }
+  .map-card__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+  .map-card__title { font-family: "Cinzel Decorative", serif; font-size: 22px; color: var(--mist-bright); }
+  .map-card__desc { font-style: italic; font-size: 15px; color: var(--text-muted); margin-bottom: 1.5rem; }
+  .pins-label { font-family: "Cinzel", serif; font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim); display: block; margin-bottom: 0.6rem; border-top: 1px solid var(--border-default); padding-top: 1rem; }
+  .pins-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.4rem; }
+  .pin-row { display: flex; align-items: center; gap: 0.5rem; font-size: 14px; color: var(--text-muted); padding: 0.3rem 0; }
+  .pin-row i { font-size: 11px; }
+  .pin-row--explored i { color: var(--teal-mid); }
+  .pin-row--unexplored i { color: var(--mist-deep); }
+  .pin-row--secret i { color: var(--gold); }
+  .pin-row--danger i { color: var(--mauve-bright); }
+  .pin-type { font-family: "Cinzel", serif; font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); margin-left: auto; }
+  .empty { padding: 3rem; text-align: center; font-style: italic; color: var(--text-dim); }
+</style>
+
+<script>
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      const id = (tab as HTMLElement).dataset.tab;
+      document.getElementById(`panel-${id}`)?.classList.add('active');
+    });
+  });
+</script>

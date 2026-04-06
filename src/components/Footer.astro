@@ -1,0 +1,84 @@
+---
+---
+
+<footer class="site-footer">
+  <span class="site-footer__brand">Emberfall Keep</span>
+  <ul class="site-footer__links">
+    <li><a href="/">Campaign</a></li>
+    <li><a href="/characters">Fellowship</a></li>
+    <li><a href="/sessions">Chronicles</a></li>
+    <li><a href="/lore">Compendium</a></li>
+    <li><a href="/maps">Maps</a></li>
+    <li>
+      <a href="https://discord.gg/dTRaBUNY" target="_blank" rel="noopener" class="site-footer__discord">
+        <i class="fa-brands fa-discord"></i> Discord
+      </a>
+    </li>
+  </ul>
+  <p class="site-footer__motto">In Omnia Paratus &middot; Est. 2026</p>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 6rem;
+    padding: 2.5rem var(--content-pad);
+    border-top: 1px solid var(--border-default);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    text-align: center;
+  }
+
+  .site-footer__brand {
+    font-family: "Cinzel Decorative", serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--mist-mid);
+  }
+
+  .site-footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .site-footer__links li a {
+    font-family: "Cinzel", serif;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 0.3rem 0.75rem;
+    transition: color 0.2s;
+    display: block;
+  }
+
+  .site-footer__links li a:hover {
+    color: var(--mist-bright);
+  }
+
+  .site-footer__discord {
+    color: #7289da !important;
+  }
+
+  .site-footer__discord:hover {
+    color: #99aaf0 !important;
+  }
+
+  .site-footer__motto {
+    font-family: "Cinzel", serif;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 0;
+  }
+</style>

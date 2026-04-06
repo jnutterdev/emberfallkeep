@@ -1,0 +1,310 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const allCharacters = await getCollection('characters');
+const active    = allCharacters.filter(c => c.data.active !== false);
+const inactive  = allCharacters.filter(c => c.data.active === false);
+
+function classIcon(cls?: string): string {
+  const map: Record<string, string> = {
+    'Fighter':     'fa-shield-halved',
+    'Paladin':     'fa-shield-halved',
+    'Barbarian':   'fa-hand-fist',
+    'Wizard':      'fa-wand-sparkles',
+    'Sorcerer':    'fa-wand-sparkles',
+    'Warlock':     'fa-wand-sparkles',
+    'Bard':        'fa-music',
+    'Cleric':      'fa-sun',
+    'Druid':       'fa-leaf',
+    'Ranger':      'fa-bow-arrow',
+    'Rogue':       'fa-skull',
+    'Monk':        'fa-hand-fist',
+    'Blood Hunter':'fa-droplet',
+    'Artificer':   'fa-gears',
+  };
+  return map[cls ?? ''] ?? 'fa-user';
+}
+---
+
+<Base title="Fellowship" description="The party members of Emberfall Keep.">
+
+  <!-- ── PAGE HEADER ─────────────────────────────────────────────────────── -->
+  <header class="page-header">
+    <div class="page-header-inner">
+      <div>
+        <a href="/" class="page-back">
+          <i class="fa-solid fa-chevron-left"></i> Emberfall Keep
+        </a>
+        <h1 class="page-title">The Fellowship</h1>
+        <p class="page-subtitle">
+          {active.length} {active.length === 1 ? 'adventurer' : 'adventurers'} at the table.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── MAIN ────────────────────────────────────────────────────────────── -->
+  <main class="main">
+    <div class="wrap">
+
+      <!-- Active characters -->
+      {active.length > 0 ? (
+        <div class="roster-grid">
+          {active.map(c => (
+            <a class="roster-card" href={`/characters/${c.slug}`}>
+              <div class="roster-portrait">
+                {c.data.portrait
+                  ? <img src={c.data.portrait} alt={c.data.name} class="roster-img" />
+                  : <i class={`fa-solid ${classIcon(c.data.characterClass)}`}></i>
+                }
+              </div>
+              <div class="roster-caption">
+                <p class="roster-name">{c.data.name}</p>
+                <p class="roster-class">
+                  {[c.data.race, c.data.characterClass, c.data.level ? `Lvl ${c.data.level}` : null]
+                    .filter(Boolean).join(' · ')}
+                </p>
+                <p class="roster-player">
+                  <i class="fa-solid fa-user-group"></i> {c.data.player}
+                </p>
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="empty-state">
+          <i class="fa-solid fa-users"></i>
+          <p>No characters have joined the fellowship yet.</p>
+        </div>
+      )}
+
+      <!-- Retired / deceased -->
+      {inactive.length > 0 && (
+        <>
+          <div class="section-rule">
+            <span>Retired &amp; Fallen</span>
+          </div>
+          <div class="roster-grid roster-grid--inactive">
+            {inactive.map(c => (
+              <a class="roster-card roster-card--inactive" href={`/characters/${c.slug}`}>
+                <div class="roster-portrait">
+                  {c.data.portrait
+                    ? <img src={c.data.portrait} alt={c.data.name} class="roster-img" />
+                    : <i class={`fa-solid ${classIcon(c.data.characterClass)}`}></i>
+                  }
+                  <span class="roster-deceased-badge">
+                    <i class="fa-solid fa-skull"></i>
+                  </span>
+                </div>
+                <div class="roster-caption">
+                  <p class="roster-name">{c.data.name}</p>
+                  <p class="roster-class">
+                    {[c.data.race, c.data.characterClass, c.data.level ? `Lvl ${c.data.level}` : null]
+                      .filter(Boolean).join(' · ')}
+                  </p>
+                  <p class="roster-player">
+                    <i class="fa-solid fa-user-group"></i> {c.data.player}
+                  </p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </>
+      )}
+
+    </div>
+  </main>
+
+</Base>
+
+<style>
+  /* ── Page Header ──────────────────────────────────────────────────── */
+  .page-header {
+    margin-top: 52px;
+    padding: 4rem 0 2.5rem;
+    border-bottom: 1px solid var(--border-default);
+    background: linear-gradient(180deg, rgba(104,152,168,0.05) 0%, transparent 100%);
+  }
+  .page-header-inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 2.5rem;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem;
+  }
+  .page-back {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); text-decoration: none;
+    margin-bottom: 1rem; transition: color 0.2s; display: block;
+  }
+  .page-back:hover { color: var(--mist-mid); }
+  .page-title {
+    font-family: "Cinzel Decorative", serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 700; color: var(--mist-bright);
+    line-height: 1; margin-bottom: 0.5rem;
+  }
+  .page-subtitle {
+    font-family: "Cinzel", serif; font-size: 14px;
+    letter-spacing: 0.08em; color: var(--text-muted);
+  }
+
+  /* ── Main ─────────────────────────────────────────────────────────── */
+  .main { padding: 3.5rem 0 6rem; }
+
+  /* ── Roster Grid ──────────────────────────────────────────────────── */
+  .roster-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 3rem;
+  }
+  .roster-grid--inactive {
+    opacity: 0.7;
+  }
+
+  /* ── Roster Card ──────────────────────────────────────────────────── */
+  .roster-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .roster-card:hover .roster-portrait {
+    border-color: rgba(104,152,168,0.5);
+  }
+  .roster-card:hover .roster-name { color: var(--mist-bright); }
+
+  /* Portrait */
+  .roster-portrait {
+    aspect-ratio: 2/3;
+    background: var(--void-raised);
+    border: 1px solid var(--border-default);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    color: rgba(104,152,168,0.2);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.25s;
+  }
+  /* Duotone overlay */
+  .roster-portrait::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--teal-tint);
+    mix-blend-mode: multiply;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .roster-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  /* Deceased badge */
+  .roster-deceased-badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 2;
+    background: rgba(200,136,120,0.2);
+    border: 1px solid rgba(200,136,120,0.4);
+    padding: 0.2rem 0.4rem;
+    font-size: 10px;
+    color: var(--mauve-bright);
+  }
+
+  /* Caption */
+  .roster-caption {
+    padding: 0.65rem 0 0;
+  }
+  .roster-name {
+    font-family: "Cinzel", serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--mist-mid);
+    letter-spacing: 0.04em;
+    margin-bottom: 0.15rem;
+    transition: color 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .roster-class {
+    font-family: "Cinzel", serif;
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .roster-player {
+    font-family: "Cinzel", serif;
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+  .roster-player i {
+    color: var(--teal-mid);
+    margin-right: 0.3rem;
+    font-size: 8px;
+  }
+
+  /* ── Section Rule ─────────────────────────────────────────────────── */
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    color: var(--text-dim);
+    font-family: "Cinzel", serif;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .section-rule::before,
+  .section-rule::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border-default);
+  }
+
+  /* ── Empty State ──────────────────────────────────────────────────── */
+  .empty-state {
+    padding: 5rem 2rem;
+    text-align: center;
+    border: 1px solid var(--border-default);
+    background: var(--void-surface);
+  }
+  .empty-state i {
+    font-size: 2.5rem;
+    color: var(--teal-deep);
+    margin-bottom: 1rem;
+    display: block;
+  }
+  .empty-state p {
+    font-style: italic;
+    color: var(--text-dim);
+  }
+
+  /* ── Responsive ───────────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .roster-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 650px) {
+    .roster-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 420px) {
+    .roster-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

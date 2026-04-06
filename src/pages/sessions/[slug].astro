@@ -1,0 +1,151 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const sessions = await getCollection('sessions');
+  return sessions.map(s => ({
+    params: { slug: s.slug },
+    props: { session: s },
+  }));
+}
+
+const { session } = Astro.props;
+const { Content } = await render(session);
+
+// Load characters so we can resolve TinaCMS reference paths to display names.
+// New format:    { character: "src/content/characters/thessira-vael.md" }
+// Legacy format: "src/content/characters/thessira-vael.md"  (plain reference path)
+// Oldest format: "Thessira Vael"  (plain string, before the reference field existed)
+const allCharacters = await getCollection('characters');
+
+function resolvePartyMember(ref: string | { character: string }): string {
+  // Unwrap the new object format
+  const path = typeof ref === 'object' && ref !== null ? ref.character : ref;
+  // If it looks like a file path, extract the slug and look up the character name
+  if (path.includes('/')) {
+    const slug = path.split('/').pop()?.replace(/\.mdx?$/, '') ?? path;
+    const match = allCharacters.find(c => c.slug === slug);
+    if (match) return match.data.name;
+    // Slug not found — humanise the filename as a readable fallback
+    return slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
+  // Already a plain display string (oldest legacy data)
+  return path;
+}
+
+const dateStr = session.data.date.toLocaleDateString('en-GB', {
+  day: 'numeric', month: 'long', year: 'numeric',
+});
+---
+
+<Base title={session.data.title}>
+  <PageHeader
+    title={session.data.title}
+    subtitle={`Session ${session.data.sessionNumber} · ${dateStr}`}
+    backHref="/sessions"
+    backLabel="All Chronicles"
+  />
+  <main class="main">
+    <div class="wrap">
+      <div class="session-layout">
+        <article class="prose">
+          <Content />
+        </article>
+        <aside class="sidebar">
+          {session.data.partyPresent.length > 0 && (
+            <div class="sidebar-block">
+              <h3 class="sidebar-heading">Party Present</h3>
+              <ul class="party-list">
+                {session.data.partyPresent.map((ref: string | { character: string }) => (
+                  <li><i class="fa-solid fa-user"></i> {resolvePartyMember(ref)}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {session.data.rewards && (
+            <div class="sidebar-block">
+              <h3 class="sidebar-heading">Rewards</h3>
+              {session.data.rewards.xp && <p class="reward-row"><span>XP</span><strong>{session.data.rewards.xp.toLocaleString()}</strong></p>}
+              {session.data.rewards.gold && <p class="reward-row"><span>Gold</span><strong>{session.data.rewards.gold} gp</strong></p>}
+              {session.data.rewards.loot && session.data.rewards.loot.length > 0 && (
+                <>
+                  <p class="sidebar-subhead">Loot</p>
+                  <ul class="loot-list">
+                    {session.data.rewards.loot.map(item => <li>{item}</li>)}
+                  </ul>
+                </>
+              )}
+            </div>
+          )}
+        </aside>
+      </div>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .main { padding: 3.5rem 0 5rem; }
+  .session-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 3rem;
+    align-items: start;
+  }
+  /* Prose */
+  .prose {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px; line-height: 1.8;
+    color: var(--text-body);
+  }
+  .prose :global(p) { margin-bottom: 1.25rem; }
+  .prose :global(p:first-child) { font-size: 18px; color: var(--text-muted); }
+  .prose :global(h2) {
+    font-family: "Cinzel Decorative", serif; font-size: 20px;
+    color: var(--mist-bright); margin: 2.5rem 0 1rem;
+    padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-default);
+  }
+  .prose :global(h3) {
+    font-family: "Cinzel", serif; font-size: 14px; font-weight: 600;
+    letter-spacing: 0.06em; color: var(--mist-mid);
+    margin: 2rem 0 0.75rem; text-transform: uppercase;
+  }
+  /* Sidebar */
+  .sidebar { position: sticky; top: calc(var(--nav-height) + 2rem); }
+  .sidebar-block {
+    background: var(--void-surface);
+    border: 1px solid var(--border-default);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .sidebar-heading {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-default);
+  }
+  .sidebar-subhead {
+    font-family: "Cinzel", serif; font-size: 8px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--text-dim); margin: 0.75rem 0 0.4rem;
+  }
+  .party-list, .loot-list {
+    list-style: none; font-size: 14px; color: var(--text-muted);
+  }
+  .party-list li { margin-bottom: 0.3rem; }
+  .party-list i { color: var(--teal-mid); margin-right: 0.4rem; font-size: 11px; }
+  .loot-list li { padding: 0.2rem 0; border-bottom: 1px solid var(--border-default); font-size: 14px; }
+  .loot-list li:last-child { border-bottom: none; }
+  .reward-row {
+    display: flex; justify-content: space-between;
+    font-family: "Cinzel", serif; font-size: 10px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 0.4rem;
+  }
+  .reward-row strong { color: var(--mist-mid); font-family: "Cinzel Decorative", serif; font-size: 14px; text-transform: none; letter-spacing: 0; }
+  @media (max-width: 800px) {
+    .session-layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+</style>

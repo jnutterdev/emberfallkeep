@@ -1,0 +1,62 @@
+{
+  "name": "Castle Greyhawk",
+  "tier": "World",
+  "campaign": "a-veil-of-secrecy",
+  "description": "A map of Greyhawk",
+  "pins": [
+    {
+      "name": "City of Emberglass",
+      "type": "Capital City",
+      "status": "explored",
+      "x": 47,
+      "y": 46,
+      "session": "Session III"
+    },
+    {
+      "name": "Thornwall Keep",
+      "type": "Ruined Fortress",
+      "status": "explored",
+      "x": 32,
+      "y": 57,
+      "session": "Session VII"
+    },
+    {
+      "name": "The Ashwood",
+      "type": "Ancient Forest",
+      "status": "explored",
+      "x": 26,
+      "y": 49,
+      "session": "Session VI"
+    },
+    {
+      "name": "Stormreach",
+      "type": "Port Town",
+      "status": "explored",
+      "x": 61,
+      "y": 34,
+      "session": "Session I"
+    },
+    {
+      "name": "The Deep Scar",
+      "type": "Ancient Chasm",
+      "status": "unexplored",
+      "x": 56,
+      "y": 64
+    },
+    {
+      "name": "Irondeep Mines",
+      "type": "Mine Complex",
+      "status": "danger",
+      "x": 44,
+      "y": 68,
+      "session": "Session IX"
+    },
+    {
+      "name": "Temple of the Shattered Eye",
+      "type": "Hidden Temple",
+      "status": "secret",
+      "x": 35,
+      "y": 69
+    }
+  ]
+}

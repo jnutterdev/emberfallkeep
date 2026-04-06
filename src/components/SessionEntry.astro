@@ -1,0 +1,79 @@
+---
+interface Props {
+  title: string;
+  sessionNumber: number;
+  date: Date;
+  summary?: string;
+  partyPresent?: string[];
+  href: string;
+}
+const { title, sessionNumber, date, summary, partyPresent = [], href } = Astro.props;
+
+const formattedDate = date.toLocaleDateString('en-GB', {
+  day: 'numeric', month: 'long', year: 'numeric',
+});
+---
+
+<a class="session-entry" href={href}>
+  <div class="session-entry__num">
+    <span class="session-entry__numeral">{String(sessionNumber).padStart(2,'0')}</span>
+  </div>
+  <div class="session-entry__body">
+    <div class="session-entry__title">{title}</div>
+    {summary && <p class="session-entry__summary">{summary}</p>}
+    <div class="session-entry__meta">
+      <span><i class="fa-regular fa-calendar"></i> {formattedDate}</span>
+      {partyPresent.length > 0 && (
+        <span><i class="fa-solid fa-users"></i> {partyPresent.join(', ')}</span>
+      )}
+    </div>
+  </div>
+  <div class="session-entry__arrow">
+    <i class="fa-solid fa-chevron-right"></i>
+  </div>
+</a>
+
+<style>
+  .session-entry {
+    display: flex; align-items: flex-start; gap: 1.25rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--void-surface);
+    border-bottom: 1px solid var(--border-default);
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .session-entry:last-child { border-bottom: none; }
+  .session-entry:hover { background: var(--void-raised); }
+  .session-entry:hover .session-entry__title { color: var(--mist-bright); }
+  .session-entry__num {
+    flex-shrink: 0; width: 48px; text-align: center;
+    padding-top: 0.15rem;
+  }
+  .session-entry__numeral {
+    font-family: "Cinzel Decorative", serif; font-size: 22px;
+    color: var(--mist-deep); line-height: 1;
+  }
+  .session-entry__body { flex: 1; min-width: 0; }
+  .session-entry__title {
+    font-family: "Cinzel", serif; font-size: 16px; font-weight: 600;
+    color: var(--mist-mid); letter-spacing: 0.04em;
+    margin-bottom: 0.3rem; transition: color 0.2s;
+  }
+  .session-entry__summary {
+    font-style: italic; font-size: 15px;
+    color: var(--text-muted); line-height: 1.6;
+    margin-bottom: 0.5rem;
+  }
+  .session-entry__meta {
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .session-entry__meta i { color: var(--teal-mid); margin-right: 0.3rem; }
+  .session-entry__arrow {
+    flex-shrink: 0; color: var(--text-dim); font-size: 11px;
+    padding-top: 0.3rem; transition: color 0.2s;
+  }
+  .session-entry:hover .session-entry__arrow { color: var(--mist-mid); }
+</style>

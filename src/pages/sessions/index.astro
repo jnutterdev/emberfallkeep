@@ -1,0 +1,434 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const allSessions = (await getCollection('sessions'))
+  .sort((a, b) => b.data.sessionNumber - a.data.sessionNumber);
+
+const latest = allSessions[0];
+const oldest = allSessions[allSessions.length - 1];
+
+const totalXP = allSessions.reduce((sum, s) => sum + (s.data.rewards?.xp ?? 0), 0);
+
+function toRoman(num: number): string {
+  if (!num || num <= 0) return '–';
+  const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+  const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+  let result = '';
+  for (let i = 0; i < vals.length; i++) {
+    while (num >= vals[i]) { result += syms[i]; num -= vals[i]; }
+  }
+  return result;
+}
+
+function fmtDate(d?: Date): string {
+  if (!d) return '—';
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function stripPrefix(title: string): string {
+  const idx = title.indexOf('—');
+  return idx !== -1 ? title.slice(idx + 1).trim() : title;
+}
+---
+
+<Base title="Chronicles" description="A record of every session, in the order they were lived.">
+
+  <!-- ── PAGE HEADER ─────────────────────────────────────────────────────── -->
+  <header class="page-header">
+    <div class="page-header-inner">
+      <div class="page-header-left">
+        <a href="/" class="page-back">
+          <i class="fa-solid fa-chevron-left"></i> Emberfall Keep
+        </a>
+        <h1 class="page-title">Chronicles</h1>
+        <p class="page-subtitle">A record of every session, in the order they were lived.</p>
+      </div>
+      <div class="page-header-right">
+        <a href="#" class="btn btn-ghost"><i class="fa-solid fa-scroll"></i> New Entry</a>
+      </div>
+    </div>
+
+    <!-- Stat strip -->
+    <div class="stat-strip">
+      <div class="stat-strip-inner">
+        <div class="strip-stat">
+          <span class="lbl">Sessions</span>
+          <span class="val">{allSessions.length}</span>
+        </div>
+        <div class="strip-stat">
+          <span class="lbl">Total XP</span>
+          <span class="val">{totalXP > 0 ? totalXP.toLocaleString() : '—'}</span>
+        </div>
+        <div class="strip-stat">
+          <span class="lbl">First Session</span>
+          <span class="val">{oldest ? fmtDate(oldest.data.date) : '—'}</span>
+        </div>
+        <div class="strip-stat">
+          <span class="lbl">Last Session</span>
+          <span class="val">{latest ? fmtDate(latest.data.date) : '—'}</span>
+        </div>
+        <div class="strip-stat">
+          <span class="lbl">Party Members</span>
+          <span class="val">{latest?.data.partyPresent?.length ?? '—'}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── MAIN ────────────────────────────────────────────────────────────── -->
+  <main class="main">
+    <div class="wrap">
+      <div class="main-layout">
+
+        <!-- Session list -->
+        <div>
+          <div class="filter-bar">
+            <span class="filter-label">Filter</span>
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">Combat</button>
+            <button class="filter-btn">Exploration</button>
+            <button class="filter-btn">Roleplay</button>
+          </div>
+
+          {allSessions.length > 0 ? (
+            <ul class="session-list">
+              {allSessions.map((s, i) => (
+                <li>
+                  <a
+                    href={`/sessions/${s.slug}`}
+                    class:list={['session-entry', { latest: i === 0 }]}
+                  >
+                    <div class="se-num-col">
+                      <span class="se-num">{toRoman(s.data.sessionNumber)}</span>
+                      <span class="se-num-label">Session</span>
+                    </div>
+                    <div class="se-body">
+                      <div class="se-header">
+                        <span class="se-title">{stripPrefix(s.data.title)}</span>
+                        <span class="se-date">{fmtDate(s.data.date)}</span>
+                      </div>
+                      {s.data.summary && (
+                        <p class="se-desc">{s.data.summary}</p>
+                      )}
+                      <div class="se-footer">
+                        {i === 0 && <span class="se-tag highlight">Latest</span>}
+                        {s.data.rewards?.xp && (
+                          <span class="se-meta">
+                            {s.data.rewards.xp.toLocaleString()} XP
+                            {s.data.partyPresent?.length
+                              ? <>&nbsp;&middot;&nbsp;{s.data.partyPresent.length} present</>
+                              : ''}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div class="empty-state">
+              <i class="fa-solid fa-book-open"></i>
+              <p>The chronicles are empty. Your story has yet to be written.</p>
+            </div>
+          )}
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+          {latest && (
+            <div class="latest-card">
+              <span class="latest-label">
+                <i class="fa-solid fa-scroll"></i>&nbsp; Latest Session
+              </span>
+              <span class="latest-num">Session {toRoman(latest.data.sessionNumber)}</span>
+              <p class="latest-title">{stripPrefix(latest.data.title)}</p>
+              {latest.data.summary && (
+                <p class="latest-desc">{latest.data.summary}</p>
+              )}
+              <a
+                href={`/sessions/${latest.slug}`}
+                class="btn btn-primary"
+                style="width:100%;justify-content:center"
+              >
+                <i class="fa-solid fa-book-open"></i> Read Full
+              </a>
+            </div>
+          )}
+
+          <div class="sidebar-block">
+            <p class="sidebar-block-title">Chronicle Stats</p>
+            <div class="sidebar-row">
+              <span class="k">Sessions</span>
+              <span class="v mono">{allSessions.length}</span>
+            </div>
+            {totalXP > 0 && (
+              <div class="sidebar-row">
+                <span class="k">Total XP</span>
+                <span class="v mono">{totalXP.toLocaleString()}</span>
+              </div>
+            )}
+            {oldest && (
+              <div class="sidebar-row">
+                <span class="k">First played</span>
+                <span class="v">{fmtDate(oldest.data.date)}</span>
+              </div>
+            )}
+            {latest && (
+              <div class="sidebar-row">
+                <span class="k">Last played</span>
+                <span class="v">{fmtDate(latest.data.date)}</span>
+              </div>
+            )}
+          </div>
+
+          {allSessions.length > 0 && (
+            <div class="sidebar-block">
+              <p class="sidebar-block-title">All Sessions</p>
+              {allSessions.slice(0, 8).map(s => (
+                <div class="sidebar-row">
+                  <span class="k">Session {toRoman(s.data.sessionNumber)}</span>
+                  <span class="v">{stripPrefix(s.data.title).slice(0, 22)}{stripPrefix(s.data.title).length > 22 ? '…' : ''}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+</Base>
+
+<style>
+  /* ── Page Header ──────────────────────────────────────────────────── */
+  .page-header {
+    margin-top: 52px;
+    padding: 4rem 0 0;
+    border-bottom: 1px solid var(--border-default);
+    background: linear-gradient(180deg, rgba(180,100,80,0.05) 0%, transparent 100%);
+  }
+  .page-header-inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 2.5rem 2.5rem;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem;
+  }
+  .page-back {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); text-decoration: none;
+    margin-bottom: 1rem; transition: color 0.2s; display: block;
+  }
+  .page-back:hover { color: var(--mist-mid); }
+  .page-title {
+    font-family: "Cinzel Decorative", serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 700; color: var(--mist-bright);
+    line-height: 1; margin-bottom: 0.5rem;
+  }
+  .page-subtitle {
+    font-family: "Cinzel", serif; font-size: 14px;
+    letter-spacing: 0.08em; color: var(--text-muted);
+  }
+  .page-header-right {
+    display: flex; flex-direction: column;
+    align-items: flex-end; gap: 0.75rem; padding-bottom: 0.25rem;
+  }
+
+  /* ── Stat Strip ───────────────────────────────────────────────────── */
+  .stat-strip {
+    border-top: 1px solid var(--border-default);
+    background: var(--void-surface);
+  }
+  .stat-strip-inner {
+    max-width: 1100px; margin: 0 auto;
+    padding: 0 2.5rem; display: flex;
+  }
+  .strip-stat {
+    flex: 1; padding: 0.9rem 1.25rem;
+    border-right: 1px solid var(--border-default);
+    text-align: center;
+  }
+  .strip-stat:last-child { border-right: none; }
+  .strip-stat .lbl {
+    font-family: "Cinzel", serif; font-size: 8px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); display: block; margin-bottom: 0.2rem;
+  }
+  .strip-stat .val {
+    font-family: monospace; font-size: 15px; color: var(--teal-mid);
+  }
+
+  /* ── Main Layout ──────────────────────────────────────────────────── */
+  .main { padding: 3.5rem 0 5rem; }
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  /* ── Filter Bar ───────────────────────────────────────────────────── */
+  .filter-bar {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin-bottom: 2rem; flex-wrap: wrap;
+  }
+  .filter-label {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); margin-right: 0.25rem;
+  }
+  .filter-btn {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0.25rem 0.65rem; border-radius: 2px;
+    border: 1px solid var(--border-default);
+    background: transparent; color: var(--text-dim);
+    cursor: pointer; transition: color 0.2s, border-color 0.2s, background 0.2s;
+  }
+  .filter-btn:hover { color: var(--mist-mid); border-color: var(--border-mist); }
+  .filter-btn.active {
+    background: rgba(104,152,168,0.1);
+    border-color: var(--border-accent);
+    color: var(--teal-bright);
+  }
+
+  /* ── Session List ─────────────────────────────────────────────────── */
+  .session-list { list-style: none; }
+  .session-entry {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 1.5rem;
+    padding: 1.75rem 0;
+    border-bottom: 1px solid var(--border-default);
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .session-entry:first-child { border-top: 1px solid var(--border-default); }
+  .session-entry:hover .se-title { color: var(--mist-bright); }
+  .session-entry.latest {
+    border-left: 2px solid var(--teal-deep);
+    padding-left: 1.25rem;
+  }
+
+  .se-num-col { text-align: right; padding-top: 3px; }
+  .se-num {
+    font-family: "Cinzel Decorative", serif; font-size: 22px;
+    color: var(--teal-deep); line-height: 1; display: block;
+  }
+  .se-num-label {
+    font-family: "Cinzel", serif; font-size: 8px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-dim); display: block; margin-top: 0.15rem;
+  }
+
+  .se-header {
+    display: flex; align-items: baseline;
+    justify-content: space-between; gap: 1rem; margin-bottom: 0.3rem;
+  }
+  .se-title {
+    font-family: "Cinzel", serif; font-size: 15px; font-weight: 600;
+    color: var(--mist-mid); letter-spacing: 0.04em; transition: color 0.2s;
+  }
+  .se-date {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.1em; color: var(--text-dim);
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .se-desc {
+    font-style: italic; font-size: 15px;
+    color: var(--text-muted); line-height: 1.65; margin-bottom: 0.6rem;
+  }
+  .se-footer {
+    display: flex; align-items: center;
+    gap: 0.5rem; flex-wrap: wrap;
+  }
+  .se-tag {
+    font-family: "Cinzel", serif; font-size: 8px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0.15rem 0.45rem; border-radius: 2px;
+    border: 1px solid var(--border-default); color: var(--text-dim);
+  }
+  .se-tag.highlight {
+    border-color: var(--border-accent); color: var(--teal-mid);
+    background: rgba(104,152,168,0.06);
+  }
+  .se-meta {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.08em; color: var(--text-dim); margin-left: auto;
+  }
+
+  /* ── Empty State ──────────────────────────────────────────────────── */
+  .empty-state {
+    padding: 4rem 2rem; text-align: center;
+    border: 1px solid var(--border-default); background: var(--void-surface);
+  }
+  .empty-state i { font-size: 2rem; color: var(--teal-deep); margin-bottom: 1rem; display: block; }
+  .empty-state p { font-style: italic; color: var(--text-dim); }
+
+  /* ── Sidebar ──────────────────────────────────────────────────────── */
+  .sidebar { position: sticky; top: calc(52px + 2rem); }
+
+  .latest-card {
+    background: var(--void-surface);
+    border: 1px solid var(--border-default);
+    border-top: 2px solid var(--teal-deep);
+    padding: 1.25rem; margin-bottom: 1.25rem;
+  }
+  .latest-label {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--teal-mid); margin-bottom: 0.6rem; display: block;
+  }
+  .latest-num {
+    font-family: "Cinzel Decorative", serif; font-size: 11px;
+    color: var(--text-dim); display: block; margin-bottom: 0.2rem;
+  }
+  .latest-title {
+    font-family: "Cinzel", serif; font-size: 16px; font-weight: 600;
+    color: var(--mist-mid); margin-bottom: 0.5rem;
+  }
+  .latest-desc {
+    font-style: italic; font-size: 15px;
+    color: var(--text-muted); line-height: 1.6; margin-bottom: 0.9rem;
+  }
+
+  .sidebar-block {
+    background: var(--void-surface);
+    border: 1px solid var(--border-default);
+    padding: 1.25rem; margin-bottom: 1.25rem;
+  }
+  .sidebar-block-title {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 0.9rem;
+    padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-default);
+  }
+  .sidebar-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 0.35rem 0; border-bottom: 1px solid rgba(74,72,69,0.4); font-size: 13px;
+  }
+  .sidebar-row:last-child { border-bottom: none; }
+  .sidebar-row .k {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
+  }
+  .sidebar-row .v { color: var(--mist-mid); font-style: italic; }
+  .sidebar-row .v.mono {
+    font-family: monospace; font-style: normal; color: var(--teal-mid);
+  }
+
+  /* ── Responsive ───────────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .page-header-inner { flex-direction: column; align-items: flex-start; }
+  }
+  @media (max-width: 600px) {
+    .stat-strip-inner { flex-wrap: wrap; }
+    .strip-stat { flex: 1 1 33%; border-bottom: 1px solid var(--border-default); }
+    .se-header { flex-direction: column; gap: 0.15rem; }
+  }
+</style>

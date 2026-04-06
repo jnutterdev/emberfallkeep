@@ -1,0 +1,1019 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const campaigns = await getCollection('campaigns');
+  return campaigns.map(c => ({
+    params: { slug: c.slug },
+    props: { campaign: c },
+  }));
+}
+
+const { campaign } = Astro.props;
+const { Content } = await render(campaign);
+
+const allCharacters = await getCollection('characters', c => c.data.campaign === campaign.slug);
+const active   = allCharacters.filter(c => c.data.active !== false);
+const inactive = allCharacters.filter(c => c.data.active === false);
+
+const sessions = (await getCollection('sessions', s => s.data.campaign === campaign.slug))
+  .sort((a, b) => b.data.sessionNumber - a.data.sessionNumber);
+
+const npcs     = await getCollection('npcs',     n => n.data.campaign === campaign.slug);
+const factions = await getCollection('factions', f => f.data.campaign === campaign.slug);
+const items    = await getCollection('items',    i => i.data.campaign === campaign.slug);
+const maps     = await getCollection('maps',     m => m.data.campaign === campaign.slug);
+
+function toRoman(num: number): string {
+  if (!num || num <= 0) return '—';
+  const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+  const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+  let result = '';
+  for (let i = 0; i < vals.length; i++) {
+    while (num >= vals[i]) { result += syms[i]; num -= vals[i]; }
+  }
+  return result;
+}
+
+function fmtDate(d?: Date): string {
+  if (!d) return '—';
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function stripPrefix(title: string): string {
+  const idx = title.indexOf('—');
+  return idx !== -1 ? title.slice(idx + 1).trim() : title;
+}
+
+function classIcon(cls?: string): string {
+  const map: Record<string, string> = {
+    'Fighter': 'fa-shield-halved', 'Paladin': 'fa-shield-halved',
+    'Barbarian': 'fa-hand-fist',   'Wizard': 'fa-wand-sparkles',
+    'Sorcerer': 'fa-wand-sparkles','Warlock': 'fa-wand-sparkles',
+    'Bard': 'fa-music',            'Cleric': 'fa-sun',
+    'Druid': 'fa-leaf',            'Ranger': 'fa-bow-arrow',
+    'Rogue': 'fa-skull',           'Monk': 'fa-hand-fist',
+    'Blood Hunter': 'fa-droplet',  'Artificer': 'fa-gears',
+  };
+  return map[cls ?? ''] ?? 'fa-user';
+}
+
+const d = campaign.data;
+const latestSession = sessions[0];
+const totalXP = sessions.reduce((s, r) => s + (r.data.rewards?.xp ?? 0), 0);
+---
+
+<Base title={d.title} description={d.tagline ?? d.description ?? ''}>
+
+  <!-- ── BANNER ──────────────────────────────────────────────────────────── -->
+  <section class="campaign-banner">
+    <div class="banner-art" style={d.coverImage ? `background-image: url('${d.coverImage}')` : ''}></div>
+    <div class="banner-content">
+      <a href="/" class="banner-back">
+        <i class="fa-solid fa-chevron-left"></i> Emberfall Keep
+      </a>
+      <div class="banner-eyebrow">
+        <span class:list={['pill', d.status === 'Active' ? 'pill-active' : 'pill-archived']}>
+          {d.status === 'Active' && <span class="pill-dot"></span>}
+          {d.status}
+        </span>
+        <span class="banner-meta-label">
+          {d.system}
+          {sessions.length > 0 && <>&nbsp;&middot;&nbsp;Session {toRoman(sessions.length)}</>}
+        </span>
+      </div>
+      <h1 class="banner-title">{d.title}</h1>
+      {(d.tagline || d.setting) && (
+        <p class="banner-subtitle">
+          {d.tagline ?? ''}
+          {d.tagline && d.setting && <>&nbsp;&middot;&nbsp;</>}
+          {d.setting ?? ''}
+        </p>
+      )}
+    </div>
+  </section>
+
+  <!-- ── TABS BAR ─────────────────────────────────────────────────────────── -->
+  <div class="tabs-bar">
+    <div class="tabs-inner">
+      <button class="tab-btn active" data-tab="overview">Overview</button>
+      <button class="tab-btn" data-tab="party">
+        Party {active.length > 0 && <span class="tab-count">{active.length}</span>}
+      </button>
+      <button class="tab-btn" data-tab="chronicles">
+        Chronicles {sessions.length > 0 && <span class="tab-count">{sessions.length}</span>}
+      </button>
+      <button class="tab-btn" data-tab="compendium">
+        Compendium {(npcs.length + factions.length + items.length) > 0 && <span class="tab-count">{npcs.length + factions.length + items.length}</span>}
+      </button>
+      <button class="tab-btn" data-tab="maps">
+        Maps {maps.length > 0 && <span class="tab-count">{maps.length}</span>}
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ OVERVIEW ════════════════════════════════════════════════════════════ -->
+  <div class="tab-panel active" id="tab-overview">
+    <section class="overview">
+      <div class="wrap">
+
+        <!-- Stat bar -->
+        <div class="stat-bar">
+          <div class="stat-bar-item">
+            <span class="lbl">Sessions</span>
+            <span class="val">{sessions.length > 0 ? toRoman(sessions.length) : '—'}</span>
+          </div>
+          <div class="stat-bar-item">
+            <span class="lbl">Last Played</span>
+            <span class="val">{fmtDate(d.lastSession)}</span>
+          </div>
+          <div class="stat-bar-item">
+            <span class="lbl">Party Size</span>
+            <span class="val">{(d.partySize ?? active.length) || '—'}</span>
+          </div>
+          {totalXP > 0 && (
+            <div class="stat-bar-item">
+              <span class="lbl">Total XP</span>
+              <span class="val">{totalXP.toLocaleString()}</span>
+            </div>
+          )}
+          <div class="stat-bar-item">
+            <span class="lbl">System</span>
+            <span class="val">{d.system}</span>
+          </div>
+          {d.dungeonMaster && (
+            <div class="stat-bar-item">
+              <span class="lbl">DM</span>
+              <span class="val">{d.dungeonMaster}</span>
+            </div>
+          )}
+        </div>
+
+        <div class="overview-grid">
+
+          <!-- Body -->
+          <div class="overview-body">
+            {d.description && (
+              <p class="overview-description">{d.description}</p>
+            )}
+            <Content />
+          </div>
+
+          <!-- Sidebar -->
+          <aside class="overview-sidebar">
+
+            {latestSession && (
+              <div class="sidebar-block sidebar-block--highlight">
+                <span class="sidebar-block-label">
+                  <i class="fa-solid fa-scroll"></i>&nbsp; Latest Session
+                </span>
+                <p class="rh-num">Session {toRoman(latestSession.data.sessionNumber)}</p>
+                <p class="rh-title">{stripPrefix(latestSession.data.title)}</p>
+                {latestSession.data.summary && (
+                  <p class="rh-desc">{latestSession.data.summary}</p>
+                )}
+                <a href={`/sessions/${latestSession.slug}`} class="btn btn-primary" style="width:100%;justify-content:center">
+                  <i class="fa-solid fa-book-open"></i> Read Recap
+                </a>
+              </div>
+            )}
+
+            <div class="sidebar-block">
+              <p class="sidebar-block-title">Campaign Info</p>
+              {d.setting && (
+                <div class="sidebar-row">
+                  <span class="k">Setting</span>
+                  <span class="v">{d.setting}</span>
+                </div>
+              )}
+              {d.system && (
+                <div class="sidebar-row">
+                  <span class="k">System</span>
+                  <span class="v">{d.system}</span>
+                </div>
+              )}
+              {d.dungeonMaster && (
+                <div class="sidebar-row">
+                  <span class="k">DM</span>
+                  <span class="v">{d.dungeonMaster}</span>
+                </div>
+              )}
+              {d.startDate && (
+                <div class="sidebar-row">
+                  <span class="k">Started</span>
+                  <span class="v">{fmtDate(d.startDate)}</span>
+                </div>
+              )}
+              <div class="sidebar-row">
+                <span class="k">Status</span>
+                <span class="v">{d.status}</span>
+              </div>
+            </div>
+
+            <div class="sidebar-block">
+              <p class="sidebar-block-title">Compendium</p>
+              <div class="sidebar-row">
+                <span class="k">NPCs</span>
+                <span class="v mono">{npcs.length}</span>
+              </div>
+              <div class="sidebar-row">
+                <span class="k">Factions</span>
+                <span class="v mono">{factions.length}</span>
+              </div>
+              <div class="sidebar-row">
+                <span class="k">Items</span>
+                <span class="v mono">{items.length}</span>
+              </div>
+              <div class="sidebar-row">
+                <span class="k">Maps</span>
+                <span class="v mono">{maps.length}</span>
+              </div>
+            </div>
+
+          </aside>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ══ PARTY ═══════════════════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-party">
+    <section class="party">
+      <div class="wrap">
+        {active.length > 0 ? (
+          <div class="party-grid">
+            {active.map(c => (
+              <a class="party-card" href={`/characters/${c.slug}`}>
+                <div class="party-portrait">
+                  {c.data.portrait
+                    ? <img src={c.data.portrait} alt={c.data.name} class="party-portrait-img" />
+                    : <i class={`fa-solid ${classIcon(c.data.characterClass)}`}></i>
+                  }
+                </div>
+                <div class="party-caption">
+                  <p class="party-name">{c.data.name}</p>
+                  <p class="party-class">
+                    {c.data.characterClass ?? 'Adventurer'}
+                    {c.data.level ? ` · Lvl ${c.data.level}` : ''}
+                  </p>
+                  <p class="party-player">{c.data.player}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div class="empty-state">
+            <i class="fa-solid fa-users"></i>
+            <p>No characters added to this campaign yet.</p>
+          </div>
+        )}
+
+        {inactive.length > 0 && (
+          <>
+            <div class="section-rule"><span>Retired &amp; Fallen</span></div>
+            <div class="party-grid party-grid--inactive">
+              {inactive.map(c => (
+                <a class="party-card" href={`/characters/${c.slug}`}>
+                  <div class="party-portrait">
+                    {c.data.portrait
+                      ? <img src={c.data.portrait} alt={c.data.name} class="party-portrait-img" />
+                      : <i class={`fa-solid ${classIcon(c.data.characterClass)}`}></i>
+                    }
+                    <span class="party-deceased"><i class="fa-solid fa-skull"></i></span>
+                  </div>
+                  <div class="party-caption">
+                    <p class="party-name">{c.data.name}</p>
+                    <p class="party-class">
+                      {c.data.characterClass ?? 'Adventurer'}
+                      {c.data.level ? ` · Lvl ${c.data.level}` : ''}
+                    </p>
+                    <p class="party-player">{c.data.player}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </section>
+  </div>
+
+  <!-- ══ CHRONICLES ══════════════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-chronicles">
+    <section class="tab-chronicles">
+      <div class="wrap">
+        <div class="chronicles-layout">
+
+          <!-- Session list -->
+          <div>
+            {sessions.length > 0 ? (
+              <ul class="session-list">
+                {sessions.map((s, i) => (
+                  <li>
+                    <a href={`/sessions/${s.slug}`} class:list={['session-item', { latest: i === 0 }]}>
+                      <div class="session-num-col">
+                        <span class="session-num">{toRoman(s.data.sessionNumber)}</span>
+                        <span class="session-num-label">Session</span>
+                      </div>
+                      <div class="session-body">
+                        <div class="session-header">
+                          <span class="session-title">{stripPrefix(s.data.title)}</span>
+                          <span class="session-date">{fmtDate(s.data.date)}</span>
+                        </div>
+                        {s.data.summary && (
+                          <p class="session-desc">{s.data.summary}</p>
+                        )}
+                        <div class="session-footer">
+                          {i === 0 && <span class="session-tag highlight">Latest</span>}
+                          {s.data.rewards?.xp && (
+                            <span class="session-meta">{s.data.rewards.xp.toLocaleString()} XP</span>
+                          )}
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div class="empty-state">
+                <i class="fa-solid fa-book-open"></i>
+                <p>No sessions recorded for this campaign yet.</p>
+              </div>
+            )}
+          </div>
+
+          <!-- Sidebar -->
+          {latestSession && (
+            <aside class="chronicles-sidebar">
+              <div class="sidebar-block sidebar-block--highlight">
+                <span class="sidebar-block-label">
+                  <i class="fa-solid fa-scroll"></i>&nbsp; Latest Session
+                </span>
+                <p class="rh-num">Session {toRoman(latestSession.data.sessionNumber)}</p>
+                <p class="rh-title">{stripPrefix(latestSession.data.title)}</p>
+                {latestSession.data.summary && (
+                  <p class="rh-desc">{latestSession.data.summary}</p>
+                )}
+                <a href={`/sessions/${latestSession.slug}`} class="btn btn-primary" style="width:100%;justify-content:center">
+                  <i class="fa-solid fa-book-open"></i> Read Full
+                </a>
+              </div>
+
+              <div class="sidebar-block">
+                <p class="sidebar-block-title">Chronicle Stats</p>
+                <div class="sidebar-row">
+                  <span class="k">Sessions</span>
+                  <span class="v mono">{sessions.length}</span>
+                </div>
+                {totalXP > 0 && (
+                  <div class="sidebar-row">
+                    <span class="k">Total XP</span>
+                    <span class="v mono">{totalXP.toLocaleString()}</span>
+                  </div>
+                )}
+                {sessions[sessions.length - 1] && (
+                  <div class="sidebar-row">
+                    <span class="k">First Session</span>
+                    <span class="v">{fmtDate(sessions[sessions.length - 1].data.date)}</span>
+                  </div>
+                )}
+                <div class="sidebar-row">
+                  <span class="k">Last Session</span>
+                  <span class="v">{fmtDate(latestSession.data.date)}</span>
+                </div>
+              </div>
+            </aside>
+          )}
+
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ══ COMPENDIUM ══════════════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-compendium">
+    <section class="tab-compendium">
+      <div class="wrap">
+
+        <!-- Sub-tabs -->
+        <div class="comp-tabs">
+          <button class="comp-tab active" data-comp="npcs">
+            NPCs <span class="tab-count">{npcs.length}</span>
+          </button>
+          <button class="comp-tab" data-comp="factions">
+            Factions <span class="tab-count">{factions.length}</span>
+          </button>
+          <button class="comp-tab" data-comp="items">
+            Items <span class="tab-count">{items.length}</span>
+          </button>
+        </div>
+
+        <!-- NPCs -->
+        <div class="comp-panel active" id="comp-npcs">
+          {npcs.length > 0 ? (
+            <div class="entry-grid">
+              {npcs.map(n => (
+                <a class="entry-card" href={`/lore/npcs/${n.slug}`}>
+                  <div class="entry-card-icon">
+                    {n.data.portrait
+                      ? <img src={n.data.portrait} alt={n.data.name} style="width:100%;height:100%;object-fit:cover;border-radius:1px;" />
+                      : <i class="fa-solid fa-user"></i>
+                    }
+                  </div>
+                  <div>
+                    <p class="entry-card-name">{n.data.name}</p>
+                    <p class="entry-card-sub">{n.data.title ?? n.data.affiliation ?? '—'}</p>
+                    {n.data.description && (
+                      <p class="entry-card-desc">{n.data.description}</p>
+                    )}
+                  </div>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p class="empty-inline">No NPCs recorded for this campaign yet.</p>
+          )}
+        </div>
+
+        <!-- Factions -->
+        <div class="comp-panel" id="comp-factions">
+          {factions.length > 0 ? (
+            <div class="entry-grid">
+              {factions.map(f => (
+                <a class="entry-card" href={`/lore/factions/${f.slug}`}>
+                  <div class="entry-card-icon">
+                    <i class="fa-solid fa-flag"></i>
+                  </div>
+                  <div>
+                    <p class="entry-card-name">{f.data.name}</p>
+                    <p class="entry-card-sub">{f.data.type}</p>
+                    {f.data.description && (
+                      <p class="entry-card-desc">{f.data.description}</p>
+                    )}
+                  </div>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p class="empty-inline">No factions recorded for this campaign yet.</p>
+          )}
+        </div>
+
+        <!-- Items -->
+        <div class="comp-panel" id="comp-items">
+          {items.length > 0 ? (
+            <div class="entry-grid">
+              {items.map(it => (
+                <a class="entry-card" href={`/lore/items/${it.slug}`}>
+                  <div class="entry-card-icon">
+                    <i class="fa-solid fa-gem"></i>
+                  </div>
+                  <div>
+                    <p class="entry-card-name">{it.data.name}</p>
+                    <p class="entry-card-sub">{it.data.type} · {it.data.rarity}</p>
+                    {it.data.properties && (
+                      <p class="entry-card-desc">{it.data.properties}</p>
+                    )}
+                  </div>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p class="empty-inline">No items recorded for this campaign yet.</p>
+          )}
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <!-- ══ MAPS ════════════════════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-maps">
+    <section class="tab-maps">
+      <div class="wrap">
+        {maps.length > 0 ? (
+          <div class="maps-grid">
+            {maps.map(m => (
+              <a class="map-thumb" href="/maps">
+                {m.data.image
+                  ? <img src={m.data.image} alt={m.data.name} style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.5;" />
+                  : <i class="fa-solid fa-map"></i>
+                }
+                <span class="map-thumb-label">{m.data.name}</span>
+                <span class="map-thumb-type">{m.data.tier}</span>
+                {m.data.pins.length > 0 && (
+                  <span class="map-thumb-pins">
+                    <i class="fa-solid fa-location-dot"></i> {m.data.pins.length} locations
+                  </span>
+                )}
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div class="empty-state">
+            <i class="fa-solid fa-map"></i>
+            <p>No maps uploaded for this campaign yet.</p>
+            <a href="/maps" class="btn btn-ghost" style="margin-top:1rem">
+              <i class="fa-solid fa-arrow-right"></i> Go to Maps
+            </a>
+          </div>
+        )}
+      </div>
+    </section>
+  </div>
+
+</Base>
+
+<style>
+  /* ── Banner ───────────────────────────────────────────────────────── */
+  .campaign-banner {
+    margin-top: 52px;
+    position: relative;
+    height: 42vh;
+    min-height: 300px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .banner-art {
+    position: absolute; inset: 0;
+    background-color: var(--void-raised);
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    filter: saturate(0.3) sepia(0.4);
+  }
+  /* gradient overlay always on top of bg image */
+  .banner-art::after {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(to bottom, rgba(39,37,36,0.2) 0%, transparent 40%, var(--void-deep) 100%),
+      radial-gradient(ellipse 60% 80% at 30% 50%, rgba(180,100,80,0.12) 0%, transparent 60%);
+  }
+  .banner-content {
+    position: relative; z-index: 2;
+    padding: 0 2.5rem 2.5rem;
+    max-width: 1100px; width: 100%; margin: 0 auto;
+  }
+  .banner-back {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); text-decoration: none;
+    margin-bottom: 1rem; transition: color 0.2s; display: block;
+  }
+  .banner-back:hover { color: var(--mist-mid); }
+  .banner-eyebrow {
+    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem;
+  }
+  .pill {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.2rem 0.65rem; border-radius: 2px;
+    font-family: "Cinzel", serif; font-size: 9px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase;
+  }
+  .pill-active {
+    background: rgba(104,152,168,0.1);
+    border: 1px solid rgba(104,152,168,0.4);
+    color: var(--teal-bright);
+  }
+  .pill-dot {
+    width: 5px; height: 5px; border-radius: 50%; background: var(--teal-bright);
+  }
+  .pill-archived {
+    background: rgba(80,72,72,0.4);
+    border: 1px solid var(--border-default);
+    color: var(--text-muted);
+  }
+  .banner-meta-label {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim);
+  }
+  .banner-title {
+    font-family: "Cinzel Decorative", serif;
+    font-size: clamp(28px, 5vw, 56px);
+    font-weight: 700; color: var(--mist-bright);
+    line-height: 1; letter-spacing: 0.01em;
+    text-shadow: 0 2px 30px rgba(0,0,0,0.7);
+  }
+  .banner-subtitle {
+    font-family: "Cinzel", serif; font-size: 14px;
+    letter-spacing: 0.08em; color: var(--text-muted); margin-top: 0.4rem;
+  }
+
+  /* ── Tabs bar ─────────────────────────────────────────────────────── */
+  .tabs-bar {
+    border-bottom: 1px solid var(--border-default);
+    background: rgba(39,37,36,0.6);
+    backdrop-filter: blur(6px);
+    position: sticky; top: 52px; z-index: 50;
+  }
+  .tabs-inner {
+    max-width: 1100px; margin: 0 auto;
+    padding: 0 2.5rem; display: flex; gap: 0;
+  }
+  .tab-btn {
+    font-family: "Cinzel", serif; font-size: 10px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--text-dim); background: none; border: none;
+    padding: 0.85rem 1.1rem; cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: color 0.2s, border-color 0.2s;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .tab-btn:hover { color: var(--mist-mid); }
+  .tab-btn.active { color: var(--teal-bright); border-bottom-color: var(--teal-mid); }
+  .tab-count {
+    font-family: monospace; font-size: 10px;
+    color: var(--text-dim); background: var(--void-raised);
+    border: 1px solid var(--border-default);
+    padding: 0 0.35rem; border-radius: 2px; line-height: 1.4;
+  }
+  .tab-btn.active .tab-count { color: var(--teal-mid); border-color: rgba(104,152,168,0.3); }
+
+  /* ── Tab panels ───────────────────────────────────────────────────── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Overview ─────────────────────────────────────────────────────── */
+  .overview {
+    padding: 4rem 0 5rem;
+    background: linear-gradient(160deg, rgba(180,100,80,0.04) 0%, transparent 40%);
+  }
+  .stat-bar {
+    display: flex; gap: 0;
+    border: 1px solid var(--border-default);
+    overflow: hidden; margin-bottom: 3rem;
+  }
+  .stat-bar-item {
+    flex: 1; padding: 0.9rem 1.1rem;
+    border-right: 1px solid var(--border-default);
+  }
+  .stat-bar-item:last-child { border-right: none; }
+  .stat-bar-item .lbl {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); display: block; margin-bottom: 0.2rem;
+  }
+  .stat-bar-item .val {
+    font-family: monospace; font-size: 15px; color: var(--teal-mid);
+  }
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 5rem; align-items: start;
+  }
+  .overview-description {
+    font-style: italic; font-size: 16px;
+    color: var(--text-body); line-height: 1.85;
+    margin-bottom: 1.5rem;
+  }
+  .overview-body :global(p) {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px; line-height: 1.8;
+    color: var(--text-body); margin-bottom: 1rem;
+  }
+  .overview-body :global(h2) {
+    font-family: "Cinzel Decorative", serif; font-size: 20px;
+    color: var(--mist-bright); margin: 2.5rem 0 1rem;
+    padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-default);
+  }
+  .overview-body :global(h3) {
+    font-family: "Cinzel", serif; font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); margin: 2rem 0 0.6rem;
+  }
+
+  /* Sidebar shared */
+  .overview-sidebar { position: sticky; top: calc(52px + 52px + 2rem); }
+  .sidebar-block {
+    background: var(--void-surface);
+    border: 1px solid var(--border-default);
+    padding: 1.25rem; margin-bottom: 1.25rem;
+  }
+  .sidebar-block--highlight {
+    border-top: 2px solid var(--teal-deep);
+  }
+  .sidebar-block-label {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--teal-mid); margin-bottom: 0.6rem; display: block;
+  }
+  .sidebar-block-title {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 0.9rem;
+    padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-default);
+  }
+  .rh-num {
+    font-family: "Cinzel Decorative", serif; font-size: 11px;
+    color: var(--text-dim); margin-bottom: 0.2rem;
+  }
+  .rh-title {
+    font-family: "Cinzel", serif; font-size: 15px; font-weight: 600;
+    color: var(--mist-mid); margin-bottom: 0.5rem;
+  }
+  .rh-desc {
+    font-style: italic; font-size: 14px;
+    color: var(--text-muted); line-height: 1.6; margin-bottom: 0.75rem;
+  }
+  .sidebar-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 0.35rem 0; border-bottom: 1px solid rgba(74,72,69,0.4); font-size: 13px;
+  }
+  .sidebar-row:last-child { border-bottom: none; }
+  .sidebar-row .k {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
+  }
+  .sidebar-row .v { color: var(--mist-mid); font-style: italic; }
+  .sidebar-row .v.mono {
+    font-family: monospace; font-style: normal; color: var(--teal-mid); font-size: 13px;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    padding: 0.5rem 1.1rem;
+    font-family: "Cinzel", serif; font-size: 10px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    border-radius: 2px; cursor: pointer; text-decoration: none;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    border: 1px solid transparent;
+  }
+  .btn-primary {
+    background: var(--teal-deep); border-color: rgba(104,152,168,0.4); color: var(--teal-bright);
+  }
+  .btn-primary:hover { background: var(--teal-mid); color: var(--void-deep); }
+  .btn-ghost {
+    background: transparent; border-color: var(--border-default); color: var(--text-muted);
+  }
+  .btn-ghost:hover { border-color: rgba(221,212,176,0.3); color: var(--mist-bright); }
+
+  /* ── Party ────────────────────────────────────────────────────────── */
+  .party { padding: 4rem 0 5rem; }
+  .party-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px; margin-bottom: 3rem;
+  }
+  .party-grid--inactive { opacity: 0.65; }
+  .party-card {
+    display: flex; flex-direction: column;
+    text-decoration: none; cursor: pointer;
+  }
+  .party-card:hover .party-portrait { border-color: rgba(104,152,168,0.5); }
+  .party-card:hover .party-name { color: var(--mist-bright); }
+  .party-portrait {
+    aspect-ratio: 2/3;
+    background: var(--void-raised);
+    border: 1px solid var(--border-default);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px; color: rgba(104,152,168,0.2);
+    position: relative; overflow: hidden;
+    transition: border-color 0.25s;
+  }
+  .party-portrait::after {
+    content: ""; position: absolute; inset: 0;
+    background: var(--teal-tint); mix-blend-mode: multiply;
+    opacity: 0.55; pointer-events: none;
+  }
+  .party-portrait-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: top center;
+  }
+  .party-deceased {
+    position: absolute; top: 0.5rem; right: 0.5rem; z-index: 2;
+    background: rgba(200,136,120,0.2); border: 1px solid rgba(200,136,120,0.4);
+    padding: 0.2rem 0.4rem; font-size: 10px; color: var(--mauve-bright);
+  }
+  .party-caption { padding: 0.6rem 0 0; }
+  .party-name {
+    font-family: "Cinzel", serif; font-size: 11px; font-weight: 600;
+    color: var(--mist-mid); letter-spacing: 0.04em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    transition: color 0.2s;
+  }
+  .party-class {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.06em; color: var(--text-dim);
+  }
+  .party-player {
+    font-family: "Cinzel", serif; font-size: 9px;
+    color: var(--text-dim); margin-top: 0.1rem;
+  }
+
+  /* ── Chronicles ───────────────────────────────────────────────────── */
+  .tab-chronicles { padding: 4rem 0 5rem; }
+  .chronicles-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 4rem; align-items: start;
+  }
+  .chronicles-sidebar { position: sticky; top: calc(52px + 52px + 2rem); }
+  .session-list { list-style: none; }
+  .session-item {
+    display: grid;
+    grid-template-columns: 54px 1fr;
+    gap: 1.5rem; padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border-default);
+    text-decoration: none; transition: background 0.15s;
+  }
+  .session-item:first-child { border-top: 1px solid var(--border-default); }
+  .session-item.latest { border-left: 2px solid var(--teal-deep); padding-left: 1.25rem; }
+  .session-item:hover .session-title { color: var(--mist-bright); }
+  .session-num-col { text-align: right; padding-top: 3px; }
+  .session-num {
+    font-family: "Cinzel Decorative", serif; font-size: 20px;
+    color: var(--teal-deep); line-height: 1; display: block;
+  }
+  .session-num-label {
+    font-family: "Cinzel", serif; font-size: 8px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-dim); display: block; margin-top: 0.15rem;
+  }
+  .session-header {
+    display: flex; align-items: baseline;
+    justify-content: space-between; gap: 1rem; margin-bottom: 0.3rem;
+  }
+  .session-title {
+    font-family: "Cinzel", serif; font-size: 15px; font-weight: 600;
+    color: var(--mist-mid); letter-spacing: 0.04em; transition: color 0.2s;
+  }
+  .session-date {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.1em; color: var(--text-dim); white-space: nowrap; flex-shrink: 0;
+  }
+  .session-desc {
+    font-style: italic; font-size: 14px;
+    color: var(--text-muted); line-height: 1.6; margin-bottom: 0.5rem;
+  }
+  .session-footer { display: flex; align-items: center; gap: 0.5rem; }
+  .session-tag {
+    font-family: "Cinzel", serif; font-size: 8px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0.15rem 0.45rem; border-radius: 2px;
+    border: 1px solid var(--border-default); color: var(--text-dim);
+  }
+  .session-tag.highlight {
+    border-color: var(--border-accent); color: var(--teal-mid);
+    background: rgba(104,152,168,0.06);
+  }
+  .session-meta {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.08em; color: var(--text-dim); margin-left: auto;
+  }
+
+  /* ── Compendium ───────────────────────────────────────────────────── */
+  .tab-compendium { padding: 4rem 0 5rem; }
+  .comp-tabs {
+    display: flex; gap: 0;
+    border-bottom: 1px solid var(--border-default); margin-bottom: 2.5rem;
+  }
+  .comp-tab {
+    font-family: "Cinzel", serif; font-size: 10px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--text-dim); background: none; border: none;
+    padding: 0.65rem 1rem; cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    display: flex; align-items: center; gap: 0.4rem;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .comp-tab:hover { color: var(--mist-mid); }
+  .comp-tab.active { color: var(--mist-bright); border-bottom-color: var(--mist-deep); }
+  .comp-panel { display: none; }
+  .comp-panel.active { display: block; }
+  .entry-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: var(--border-default); border: 1px solid var(--border-default);
+  }
+  .entry-card {
+    background: var(--void-surface); padding: 1.25rem;
+    cursor: pointer; transition: background 0.15s;
+    display: flex; gap: 0.9rem; align-items: flex-start; text-decoration: none;
+  }
+  .entry-card:hover { background: var(--void-raised); }
+  .entry-card:hover .entry-card-name { color: var(--mist-bright); }
+  .entry-card-icon {
+    width: 32px; height: 32px; flex-shrink: 0;
+    border: 1px solid var(--border-default); background: var(--void-raised);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--teal-mid); font-size: 13px; border-radius: 2px;
+    margin-top: 2px; overflow: hidden;
+  }
+  .entry-card-name {
+    font-family: "Cinzel", serif; font-size: 12px; font-weight: 600;
+    color: var(--mist-mid); letter-spacing: 0.04em; margin-bottom: 0.2rem;
+    transition: color 0.2s;
+  }
+  .entry-card-sub {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim);
+  }
+  .entry-card-desc {
+    font-style: italic; font-size: 13px;
+    color: var(--text-muted); line-height: 1.55; margin-top: 0.25rem;
+  }
+  .empty-inline {
+    font-style: italic; color: var(--text-dim);
+    padding: 2rem 0; border-top: 1px solid var(--border-default);
+  }
+
+  /* ── Maps ─────────────────────────────────────────────────────────── */
+  .tab-maps { padding: 4rem 0 5rem; }
+  .maps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: var(--border-default); border: 1px solid var(--border-default);
+    margin-bottom: 1.5rem;
+  }
+  .map-thumb {
+    background: var(--void-raised); aspect-ratio: 4/3;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 0.4rem; cursor: pointer; transition: background 0.15s;
+    position: relative; overflow: hidden; text-decoration: none;
+  }
+  .map-thumb:hover { background: var(--void-border); }
+  .map-thumb i { font-size: 32px; color: rgba(104,152,168,0.2); position: relative; }
+  .map-thumb-label {
+    font-family: "Cinzel", serif; font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-dim); position: relative;
+  }
+  .map-thumb-type {
+    font-family: "Cinzel", serif; font-size: 8px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(104,152,168,0.4); position: relative;
+  }
+  .map-thumb-pins {
+    font-family: "Cinzel", serif; font-size: 8px;
+    letter-spacing: 0.08em; color: var(--text-dim); position: relative;
+  }
+
+  /* ── Shared ───────────────────────────────────────────────────────── */
+  .section-rule {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 2rem; color: var(--text-dim);
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+  }
+  .section-rule::before, .section-rule::after {
+    content: ""; flex: 1; height: 1px; background: var(--border-default);
+  }
+  .empty-state {
+    padding: 5rem 2rem; text-align: center;
+    border: 1px solid var(--border-default); background: var(--void-surface);
+  }
+  .empty-state i {
+    font-size: 2.5rem; color: var(--teal-deep);
+    margin-bottom: 1rem; display: block;
+  }
+  .empty-state p { font-style: italic; color: var(--text-dim); }
+
+  /* ── Responsive ───────────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .overview-grid { grid-template-columns: 1fr; }
+    .overview-sidebar { position: static; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .chronicles-layout { grid-template-columns: 1fr; }
+    .chronicles-sidebar { display: none; }
+    .party-grid { grid-template-columns: repeat(3, 1fr); }
+    .entry-grid { grid-template-columns: 1fr 1fr; }
+    .maps-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .stat-bar { flex-wrap: wrap; }
+    .stat-bar-item { flex: 1 1 45%; }
+    .party-grid { grid-template-columns: repeat(2, 1fr); }
+    .entry-grid { grid-template-columns: 1fr; }
+    .maps-grid { grid-template-columns: 1fr; }
+    .overview-sidebar { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  // Main tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const id = (btn as HTMLElement).dataset.tab;
+      document.getElementById(`tab-${id}`)?.classList.add('active');
+    });
+  });
+
+  // Compendium sub-tabs
+  document.querySelectorAll('.comp-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.comp-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.comp-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      const id = (tab as HTMLElement).dataset.comp;
+      document.getElementById(`comp-${id}`)?.classList.add('active');
+    });
+  });
+</script>

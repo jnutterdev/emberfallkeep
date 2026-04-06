@@ -1,0 +1,21 @@
+{
+  "name": "emberfall-keep",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tinacms dev -c \"astro dev\"",
+    "build": "tinacms build && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.0.0",
+    "astro": "^5.0.0",
+    "tinacms": "^2.0.0"
+  },
+  "devDependencies": {
+    "@tinacms/cli": "^1.6.0",
+    "typescript": "^5.7.0"
+  }
+}

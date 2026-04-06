@@ -1,0 +1,664 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const characters = await getCollection('characters');
+  return characters.map(c => ({
+    params: { slug: c.slug },
+    props: { character: c },
+  }));
+}
+
+const { character: c } = Astro.props;
+const { Content } = await render(c);
+
+function mod(score: number): string {
+  const m = Math.floor((score - 10) / 2);
+  return m >= 0 ? `+${m}` : `${m}`;
+}
+
+function classIcon(cls?: string): string {
+  const map: Record<string, string> = {
+    'Fighter':     'fa-shield-halved',
+    'Paladin':     'fa-shield-halved',
+    'Barbarian':   'fa-hand-fist',
+    'Wizard':      'fa-wand-sparkles',
+    'Sorcerer':    'fa-wand-sparkles',
+    'Warlock':     'fa-wand-sparkles',
+    'Bard':        'fa-music',
+    'Cleric':      'fa-sun',
+    'Druid':       'fa-leaf',
+    'Ranger':      'fa-bow-arrow',
+    'Rogue':       'fa-skull',
+    'Monk':        'fa-hand-fist',
+    'Blood Hunter':'fa-droplet',
+    'Artificer':   'fa-gears',
+  };
+  return map[cls ?? ''] ?? 'fa-user';
+}
+
+const stats = c.data.stats;
+const combat = c.data.combat;
+
+const abilityNames = ['str','dex','con','int','wis','cha'] as const;
+const abilityLabels: Record<string, string> = {
+  str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA',
+};
+---
+
+<Base title={c.data.name} description={`Character sheet for ${c.data.name}, played by ${c.data.player}.`}>
+
+  <!-- ── BANNER ──────────────────────────────────────────────────────────── -->
+  <div class="banner">
+    <div class="banner-inner">
+
+      <!-- Portrait -->
+      <div class="banner-portrait-wrap">
+        <div class="banner-portrait">
+          {c.data.portrait
+            ? <img src={c.data.portrait} alt={c.data.name} class="banner-portrait-img" />
+            : <i class={`fa-solid ${classIcon(c.data.characterClass)}`}></i>
+          }
+        </div>
+      </div>
+
+      <!-- Meta -->
+      <div class="banner-meta">
+        <a href="/characters" class="banner-back">
+          <i class="fa-solid fa-chevron-left"></i> The Fellowship
+        </a>
+        <div class="banner-eyebrow">
+          {c.data.active !== false
+            ? <span class="pill pill-active">Active</span>
+            : <span class="pill pill-inactive">Retired</span>
+          }
+          <span class="banner-player">Played by {c.data.player}</span>
+        </div>
+        <h1 class="banner-name">{c.data.name}</h1>
+        <p class="banner-class">
+          {c.data.race && <>{c.data.race}&nbsp;&middot;&nbsp;</>}
+          {c.data.characterClass && <span>{c.data.characterClass}</span>}
+          {c.data.subclass && <>&nbsp;&middot;&nbsp;{c.data.subclass}</>}
+          {c.data.level && <>&nbsp;&middot;&nbsp;Level {c.data.level}</>}
+        </p>
+        <div class="banner-actions">
+          <a href={`/admin/index.html#/characters/${c.slug}`} class="btn btn-ghost">
+            <i class="fa-solid fa-pen"></i> Edit Sheet
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── TABS BAR ─────────────────────────────────────────────────────────── -->
+  <div class="tabs-bar">
+    <div class="tabs-inner">
+      <button class="tab-btn active" data-tab="stats">Stats</button>
+      <button class="tab-btn" data-tab="backstory">Backstory</button>
+    </div>
+  </div>
+
+  <!-- ── STATS PANEL ──────────────────────────────────────────────────────── -->
+  <div class="tab-panel active" id="tab-stats">
+    <section class="tab-stats">
+      <div class="wrap">
+        <div class="stats-layout">
+
+          <!-- Left column -->
+          <div>
+
+            <!-- Ability Scores -->
+            {stats && (
+              <>
+                <p class="stat-section-title">Ability Scores</p>
+                <div class="ability-scores">
+                  {abilityNames.map(key => (
+                    <div class="ability">
+                      <span class="ability-name">{abilityLabels[key]}</span>
+                      <span class="ability-score">{stats[key]}</span>
+                      <span class="ability-mod">{mod(stats[key])}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <!-- Combat Stats -->
+            {combat && (
+              <>
+                <p class="stat-section-title">Combat</p>
+                <div class="combat-stats">
+                  {combat.ac !== undefined && (
+                    <div class="combat-stat">
+                      <span class="lbl">Armor Class</span>
+                      <span class="val">{combat.ac}</span>
+                    </div>
+                  )}
+                  {combat.maxHp !== undefined && (
+                    <div class="combat-stat">
+                      <span class="lbl">Max HP</span>
+                      <span class="val danger">{combat.maxHp}</span>
+                    </div>
+                  )}
+                  {combat.speed !== undefined && (
+                    <div class="combat-stat">
+                      <span class="lbl">Speed</span>
+                      <span class="val accent">{combat.speed} ft</span>
+                    </div>
+                  )}
+                  {combat.initiative !== undefined && (
+                    <div class="combat-stat">
+                      <span class="lbl">Initiative</span>
+                      <span class="val accent">{combat.initiative >= 0 ? '+' : ''}{combat.initiative}</span>
+                    </div>
+                  )}
+                  {combat.hitDice && (
+                    <div class="combat-stat">
+                      <span class="lbl">Hit Dice</span>
+                      <span class="val accent">{combat.hitDice}</span>
+                    </div>
+                  )}
+                  {combat.proficiencyBonus !== undefined && (
+                    <div class="combat-stat">
+                      <span class="lbl">Prof. Bonus</span>
+                      <span class="val accent">+{combat.proficiencyBonus}</span>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+            {!stats && !combat && (
+              <div class="no-stats">
+                <i class="fa-solid fa-dice-d20"></i>
+                <p>No stats recorded yet. Fill them in via the <a href={`/admin/index.html#/characters/${c.slug}`}>admin panel</a>.</p>
+              </div>
+            )}
+
+          </div>
+
+          <!-- Right sidebar -->
+          <aside class="sidebar">
+
+            <!-- Character info -->
+            <div class="sidebar-block">
+              <p class="sidebar-block-title">Character Info</p>
+              {c.data.background && (
+                <div class="sidebar-row">
+                  <span class="k">Background</span>
+                  <span class="v">{c.data.background}</span>
+                </div>
+              )}
+              {c.data.alignment && (
+                <div class="sidebar-row">
+                  <span class="k">Alignment</span>
+                  <span class="v">{c.data.alignment}</span>
+                </div>
+              )}
+              {c.data.xpTracking && (
+                <div class="sidebar-row">
+                  <span class="k">XP Tracking</span>
+                  <span class="v">{c.data.xpTracking}</span>
+                </div>
+              )}
+              {c.data.xpTracking === 'XP' && c.data.xp !== undefined && (
+                <div class="sidebar-row">
+                  <span class="k">Current XP</span>
+                  <span class="v mono">{c.data.xp.toLocaleString()}</span>
+                </div>
+              )}
+              <div class="sidebar-row">
+                <span class="k">Level</span>
+                <span class="v mono">{c.data.level ?? '—'}</span>
+              </div>
+            </div>
+
+            <!-- Ability modifiers quick ref -->
+            {stats && (
+              <div class="sidebar-block">
+                <p class="sidebar-block-title">Modifiers</p>
+                {abilityNames.map(key => (
+                  <div class="sidebar-row">
+                    <span class="k">{abilityLabels[key]}</span>
+                    <span class="v mono">{mod(stats[key])}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+          </aside>
+
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ── BACKSTORY PANEL ───────────────────────────────────────────────────── -->
+  <div class="tab-panel" id="tab-backstory">
+    <section class="tab-backstory">
+      <div class="wrap">
+        <div class="backstory-layout">
+
+          <!-- Left: body content + personality -->
+          <div>
+
+            {(c.data.personalityTraits || c.data.ideals || c.data.bonds || c.data.flaws) && (
+              <>
+                <p class="stat-section-title">Personality</p>
+                <div class="personality-grid">
+                  {c.data.personalityTraits && (
+                    <div class="personality-cell">
+                      <span class="personality-label">Personality Traits</span>
+                      <p class="personality-text">{c.data.personalityTraits}</p>
+                    </div>
+                  )}
+                  {c.data.ideals && (
+                    <div class="personality-cell">
+                      <span class="personality-label">Ideals</span>
+                      <p class="personality-text">{c.data.ideals}</p>
+                    </div>
+                  )}
+                  {c.data.bonds && (
+                    <div class="personality-cell">
+                      <span class="personality-label">Bonds</span>
+                      <p class="personality-text">{c.data.bonds}</p>
+                    </div>
+                  )}
+                  {c.data.flaws && (
+                    <div class="personality-cell">
+                      <span class="personality-label">Flaws</span>
+                      <p class="personality-text">{c.data.flaws}</p>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+            <p class="stat-section-title">Backstory</p>
+            <div class="prose">
+              <Content />
+            </div>
+
+          </div>
+
+          <!-- Right sidebar -->
+          <aside class="sidebar">
+            <div class="sidebar-block">
+              <p class="sidebar-block-title">At a Glance</p>
+              <div class="sidebar-row">
+                <span class="k">Name</span>
+                <span class="v">{c.data.name}</span>
+              </div>
+              <div class="sidebar-row">
+                <span class="k">Player</span>
+                <span class="v">{c.data.player}</span>
+              </div>
+              {c.data.race && (
+                <div class="sidebar-row">
+                  <span class="k">Race</span>
+                  <span class="v">{c.data.race}</span>
+                </div>
+              )}
+              {c.data.characterClass && (
+                <div class="sidebar-row">
+                  <span class="k">Class</span>
+                  <span class="v">{c.data.characterClass}{c.data.subclass ? ` — ${c.data.subclass}` : ''}</span>
+                </div>
+              )}
+              {c.data.background && (
+                <div class="sidebar-row">
+                  <span class="k">Background</span>
+                  <span class="v">{c.data.background}</span>
+                </div>
+              )}
+              {c.data.alignment && (
+                <div class="sidebar-row">
+                  <span class="k">Alignment</span>
+                  <span class="v">{c.data.alignment}</span>
+                </div>
+              )}
+            </div>
+          </aside>
+
+        </div>
+      </div>
+    </section>
+  </div>
+
+</Base>
+
+<style>
+  /* ── Banner ───────────────────────────────────────────────────────── */
+  .banner {
+    margin-top: 52px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border-default);
+  }
+  .banner-inner {
+    max-width: 1100px; margin: 0 auto;
+    padding: 2.5rem 2.5rem 0;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 3rem;
+    align-items: flex-end;
+  }
+
+  /* Portrait */
+  .banner-portrait-wrap { position: relative; }
+  .banner-portrait {
+    aspect-ratio: 2/3;
+    background: var(--void-raised);
+    border: 1px solid var(--border-default);
+    border-bottom: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    color: rgba(104,152,168,0.2);
+    overflow: hidden;
+    position: relative;
+  }
+  .banner-portrait::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: var(--teal-tint);
+    mix-blend-mode: multiply;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .banner-portrait-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  /* Meta */
+  .banner-meta { padding-bottom: 2rem; }
+  .banner-back {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); text-decoration: none;
+    margin-bottom: 1.25rem; transition: color 0.2s; display: block;
+  }
+  .banner-back:hover { color: var(--mist-mid); }
+  .banner-eyebrow {
+    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;
+  }
+  .pill {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.2rem 0.65rem; border-radius: 2px;
+    font-family: "Cinzel", serif; font-size: 9px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase;
+  }
+  .pill-active {
+    background: rgba(104,152,168,0.1);
+    border: 1px solid var(--border-accent);
+    color: var(--teal-bright);
+  }
+  .pill-active::before {
+    content: ""; width: 5px; height: 5px;
+    border-radius: 50%; background: var(--teal-bright);
+  }
+  .pill-inactive {
+    background: rgba(128,120,104,0.1);
+    border: 1px solid rgba(128,120,104,0.3);
+    color: var(--mist-deep);
+  }
+  .banner-player {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .banner-name {
+    font-family: "Cinzel Decorative", serif;
+    font-size: clamp(28px, 4vw, 52px);
+    font-weight: 700; color: var(--mist-bright);
+    line-height: 1; letter-spacing: 0.01em; margin-bottom: 0.4rem;
+  }
+  .banner-class {
+    font-family: "Cinzel", serif; font-size: 13px;
+    letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 1.5rem;
+  }
+  .banner-class span { color: var(--teal-mid); }
+  .banner-actions { display: flex; gap: 0.6rem; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    padding: 0.5rem 1.1rem;
+    font-family: "Cinzel", serif; font-size: 10px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    border-radius: 2px; cursor: pointer; text-decoration: none;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    border: 1px solid transparent;
+  }
+  .btn-ghost {
+    background: transparent;
+    border-color: var(--border-default); color: var(--text-muted);
+  }
+  .btn-ghost:hover { border-color: var(--border-mist); color: var(--mist-bright); }
+
+  /* ── Tabs Bar ─────────────────────────────────────────────────────── */
+  .tabs-bar {
+    border-bottom: 1px solid var(--border-default);
+    background: rgba(39,37,36,0.6);
+    backdrop-filter: blur(6px);
+    position: sticky; top: 52px; z-index: 50;
+  }
+  .tabs-inner {
+    max-width: 1100px; margin: 0 auto;
+    padding: 0 2.5rem; display: flex;
+  }
+  .tab-btn {
+    font-family: "Cinzel", serif; font-size: 10px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--text-dim); background: none; border: none;
+    padding: 0.85rem 1.1rem; cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .tab-btn:hover { color: var(--mist-mid); }
+  .tab-btn.active { color: var(--teal-bright); border-bottom-color: var(--teal-mid); }
+
+  /* ── Tab Panels ───────────────────────────────────────────────────── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Stats Tab ────────────────────────────────────────────────────── */
+  .tab-stats { padding: 3.5rem 0 5rem; }
+  .stats-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  /* Section title */
+  .stat-section-title {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-dim); padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-default);
+    margin-bottom: 1rem; margin-top: 2rem;
+  }
+  .stat-section-title:first-child { margin-top: 0; }
+
+  /* Ability scores */
+  .ability-scores {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    margin-bottom: 2rem;
+  }
+  .ability {
+    background: var(--void-surface);
+    border: 1px solid var(--border-default);
+    padding: 0.9rem 0.5rem 0.75rem;
+    text-align: center;
+    border-radius: 2px;
+  }
+  .ability-name {
+    font-family: "Cinzel", serif; font-size: 8px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); display: block; margin-bottom: 0.35rem;
+  }
+  .ability-score {
+    font-family: "Cinzel Decorative", serif; font-size: 26px;
+    color: var(--mist-bright); line-height: 1; display: block;
+  }
+  .ability-mod {
+    font-family: monospace; font-size: 12px;
+    color: var(--teal-mid); display: block; margin-top: 0.25rem;
+  }
+
+  /* Combat stats */
+  .combat-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 2rem;
+  }
+  .combat-stat {
+    background: var(--void-surface);
+    border: 1px solid var(--border-default);
+    padding: 0.85rem 0.75rem;
+    border-radius: 2px; text-align: center;
+  }
+  .combat-stat .lbl {
+    font-family: "Cinzel", serif; font-size: 8px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); display: block; margin-bottom: 0.3rem;
+  }
+  .combat-stat .val {
+    font-family: monospace; font-size: 22px;
+    color: var(--mist-bright); line-height: 1;
+  }
+  .combat-stat .val.accent { color: var(--teal-mid); }
+  .combat-stat .val.danger { color: var(--mauve-bright); }
+
+  /* No stats placeholder */
+  .no-stats {
+    padding: 3rem; text-align: center;
+    border: 1px solid var(--border-default); background: var(--void-surface);
+  }
+  .no-stats i {
+    font-size: 2rem; color: var(--teal-deep);
+    margin-bottom: 1rem; display: block;
+  }
+  .no-stats p { font-style: italic; color: var(--text-dim); }
+  .no-stats a { color: var(--teal-mid); }
+
+  /* ── Backstory Tab ────────────────────────────────────────────────── */
+  .tab-backstory { padding: 3.5rem 0 5rem; }
+  .backstory-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  /* Prose */
+  .prose {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px; line-height: 1.85; color: var(--text-body);
+  }
+  .prose :global(p) { margin-bottom: 1.25rem; }
+  .prose :global(p:last-child) { margin-bottom: 0; }
+  .prose :global(h2) {
+    font-family: "Cinzel Decorative", serif; font-size: 20px;
+    color: var(--mist-bright); margin: 2.5rem 0 1rem;
+    padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-default);
+  }
+  .prose :global(h3) {
+    font-family: "Cinzel", serif; font-size: 9px; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-dim); padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-default);
+    margin-bottom: 1rem; margin-top: 2.5rem;
+  }
+
+  /* Personality grid */
+  .personality-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border-default);
+    border: 1px solid var(--border-default);
+    margin-bottom: 2rem;
+  }
+  .personality-cell {
+    background: var(--void-surface);
+    padding: 1rem;
+  }
+  .personality-label {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 0.4rem; display: block;
+  }
+  .personality-text {
+    font-style: italic; font-size: 15px;
+    color: var(--text-muted); line-height: 1.6;
+  }
+
+  /* ── Sidebar (shared) ─────────────────────────────────────────────── */
+  .sidebar { position: sticky; top: calc(52px + 52px + 2rem); }
+  .sidebar-block {
+    background: var(--void-surface);
+    border: 1px solid var(--border-default);
+    padding: 1.25rem; margin-bottom: 1.25rem;
+  }
+  .sidebar-block-title {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 0.9rem;
+    padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-default);
+  }
+  .sidebar-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(74,72,69,0.4);
+    font-size: 13px;
+  }
+  .sidebar-row:last-child { border-bottom: none; }
+  .sidebar-row .k {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
+  }
+  .sidebar-row .v { color: var(--mist-mid); font-style: italic; }
+  .sidebar-row .v.mono {
+    font-family: monospace; font-style: normal; color: var(--teal-mid); font-size: 13px;
+  }
+
+  /* ── Responsive ───────────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .banner-inner { grid-template-columns: 140px 1fr; gap: 1.5rem; }
+    .stats-layout, .backstory-layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+    .ability-scores { grid-template-columns: repeat(3, 1fr); }
+    .combat-stats { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .banner-inner { grid-template-columns: 1fr; }
+    .banner-portrait { aspect-ratio: 16/9; }
+    .ability-scores { grid-template-columns: repeat(3, 1fr); }
+    .personality-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const tabId = (btn as HTMLElement).dataset.tab;
+      document.getElementById(`tab-${tabId}`)?.classList.add('active');
+    });
+  });
+</script>

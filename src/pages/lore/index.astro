@@ -1,0 +1,607 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const npcs     = await getCollection('npcs');
+const factions = await getCollection('factions');
+const items    = await getCollection('items');
+
+// ── Badge helpers ─────────────────────────────────────────────────────────────
+function dispositionBadge(d?: string) {
+  if (d === 'Friendly') return 'friendly';
+  if (d === 'Hostile')  return 'hostile';
+  if (d === 'Neutral')  return 'neutral';
+  return 'unknown';
+}
+function statusBadge(s?: string) {
+  if (s === 'Alive')    return 'alive';
+  if (s === 'Deceased') return 'deceased';
+  if (s === 'Missing')  return 'unknown';
+  return 'unknown';
+}
+function relationBadge(r?: string) {
+  if (r === 'Allied' || r === 'Friendly') return 'allied';
+  if (r === 'Hostile') return 'hostile';
+  if (r === 'Tense')   return 'tense';
+  if (r === 'Neutral') return 'neutral';
+  return 'unknown';
+}
+function rarityBadge(r?: string) {
+  if (r === 'Legendary' || r === 'Artifact') return 'artifact';
+  if (r === 'Very Rare' || r === 'Rare')     return 'rare';
+  if (r === 'Uncommon')                      return 'magic';
+  return '';
+}
+
+// Unique factions for filter list
+const factionNames = [...new Set(npcs.map(n => n.data.affiliation).filter(Boolean))];
+---
+
+<Base title="Compendium" description="NPCs, factions, and items encountered across Emberfall Keep campaigns.">
+
+  <!-- ── PAGE HEADER ──────────────────────────────────────────────────────── -->
+  <header class="page-header">
+    <div class="page-header-inner">
+      <div>
+        <a href="/" class="page-back">
+          <i class="fa-solid fa-chevron-left"></i> Emberfall Keep
+        </a>
+        <h1 class="page-title">Compendium</h1>
+        <p class="page-subtitle">NPCs, factions, and items encountered across the campaign.</p>
+      </div>
+      <div class="page-header-right">
+        <a href="#" class="btn btn-ghost"><i class="fa-solid fa-plus"></i> Add Entry</a>
+      </div>
+    </div>
+
+    <!-- Count strip / tabs -->
+    <div class="count-strip">
+      <div class="count-strip-inner">
+        <a class="count-item active" data-panel="npcs">
+          <div class="count-icon"><i class="fa-solid fa-users"></i></div>
+          <div class="count-text">
+            <span class="count-n">{npcs.length}</span>
+            <span class="count-lbl">NPCs</span>
+          </div>
+        </a>
+        <a class="count-item" data-panel="factions">
+          <div class="count-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <div class="count-text">
+            <span class="count-n">{factions.length}</span>
+            <span class="count-lbl">Factions</span>
+          </div>
+        </a>
+        <a class="count-item" data-panel="items">
+          <div class="count-icon"><i class="fa-solid fa-gem"></i></div>
+          <div class="count-text">
+            <span class="count-n">{items.length}</span>
+            <span class="count-lbl">Items</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── MAIN ─────────────────────────────────────────────────────────────── -->
+  <main class="main">
+    <div class="wrap">
+      <div class="main-layout">
+
+        <!-- ── LEFT NAV ────────────────────────────────────────────────────── -->
+        <aside class="left-nav">
+          <div class="search-wrap">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input class="search-input" type="text" placeholder="Search entries…" />
+          </div>
+
+          <div class="left-nav-section">
+            <span class="left-nav-heading">Type</span>
+            <button class="left-nav-link active" data-panel="npcs">
+              NPCs <span class="left-nav-count">{npcs.length}</span>
+            </button>
+            <button class="left-nav-link" data-panel="factions">
+              Factions <span class="left-nav-count">{factions.length}</span>
+            </button>
+            <button class="left-nav-link" data-panel="items">
+              Items <span class="left-nav-count">{items.length}</span>
+            </button>
+          </div>
+
+          <div class="left-nav-section">
+            <span class="left-nav-heading">NPC Status</span>
+            <button class="left-nav-link">
+              Alive <span class="left-nav-count">{npcs.filter(n => n.data.status === 'Alive').length}</span>
+            </button>
+            <button class="left-nav-link">
+              Deceased <span class="left-nav-count">{npcs.filter(n => n.data.status === 'Deceased').length}</span>
+            </button>
+            <button class="left-nav-link">
+              Unknown <span class="left-nav-count">{npcs.filter(n => n.data.status === 'Unknown' || !n.data.status).length}</span>
+            </button>
+          </div>
+
+          <div class="left-nav-section">
+            <span class="left-nav-heading">Disposition</span>
+            <button class="left-nav-link">
+              Friendly <span class="left-nav-count">{npcs.filter(n => n.data.disposition === 'Friendly').length}</span>
+            </button>
+            <button class="left-nav-link">
+              Hostile <span class="left-nav-count">{npcs.filter(n => n.data.disposition === 'Hostile').length}</span>
+            </button>
+            <button class="left-nav-link">
+              Neutral <span class="left-nav-count">{npcs.filter(n => n.data.disposition === 'Neutral').length}</span>
+            </button>
+          </div>
+
+          {factionNames.length > 0 && (
+            <div class="left-nav-section">
+              <span class="left-nav-heading">Faction</span>
+              {factionNames.map(f => (
+                <button class="left-nav-link">
+                  {f}
+                </button>
+              ))}
+            </div>
+          )}
+        </aside>
+
+        <!-- ── PANELS ───────────────────────────────────────────────────────── -->
+        <div>
+
+          <!-- NPCs panel -->
+          <div class="panel active" id="panel-npcs">
+            <div class="panel-header">
+              <h2 class="panel-title">NPCs</h2>
+              <span class="panel-count">{npcs.length} entries</span>
+            </div>
+            <div class="entry-grid">
+              {npcs.map(npc => (
+                <a class="entry-card" href={`/lore/npcs/${npc.slug}`}>
+                  <div class="entry-portrait">
+                    <i class="fa-solid fa-user"></i>
+                  </div>
+                  <div class="entry-body">
+                    <div class="entry-name">{npc.data.name}</div>
+                    <div class="entry-sub">
+                      {npc.data.title ? npc.data.title : (npc.data.affiliation ?? '—')}
+                    </div>
+                    {npc.data.description && (
+                      <p class="entry-desc">{npc.data.description}</p>
+                    )}
+                    <div class="entry-badges">
+                      <span class:list={['badge', statusBadge(npc.data.status)]}>
+                        {npc.data.status ?? 'Unknown'}
+                      </span>
+                      <span class:list={['badge', dispositionBadge(npc.data.disposition)]}>
+                        {npc.data.disposition ?? 'Unknown'}
+                      </span>
+                    </div>
+                  </div>
+                </a>
+              ))}
+              {npcs.length === 0 && (
+                <p class="empty-panel">No NPCs recorded yet.</p>
+              )}
+            </div>
+          </div>
+
+          <!-- Factions panel -->
+          <div class="panel" id="panel-factions">
+            <div class="panel-header">
+              <h2 class="panel-title">Factions</h2>
+              <span class="panel-count">{factions.length} factions</span>
+            </div>
+            <div class="faction-grid">
+              {factions.map(f => (
+                <a class="faction-card" href={`/lore/factions/${f.slug}`}>
+                  <div class="faction-header">
+                    <div>
+                      <div class="faction-name">{f.data.name}</div>
+                      <div class="faction-type">{f.data.type}</div>
+                    </div>
+                    <span class:list={['badge', relationBadge(f.data.partyRelationship)]}>
+                      {f.data.partyRelationship ?? 'Unknown'}
+                    </span>
+                  </div>
+                  {f.data.description && (
+                    <p class="faction-desc">{f.data.description}</p>
+                  )}
+                  {f.data.motto && (
+                    <p class="faction-motto">"{f.data.motto}"</p>
+                  )}
+                  {f.data.notableMembers && f.data.notableMembers.length > 0 && (
+                    <p class="faction-members">
+                      Notable: <span>{f.data.notableMembers.join(', ')}</span>
+                    </p>
+                  )}
+                </a>
+              ))}
+              {factions.length === 0 && (
+                <p class="empty-panel">No factions recorded yet.</p>
+              )}
+            </div>
+          </div>
+
+          <!-- Items panel -->
+          <div class="panel" id="panel-items">
+            <div class="panel-header">
+              <h2 class="panel-title">Items & Artifacts</h2>
+              <span class="panel-count">{items.length} entries</span>
+            </div>
+            <div class="entry-grid">
+              {items.map(item => (
+                <a class="entry-card" href={`/lore/items/${item.slug}`}>
+                  <div class="entry-portrait">
+                    <i class="fa-solid fa-gem"></i>
+                  </div>
+                  <div class="entry-body">
+                    <div class="entry-name">{item.data.name}</div>
+                    <div class="entry-sub">{item.data.type}</div>
+                    {item.data.properties && (
+                      <p class="entry-desc">{item.data.properties}</p>
+                    )}
+                    <div class="entry-badges">
+                      <span class:list={['badge', rarityBadge(item.data.rarity)]}>
+                        {item.data.rarity ?? 'Unknown'}
+                      </span>
+                      {item.data.requiresAttunement && (
+                        <span class="badge artifact">Attunement</span>
+                      )}
+                      {item.data.currentHolder && (
+                        <span class="badge">{item.data.currentHolder}</span>
+                      )}
+                    </div>
+                  </div>
+                </a>
+              ))}
+              {items.length === 0 && (
+                <p class="empty-panel">No items recorded yet.</p>
+              )}
+            </div>
+          </div>
+
+        </div>
+        <!-- /panels -->
+
+      </div>
+      <!-- /main-layout -->
+    </div>
+  </main>
+
+</Base>
+
+<style>
+  /* ── Page Header ────────────────────────────────────────────────── */
+  .page-header {
+    margin-top: 52px;
+    padding: 4rem 0 0;
+    border-bottom: 1px solid var(--border-default);
+    background: linear-gradient(180deg, rgba(104,152,168,0.05) 0%, transparent 100%);
+  }
+  .page-header-inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 2.5rem 2.5rem;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem;
+  }
+  .page-back {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); text-decoration: none;
+    margin-bottom: 1rem; transition: color 0.2s; display: block;
+  }
+  .page-back:hover { color: var(--mist-mid); }
+  .page-title {
+    font-family: "Cinzel Decorative", serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 700; color: var(--mist-bright);
+    line-height: 1; margin-bottom: 0.5rem;
+  }
+  .page-subtitle {
+    font-family: "Cinzel", serif; font-size: 14px;
+    letter-spacing: 0.08em; color: var(--text-muted);
+  }
+  .page-header-right {
+    display: flex; gap: 0.6rem; padding-bottom: 0.25rem; flex-shrink: 0;
+  }
+
+  /* ── Count Strip ────────────────────────────────────────────────── */
+  .count-strip {
+    border-top: 1px solid var(--border-default);
+    background: var(--void-surface);
+  }
+  .count-strip-inner {
+    max-width: 1100px; margin: 0 auto;
+    padding: 0 2.5rem; display: flex;
+  }
+  .count-item {
+    flex: 1; padding: 0.9rem 1.25rem;
+    border-right: 1px solid var(--border-default);
+    display: flex; align-items: center; gap: 0.75rem;
+    cursor: pointer; transition: background 0.15s; text-decoration: none;
+  }
+  .count-item:last-child { border-right: none; }
+  .count-item:hover { background: rgba(255,255,255,0.02); }
+  .count-item.active { background: rgba(104,152,168,0.06); }
+  .count-icon {
+    width: 28px; height: 28px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--teal-mid); font-size: 13px;
+  }
+  .count-item.active .count-icon { color: var(--teal-bright); }
+  .count-n {
+    font-family: "Cinzel Decorative", serif;
+    font-size: 18px; color: var(--mist-mid); line-height: 1; display: block;
+  }
+  .count-item.active .count-n { color: var(--mist-bright); }
+  .count-lbl {
+    font-family: "Cinzel", serif; font-size: 8px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); display: block;
+  }
+
+  /* ── Main Layout ────────────────────────────────────────────────── */
+  .main { padding: 3.5rem 0 5rem; }
+  .main-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  /* ── Left Nav ───────────────────────────────────────────────────── */
+  .left-nav { position: sticky; top: calc(52px + 2rem); }
+  .left-nav-section { margin-bottom: 2rem; }
+  .left-nav-heading {
+    font-family: "Cinzel", serif; font-size: 8px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--text-dim); padding: 0 0 0.5rem;
+    border-bottom: 1px solid var(--border-default);
+    margin-bottom: 0.5rem; display: block;
+  }
+  .left-nav-link {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.4rem 0.6rem; border-radius: 2px;
+    font-family: "Cinzel", serif; font-size: 10px; letter-spacing: 0.1em;
+    color: var(--text-dim); text-decoration: none;
+    transition: color 0.2s, background 0.2s;
+    cursor: pointer; border: none; background: none; width: 100%; text-align: left;
+  }
+  .left-nav-link:hover { color: var(--mist-mid); background: rgba(255,255,255,0.03); }
+  .left-nav-link.active { color: var(--teal-bright); background: rgba(104,152,168,0.08); }
+  .left-nav-count { font-family: monospace; font-size: 11px; color: var(--text-dim); }
+  .left-nav-link.active .left-nav-count { color: var(--teal-deep); }
+
+  /* Search */
+  .search-wrap { position: relative; margin-bottom: 1.5rem; }
+  .search-input {
+    width: 100%; background: var(--void-surface);
+    border: 1px solid var(--border-default); border-radius: 2px;
+    padding: 0.5rem 0.75rem 0.5rem 2rem;
+    font-family: "Cinzel", serif; font-size: 10px;
+    letter-spacing: 0.1em; color: var(--mist-mid);
+    outline: none; transition: border-color 0.2s;
+  }
+  .search-input::placeholder { color: var(--text-dim); }
+  .search-input:focus { border-color: rgba(104,152,168,0.4); }
+  .search-icon {
+    position: absolute; left: 0.65rem; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim); font-size: 11px; pointer-events: none;
+  }
+
+  /* ── Panels ─────────────────────────────────────────────────────── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.75rem;
+  }
+  .panel-title {
+    font-family: "Cinzel Decorative", serif;
+    font-size: 22px; color: var(--mist-bright); font-weight: 700;
+  }
+  .panel-count {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim);
+  }
+
+  /* ── Entry Cards (NPCs, Items) ───────────────────────────────────── */
+  .entry-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--border-default);
+    border: 1px solid var(--border-default);
+    margin-bottom: 2rem;
+  }
+  .entry-card {
+    background: var(--void-surface);
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex; gap: 1rem; align-items: flex-start;
+    text-decoration: none;
+  }
+  .entry-card:hover { background: var(--void-raised); }
+  .entry-card:hover .entry-name { color: var(--mist-bright); }
+
+  .entry-portrait {
+    width: 48px; height: 48px; flex-shrink: 0;
+    background: var(--void-raised);
+    border: 1px solid var(--border-default);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(104,152,168,0.3); font-size: 18px;
+  }
+  .entry-body { flex: 1; min-width: 0; }
+  .entry-name {
+    font-family: "Cinzel", serif; font-size: 15px; font-weight: 600;
+    color: var(--mist-mid); letter-spacing: 0.04em;
+    margin-bottom: 0.15rem; transition: color 0.2s;
+  }
+  .entry-sub {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 0.35rem;
+  }
+  .entry-desc {
+    font-style: italic; font-size: 14px;
+    color: var(--text-muted); line-height: 1.55; margin-bottom: 0.4rem;
+  }
+  .entry-badges { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+
+  /* ── Badges ─────────────────────────────────────────────────────── */
+  .badge {
+    font-family: "Cinzel", serif; font-size: 8px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.15rem 0.4rem; border-radius: 2px;
+    border: 1px solid var(--border-default); color: var(--text-dim);
+  }
+  .badge.friendly, .badge.allied {
+    border-color: rgba(104,152,168,0.4); color: var(--teal-mid);
+  }
+  .badge.hostile {
+    border-color: rgba(200,136,120,0.4); color: var(--mauve-bright);
+  }
+  .badge.neutral {
+    border-color: rgba(184,176,152,0.3); color: var(--mist-deep);
+  }
+  .badge.tense {
+    border-color: rgba(200,184,120,0.4); color: var(--gold);
+  }
+  .badge.unknown { border-color: var(--border-default); color: var(--text-dim); }
+  .badge.alive {
+    border-color: rgba(104,152,168,0.3); color: var(--teal-mid);
+  }
+  .badge.deceased {
+    border-color: rgba(200,136,120,0.3); color: var(--mauve-bright);
+  }
+  .badge.magic {
+    border-color: rgba(104,152,168,0.4); color: var(--teal-mid);
+  }
+  .badge.artifact {
+    border-color: rgba(200,184,120,0.4); color: var(--gold);
+  }
+  .badge.rare {
+    border-color: rgba(104,152,168,0.3); color: var(--teal-bright);
+  }
+
+  /* ── Faction Cards ───────────────────────────────────────────────── */
+  .faction-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--border-default);
+    border: 1px solid var(--border-default);
+  }
+  .faction-card {
+    background: var(--void-surface);
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    text-decoration: none;
+  }
+  .faction-card:hover { background: var(--void-raised); }
+  .faction-card:hover .faction-name { color: var(--mist-bright); }
+
+  .faction-header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 1rem; margin-bottom: 1rem;
+  }
+  .faction-name {
+    font-family: "Cinzel", serif; font-size: 16px; font-weight: 600;
+    color: var(--mist-mid); letter-spacing: 0.04em;
+    margin-bottom: 0.2rem; transition: color 0.2s;
+  }
+  .faction-type {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
+  }
+  .faction-desc {
+    font-style: italic; font-size: 14px;
+    color: var(--text-muted); line-height: 1.65; margin-bottom: 1rem;
+  }
+  .faction-motto {
+    font-family: "Cinzel Decorative", serif; font-size: 11px;
+    color: var(--text-dim); margin-bottom: 1rem;
+  }
+  .faction-members {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-dim); border-top: 1px solid var(--border-default);
+    padding-top: 0.75rem; margin-top: 0.75rem;
+  }
+  .faction-members span {
+    color: var(--text-muted); font-family: "IM Fell English", serif;
+    font-style: italic; letter-spacing: 0; text-transform: none; font-size: 13px;
+  }
+
+  /* ── Empty states ────────────────────────────────────────────────── */
+  .empty-panel {
+    padding: 3rem; text-align: center;
+    font-style: italic; color: var(--text-dim);
+    background: var(--void-surface);
+    border: 1px solid var(--border-default);
+  }
+
+  /* ── Responsive ──────────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .left-nav {
+      position: static;
+      display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;
+    }
+    .left-nav-section { margin-bottom: 0; }
+    .left-nav-heading { display: none; }
+    .left-nav-link {
+      border: 1px solid var(--border-default);
+      border-radius: 2px; padding: 0.3rem 0.7rem;
+    }
+    .entry-grid, .faction-grid { grid-template-columns: 1fr; }
+    .count-strip-inner { flex-wrap: wrap; }
+    .count-item { flex: 1 1 45%; }
+  }
+  @media (max-width: 600px) {
+    .page-header-inner { flex-direction: column; align-items: flex-start; }
+    .page-header-right { flex-direction: row; }
+  }
+</style>
+
+<script>
+  // Count strip tabs ↔ panel switching
+  document.querySelectorAll('.count-item[data-panel]').forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = (item as HTMLElement).dataset.panel!;
+      document.querySelectorAll('.count-item').forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.left-nav-link[data-panel]').forEach(l => l.classList.remove('active'));
+      item.classList.add('active');
+      document.getElementById(`panel-${target}`)?.classList.add('active');
+      document.querySelectorAll(`.left-nav-link[data-panel="${target}"]`)
+        .forEach(l => l.classList.add('active'));
+    });
+  });
+
+  // Left nav links also switch panels
+  document.querySelectorAll('.left-nav-link[data-panel]').forEach(link => {
+    link.addEventListener('click', () => {
+      const target = (link as HTMLElement).dataset.panel!;
+      document.querySelectorAll('.count-item').forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.left-nav-link').forEach(l => l.classList.remove('active'));
+      document.querySelectorAll(`[data-panel="${target}"]`)
+        .forEach(el => el.classList.add('active'));
+      document.getElementById(`panel-${target}`)?.classList.add('active');
+    });
+  });
+
+  // Non-panel left nav links (status/disposition filters) — visual only
+  document.querySelectorAll('.left-nav-link:not([data-panel])').forEach(link => {
+    link.addEventListener('click', () => {
+      // Only toggle within its sibling group
+      const section = link.closest('.left-nav-section');
+      section?.querySelectorAll('.left-nav-link').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+    });
+  });
+</script>

@@ -1,0 +1,127 @@
+---
+const pathname = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? pathname === '/' : pathname.startsWith(href);
+---
+
+<nav class="nav">
+  <a href="/" class="nav-brand">
+    <svg
+      class="monogram-nav"
+      viewBox="0 0 60 44"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <text
+        x="30"
+        y="33"
+        text-anchor="middle"
+        font-family="Almendra SC, serif"
+        font-size="28"
+        font-weight="400"
+        fill="currentColor"
+      >EK</text>
+    </svg>
+    Emberfall Keep
+  </a>
+  <ul class="nav-links">
+    <li>
+      <a href="/" class:list={[{ active: isActive('/') }]}>Campaign</a>
+    </li>
+    <li>
+      <a href="/characters" class:list={[{ active: isActive('/characters') }]}>Fellowship</a>
+    </li>
+    <li>
+      <a href="/sessions" class:list={[{ active: isActive('/sessions') }]}>Chronicles</a>
+    </li>
+    <li>
+      <a href="/lore" class:list={[{ active: isActive('/lore') }]}>Compendium</a>
+    </li>
+    <li>
+      <a href="/maps" class:list={[{ active: isActive('/maps') }]}>Maps</a>
+    </li>
+    <li>
+      <a
+        href="https://discord.gg/dTRaBUNY"
+        target="_blank"
+        rel="noopener"
+        class="nav-discord"
+      ><i class="fa-brands fa-discord"></i> Discord</a>
+    </li>
+  </ul>
+</nav>
+
+<style>
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2.5rem;
+    height: 52px;
+    background: rgba(39, 37, 36, 0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(74, 72, 69, 0.5);
+  }
+
+  .nav-brand {
+    font-family: "Cinzel", serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--mist-mid);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .monogram-nav {
+    width: 30px;
+    height: 30px;
+    color: var(--teal-mid);
+    flex-shrink: 0;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 0;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: "Cinzel", serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 0.4rem 0.9rem;
+    text-decoration: none;
+    transition: color 0.2s;
+    display: block;
+  }
+
+  .nav-links a:hover,
+  .nav-links a.active {
+    color: var(--mist-bright);
+  }
+
+  .nav-discord {
+    color: #7289da !important;
+  }
+
+  .nav-discord:hover {
+    color: #99aaf0 !important;
+  }
+
+  @media (max-width: 800px) {
+    .nav-links {
+      display: none;
+    }
+  }
+</style>
