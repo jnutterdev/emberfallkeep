@@ -32,3 +32,9 @@ Thumbs.db
 
 # Uploads are committed to git so they are available during CI builds.
 # Add public/uploads/ back here if you switch to external media (Cloudinary etc.)
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
