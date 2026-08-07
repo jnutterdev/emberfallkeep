@@ -7,6 +7,7 @@ portrait: /uploads/orca-image-745203433.jpeg.png
 race: Halfling
 characterClass: Artificer
 level: 3
+discordId: '468761125387763744'
 dmNotes: ''
 ---
 
