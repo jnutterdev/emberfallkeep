@@ -1,7 +1,7 @@
 ---
 title: A veil of secrecy
 status: Active
-tagline: Take a ride on the bearforce one
+tagline: Woke up dead. Ended up in Sigil.
 system: 5e
 setting: Sigil
 dungeonMaster: Keith Gaspard

@@ -64,6 +64,7 @@ const allSessions: CollectionEntry<'sessions'>[] = activeCampaign
       .sort((a, b) => b.data.sessionNumber - a.data.sessionNumber)
   : [];
 const recentSessions = allSessions.slice(0, 5);
+const latestSession = allSessions[0];
 
 const allNpcs = await getCollection('npcs');
 const npcs: CollectionEntry<'npcs'>[] = activeCampaign
@@ -157,8 +158,13 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
               {activeCampaign.data.tagline ?? 'A campaign of intrigue, ruin, and reckoning'}
             </p>
 
-            {activeCampaign.data.description && (
-              <p class="campaign-desc">{activeCampaign.data.description}</p>
+            {(latestSession?.data.summary || activeCampaign.data.description) && (
+              <p class="campaign-desc">
+                {latestSession?.data.summary && (
+                  <span class="campaign-desc-label">Last time —</span>
+                )}
+                {' '}{latestSession?.data.summary ?? activeCampaign.data.description}
+              </p>
             )}
 
             <p class="campaign-callout">
@@ -616,6 +622,16 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
     color: var(--text-body);
     line-height: 1.85;
     margin-bottom: 1.5rem;
+  }
+
+  .campaign-desc-label {
+    font-family: "Cinzel", serif;
+    font-style: normal;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--teal-mid);
   }
 
   .campaign-callout {
