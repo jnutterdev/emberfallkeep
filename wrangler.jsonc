@@ -25,6 +25,7 @@
   ],
   "vars": {
     "DISCORD_CLIENT_ID": "1535296931398557817",
-    "DISCORD_REDIRECT_URI": "https://emberfallkeep.com/api/auth/discord/callback"
+    "DISCORD_REDIRECT_URI": "https://emberfallkeep.com/api/auth/discord/callback",
+    "DM_DISCORD_IDS": "455879573113012227"
   }
 }

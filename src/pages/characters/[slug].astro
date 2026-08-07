@@ -20,6 +20,8 @@ const row = await Astro.locals.runtime.env.DB.prepare(
 
 const live = mergeCharacterState(c.data, row);
 const canEdit = Astro.locals.player?.discordId != null && Astro.locals.player.discordId === c.data.discordId;
+const dmDiscordIds = (Astro.locals.runtime.env.DM_DISCORD_IDS ?? '').split(',').map(id => id.trim());
+const isDM = Astro.locals.player?.discordId != null && dmDiscordIds.includes(Astro.locals.player.discordId);
 const backstoryParagraphs = live.backstory !== null ? live.backstory.split(/\n{2,}/) : null;
 
 function mod(score: number | undefined): string {
@@ -97,9 +99,11 @@ const hasCombat = Object.values(combat).some(v => v !== undefined);
           {c.data.level && <>&nbsp;&middot;&nbsp;Level {c.data.level}</>}
         </p>
         <div class="banner-actions">
-          <a href={`/admin/index.html#/characters/${c.slug}`} class="btn btn-ghost">
-            <i class="fa-solid fa-pen"></i> Edit Sheet
-          </a>
+          {isDM && (
+            <a href={`/admin/index.html#/characters/${c.slug}`} class="btn btn-ghost">
+              <i class="fa-solid fa-pen"></i> Edit Sheet
+            </a>
+          )}
           {canEdit && (
             <a href={`/characters/${c.slug}/edit`} class="btn btn-accent">
               <i class="fa-solid fa-scroll"></i> Update My Character
