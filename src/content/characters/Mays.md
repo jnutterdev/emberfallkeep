@@ -7,6 +7,7 @@ portrait: /uploads/IMG-20260319-WA00001.png
 race: Tiefling
 characterClass: Rogue
 level: 3
+discordId: '699607174913196122'
 dmNotes: ''
 ---
 
