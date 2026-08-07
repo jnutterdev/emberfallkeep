@@ -83,14 +83,6 @@ function stripPrefix(title: string): string {
 
         <!-- Session list -->
         <div>
-          <div class="filter-bar">
-            <span class="filter-label">Filter</span>
-            <button class="filter-btn active">All</button>
-            <button class="filter-btn">Combat</button>
-            <button class="filter-btn">Exploration</button>
-            <button class="filter-btn">Roleplay</button>
-          </div>
-
           {allSessions.length > 0 ? (
             <ul class="session-list">
               {allSessions.map((s, i) => (
@@ -268,31 +260,6 @@ function stripPrefix(title: string): string {
     grid-template-columns: 1fr 300px;
     gap: 4rem;
     align-items: start;
-  }
-
-  /* ── Filter Bar ───────────────────────────────────────────────────── */
-  .filter-bar {
-    display: flex; align-items: center; gap: 0.5rem;
-    margin-bottom: 2rem; flex-wrap: wrap;
-  }
-  .filter-label {
-    font-family: "Cinzel", serif; font-size: 9px;
-    letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--text-dim); margin-right: 0.25rem;
-  }
-  .filter-btn {
-    font-family: "Cinzel", serif; font-size: 9px;
-    letter-spacing: 0.12em; text-transform: uppercase;
-    padding: 0.25rem 0.65rem; border-radius: 2px;
-    border: 1px solid var(--border-default);
-    background: transparent; color: var(--text-dim);
-    cursor: pointer; transition: color 0.2s, border-color 0.2s, background 0.2s;
-  }
-  .filter-btn:hover { color: var(--mist-mid); border-color: var(--border-mist); }
-  .filter-btn.active {
-    background: rgba(104,152,168,0.1);
-    border-color: var(--border-accent);
-    color: var(--teal-bright);
   }
 
   /* ── Session List ─────────────────────────────────────────────────── */
