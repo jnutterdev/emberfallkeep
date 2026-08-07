@@ -1,0 +1,295 @@
+---
+export const prerender = false;
+
+import Base from '../../../layouts/Base.astro';
+import { getEntry } from 'astro:content';
+import { mergeCharacterState, type CharacterStateRow } from '../../../lib/characterState';
+
+const slug = Astro.params.slug!;
+const player = Astro.locals.player;
+if (!player) return Astro.redirect(`/api/auth/discord/login`);
+
+const c = await getEntry('characters', slug);
+if (!c) return Astro.redirect('/characters');
+if (!c.data.discordId || c.data.discordId !== player.discordId) {
+  return Astro.redirect(`/characters/${slug}`);
+}
+
+const row = await Astro.locals.runtime.env.DB.prepare(
+  'SELECT * FROM character_state WHERE character_slug = ?1',
+)
+  .bind(slug)
+  .first<CharacterStateRow>();
+
+const live = mergeCharacterState(c.data, row);
+const abilityNames = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
+const abilityLabels: Record<string, string> = {
+  str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA',
+};
+const backstoryText = live.backstory ?? '';
+---
+
+<Base title={`Edit ${c.data.name}`} description={`Update ${c.data.name}'s stats, inventory, and backstory.`}>
+  <div class="edit-page">
+    <div class="wrap">
+      <a href={`/characters/${slug}`} class="back-link">
+        <i class="fa-solid fa-chevron-left"></i> Back to {c.data.name}
+      </a>
+      <h1>Update {c.data.name}</h1>
+      <p class="hint">Only fields listed here are yours to edit. Identity details (name, class, level, XP) are managed by your DM in Tina.</p>
+
+      <form id="edit-form">
+        <section class="form-section">
+          <h2>Ability Scores</h2>
+          <div class="grid-6">
+            {abilityNames.map(key => (
+              <label>
+                {abilityLabels[key]}
+                <input type="number" name={`stats.${key}`} min="1" max="30" value={live.stats[key] ?? ''} />
+              </label>
+            ))}
+          </div>
+        </section>
+
+        <section class="form-section">
+          <h2>Combat</h2>
+          <div class="grid-3">
+            <label>Current HP
+              <input type="number" name="currentHp" min="0" value={live.currentHp ?? ''} />
+            </label>
+            <label>Max HP
+              <input type="number" name="combat.maxHp" min="0" value={live.combat.maxHp ?? ''} />
+            </label>
+            <label>Armor Class
+              <input type="number" name="combat.ac" min="0" value={live.combat.ac ?? ''} />
+            </label>
+            <label>Speed
+              <input type="number" name="combat.speed" min="0" value={live.combat.speed ?? ''} />
+            </label>
+            <label>Initiative
+              <input type="number" name="combat.initiative" value={live.combat.initiative ?? ''} />
+            </label>
+            <label>Hit Dice
+              <input type="text" name="combat.hitDice" maxlength="20" value={live.combat.hitDice ?? ''} />
+            </label>
+            <label>Proficiency Bonus
+              <input type="number" name="combat.proficiencyBonus" min="0" value={live.combat.proficiencyBonus ?? ''} />
+            </label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <h2>Personality</h2>
+          <div class="grid-2">
+            <label>Personality Traits
+              <textarea name="personalityTraits" maxlength="2000">{live.personalityTraits ?? ''}</textarea>
+            </label>
+            <label>Ideals
+              <textarea name="ideals" maxlength="2000">{live.ideals ?? ''}</textarea>
+            </label>
+            <label>Bonds
+              <textarea name="bonds" maxlength="2000">{live.bonds ?? ''}</textarea>
+            </label>
+            <label>Flaws
+              <textarea name="flaws" maxlength="2000">{live.flaws ?? ''}</textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <h2>Backstory</h2>
+          <label>
+            <textarea name="backstory" rows="10" maxlength="20000">{backstoryText}</textarea>
+          </label>
+        </section>
+
+        <section class="form-section">
+          <h2>Inventory</h2>
+          <div id="inventory-rows">
+            {live.inventory.map((item, i) => (
+              <div class="inventory-row" data-index={i}>
+                <input type="text" class="inv-name" placeholder="Item name" maxlength="200" value={item.name} />
+                <input type="number" class="inv-qty" placeholder="Qty" min="0" max="9999" value={item.quantity} />
+                <input type="text" class="inv-notes" placeholder="Notes (optional)" maxlength="500" value={item.notes ?? ''} />
+                <button type="button" class="inv-remove" aria-label="Remove item">&times;</button>
+              </div>
+            ))}
+          </div>
+          <button type="button" id="inv-add" class="btn btn-ghost">
+            <i class="fa-solid fa-plus"></i> Add Item
+          </button>
+        </section>
+
+        <p id="form-error" class="form-error" hidden></p>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-accent">Save Changes</button>
+          <a href={`/characters/${slug}`} class="btn btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .edit-page { margin-top: 52px; padding: 3rem 0 5rem; }
+  .wrap { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); text-decoration: none;
+    margin-bottom: 1.5rem;
+  }
+  .back-link:hover { color: var(--mist-mid); }
+  h1 {
+    font-family: "Cinzel Decorative", serif; font-size: 32px;
+    color: var(--mist-bright); margin-bottom: 0.5rem;
+  }
+  .hint { color: var(--text-dim); font-style: italic; margin-bottom: 2.5rem; font-size: 14px; }
+
+  .form-section { margin-bottom: 2.5rem; }
+  .form-section h2 {
+    font-family: "Cinzel", serif; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border-default); margin-bottom: 1.2rem;
+  }
+
+  .grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.75rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  label {
+    display: flex; flex-direction: column; gap: 0.4rem;
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  input, textarea {
+    font-family: system-ui, sans-serif; font-size: 14px;
+    background: var(--void-surface); border: 1px solid var(--border-default);
+    color: var(--mist-bright); padding: 0.55rem 0.7rem; border-radius: 2px;
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--teal-mid); }
+  textarea { resize: vertical; min-height: 5rem; font-family: system-ui, sans-serif; }
+
+  .inventory-row {
+    display: grid; grid-template-columns: 2fr 80px 2fr auto;
+    gap: 0.6rem; margin-bottom: 0.6rem; align-items: center;
+  }
+  .inv-remove {
+    background: transparent; border: 1px solid var(--border-default);
+    color: var(--text-dim); width: 32px; height: 32px; border-radius: 2px;
+    cursor: pointer; font-size: 16px; line-height: 1;
+  }
+  .inv-remove:hover { color: var(--mauve-bright); border-color: var(--mauve-bright); }
+
+  #inv-add { margin-top: 0.5rem; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    padding: 0.55rem 1.2rem;
+    font-family: "Cinzel", serif; font-size: 10px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    border-radius: 2px; cursor: pointer; text-decoration: none;
+    border: 1px solid transparent;
+  }
+  .btn-ghost { background: transparent; border-color: var(--border-default); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--border-mist); color: var(--mist-bright); }
+  .btn-accent { background: rgba(104,152,168,0.1); border-color: var(--border-accent); color: var(--teal-bright); }
+  .btn-accent:hover { background: rgba(104,152,168,0.18); }
+
+  .form-actions { display: flex; gap: 0.75rem; margin-top: 2rem; }
+  .form-error {
+    color: var(--mauve-bright); font-size: 13px; margin-bottom: 1rem;
+  }
+
+  @media (max-width: 700px) {
+    .grid-6 { grid-template-columns: repeat(3, 1fr); }
+    .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    .inventory-row { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script define:vars={{ slug }}>
+  document.getElementById('inv-add')?.addEventListener('click', () => {
+    const container = document.getElementById('inventory-rows');
+    const row = document.createElement('div');
+    row.className = 'inventory-row';
+    row.innerHTML = `
+      <input type="text" class="inv-name" placeholder="Item name" maxlength="200" />
+      <input type="number" class="inv-qty" placeholder="Qty" min="0" max="9999" value="1" />
+      <input type="text" class="inv-notes" placeholder="Notes (optional)" maxlength="500" />
+      <button type="button" class="inv-remove" aria-label="Remove item">&times;</button>
+    `;
+    container?.appendChild(row);
+  });
+
+  document.getElementById('inventory-rows')?.addEventListener('click', (e) => {
+    const target = e.target;
+    if (target instanceof HTMLElement && target.classList.contains('inv-remove')) {
+      target.closest('.inventory-row')?.remove();
+    }
+  });
+
+  document.getElementById('edit-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const errorEl = document.getElementById('form-error');
+    if (errorEl) errorEl.hidden = true;
+
+    const num = (name) => {
+      const val = form.querySelector(`[name="${name}"]`)?.value;
+      return val === '' || val === undefined ? undefined : Number(val);
+    };
+    const str = (name) => {
+      const val = form.querySelector(`[name="${name}"]`)?.value;
+      return val === '' || val === undefined ? undefined : val;
+    };
+
+    const stats = {
+      str: num('stats.str'), dex: num('stats.dex'), con: num('stats.con'),
+      int: num('stats.int'), wis: num('stats.wis'), cha: num('stats.cha'),
+    };
+    const combat = {
+      maxHp: num('combat.maxHp'), ac: num('combat.ac'), speed: num('combat.speed'),
+      initiative: num('combat.initiative'), hitDice: str('combat.hitDice'),
+      proficiencyBonus: num('combat.proficiencyBonus'),
+    };
+    const inventory = Array.from(document.querySelectorAll('.inventory-row')).map((row) => ({
+      name: row.querySelector('.inv-name')?.value ?? '',
+      quantity: Number(row.querySelector('.inv-qty')?.value ?? 0),
+      notes: row.querySelector('.inv-notes')?.value || undefined,
+    })).filter((item) => item.name.trim() !== '');
+
+    const payload = {
+      stats, combat,
+      currentHp: num('currentHp'),
+      personalityTraits: str('personalityTraits'),
+      ideals: str('ideals'),
+      bonds: str('bonds'),
+      flaws: str('flaws'),
+      backstory: str('backstory'),
+      inventory,
+    };
+
+    const res = await fetch(`/api/characters/${slug}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      window.location.href = `/characters/${slug}`;
+    } else {
+      const body = await res.json().catch(() => ({}));
+      if (errorEl) {
+        errorEl.textContent = body.error === 'forbidden'
+          ? "You don't have permission to edit this character."
+          : 'Something went wrong saving your changes. Please try again.';
+        errorEl.hidden = false;
+      }
+    }
+  });
+</script>

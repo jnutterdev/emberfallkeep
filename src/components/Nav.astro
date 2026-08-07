@@ -54,8 +54,25 @@ const isActive = (href: string) =>
         class="nav-discord"
       ><i class="fa-brands fa-discord"></i> Discord</a>
     </li>
+    <li id="nav-auth-slot"></li>
   </ul>
 </nav>
+
+<script>
+  // Prerendered pages never run the Worker/middleware, so we can't read
+  // Astro.locals.player here — fall back to the non-HttpOnly `pd` cookie
+  // (display-only, set alongside the real session cookie on login).
+  const pd = document.cookie
+    .split('; ')
+    .find((c) => c.startsWith('pd='))
+    ?.split('=')[1];
+  const slot = document.getElementById('nav-auth-slot');
+  if (slot) {
+    slot.innerHTML = pd
+      ? `<span class="nav-player">${decodeURIComponent(pd)}</span> <a href="/api/auth/discord/logout">Logout</a>`
+      : `<a href="/api/auth/discord/login">Login with Discord</a>`;
+  }
+</script>
 
 <style>
   .nav {

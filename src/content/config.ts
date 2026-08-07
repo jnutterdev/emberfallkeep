@@ -68,6 +68,7 @@ const characters = defineCollection({
     ideals: z.string().optional(),
     bonds: z.string().optional(),
     flaws: z.string().optional(),
+    discordId: z.string().optional(),
     dmNotes: z.string().optional(),
   }),
 });

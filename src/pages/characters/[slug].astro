@@ -1,20 +1,29 @@
 ---
+export const prerender = false;
+
 import Base from '../../layouts/Base.astro';
-import { getCollection, render } from 'astro:content';
+import { getEntry, render } from 'astro:content';
 import { Image } from 'astro:assets';
+import { mergeCharacterState, type CharacterStateRow } from '../../lib/characterState';
 
-export async function getStaticPaths() {
-  const characters = await getCollection('characters');
-  return characters.map(c => ({
-    params: { slug: c.slug },
-    props: { character: c },
-  }));
-}
+const slug = Astro.params.slug!;
+const c = await getEntry('characters', slug);
+if (!c) return Astro.redirect('/characters');
 
-const { character: c } = Astro.props;
 const { Content } = await render(c);
 
-function mod(score: number): string {
+const row = await Astro.locals.runtime.env.DB.prepare(
+  'SELECT * FROM character_state WHERE character_slug = ?1',
+)
+  .bind(slug)
+  .first<CharacterStateRow>();
+
+const live = mergeCharacterState(c.data, row);
+const canEdit = Astro.locals.player?.discordId != null && Astro.locals.player.discordId === c.data.discordId;
+const backstoryParagraphs = live.backstory !== null ? live.backstory.split(/\n{2,}/) : null;
+
+function mod(score: number | undefined): string {
+  if (score === undefined) return '';
   const m = Math.floor((score - 10) / 2);
   return m >= 0 ? `+${m}` : `${m}`;
 }
@@ -39,13 +48,17 @@ function classIcon(cls?: string): string {
   return map[cls ?? ''] ?? 'fa-user';
 }
 
-const stats = c.data.stats;
-const combat = c.data.combat;
+const stats = live.stats;
+const combat = live.combat;
 
 const abilityNames = ['str','dex','con','int','wis','cha'] as const;
 const abilityLabels: Record<string, string> = {
   str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA',
 };
+
+const definedAbilities = abilityNames.filter(key => stats[key] !== undefined);
+const hasStats = definedAbilities.length > 0;
+const hasCombat = Object.values(combat).some(v => v !== undefined);
 ---
 
 <Base title={c.data.name} description={`Character sheet for ${c.data.name}, played by ${c.data.player}.`}>
@@ -87,6 +100,11 @@ const abilityLabels: Record<string, string> = {
           <a href={`/admin/index.html#/characters/${c.slug}`} class="btn btn-ghost">
             <i class="fa-solid fa-pen"></i> Edit Sheet
           </a>
+          {canEdit && (
+            <a href={`/characters/${c.slug}/edit`} class="btn btn-accent">
+              <i class="fa-solid fa-scroll"></i> Update My Character
+            </a>
+          )}
         </div>
       </div>
 
@@ -111,11 +129,11 @@ const abilityLabels: Record<string, string> = {
           <div>
 
             <!-- Ability Scores -->
-            {stats && (
+            {hasStats && (
               <>
                 <p class="stat-section-title">Ability Scores</p>
                 <div class="ability-scores">
-                  {abilityNames.map(key => (
+                  {definedAbilities.map(key => (
                     <div class="ability">
                       <span class="ability-name">{abilityLabels[key]}</span>
                       <span class="ability-score">{stats[key]}</span>
@@ -127,20 +145,20 @@ const abilityLabels: Record<string, string> = {
             )}
 
             <!-- Combat Stats -->
-            {combat && (
+            {hasCombat && (
               <>
                 <p class="stat-section-title">Combat</p>
                 <div class="combat-stats">
+                  {live.currentHp !== null && (
+                    <div class="combat-stat">
+                      <span class="lbl">Current HP</span>
+                      <span class="val danger">{live.currentHp}{combat.maxHp !== undefined && <> / {combat.maxHp}</>}</span>
+                    </div>
+                  )}
                   {combat.ac !== undefined && (
                     <div class="combat-stat">
                       <span class="lbl">Armor Class</span>
                       <span class="val">{combat.ac}</span>
-                    </div>
-                  )}
-                  {combat.maxHp !== undefined && (
-                    <div class="combat-stat">
-                      <span class="lbl">Max HP</span>
-                      <span class="val danger">{combat.maxHp}</span>
                     </div>
                   )}
                   {combat.speed !== undefined && (
@@ -171,11 +189,27 @@ const abilityLabels: Record<string, string> = {
               </>
             )}
 
-            {!stats && !combat && (
+            {!hasStats && !hasCombat && (
               <div class="no-stats">
                 <i class="fa-solid fa-dice-d20"></i>
                 <p>No stats recorded yet. Fill them in via the <a href={`/admin/index.html#/characters/${c.slug}`}>admin panel</a>.</p>
               </div>
+            )}
+
+            <!-- Inventory -->
+            {live.inventory.length > 0 && (
+              <>
+                <p class="stat-section-title">Inventory</p>
+                <div class="inventory-list">
+                  {live.inventory.map(item => (
+                    <div class="inventory-item">
+                      <span class="inventory-qty">{item.quantity}&times;</span>
+                      <span class="inventory-name">{item.name}</span>
+                      {item.notes && <span class="inventory-notes">{item.notes}</span>}
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
 
           </div>
@@ -217,10 +251,10 @@ const abilityLabels: Record<string, string> = {
             </div>
 
             <!-- Ability modifiers quick ref -->
-            {stats && (
+            {hasStats && (
               <div class="sidebar-block">
                 <p class="sidebar-block-title">Modifiers</p>
-                {abilityNames.map(key => (
+                {definedAbilities.map(key => (
                   <div class="sidebar-row">
                     <span class="k">{abilityLabels[key]}</span>
                     <span class="v mono">{mod(stats[key])}</span>
@@ -245,32 +279,32 @@ const abilityLabels: Record<string, string> = {
           <!-- Left: body content + personality -->
           <div>
 
-            {(c.data.personalityTraits || c.data.ideals || c.data.bonds || c.data.flaws) && (
+            {(live.personalityTraits || live.ideals || live.bonds || live.flaws) && (
               <>
                 <p class="stat-section-title">Personality</p>
                 <div class="personality-grid">
-                  {c.data.personalityTraits && (
+                  {live.personalityTraits && (
                     <div class="personality-cell">
                       <span class="personality-label">Personality Traits</span>
-                      <p class="personality-text">{c.data.personalityTraits}</p>
+                      <p class="personality-text">{live.personalityTraits}</p>
                     </div>
                   )}
-                  {c.data.ideals && (
+                  {live.ideals && (
                     <div class="personality-cell">
                       <span class="personality-label">Ideals</span>
-                      <p class="personality-text">{c.data.ideals}</p>
+                      <p class="personality-text">{live.ideals}</p>
                     </div>
                   )}
-                  {c.data.bonds && (
+                  {live.bonds && (
                     <div class="personality-cell">
                       <span class="personality-label">Bonds</span>
-                      <p class="personality-text">{c.data.bonds}</p>
+                      <p class="personality-text">{live.bonds}</p>
                     </div>
                   )}
-                  {c.data.flaws && (
+                  {live.flaws && (
                     <div class="personality-cell">
                       <span class="personality-label">Flaws</span>
-                      <p class="personality-text">{c.data.flaws}</p>
+                      <p class="personality-text">{live.flaws}</p>
                     </div>
                   )}
                 </div>
@@ -279,7 +313,10 @@ const abilityLabels: Record<string, string> = {
 
             <p class="stat-section-title">Backstory</p>
             <div class="prose">
-              <Content />
+              {backstoryParagraphs
+                ? backstoryParagraphs.map(paragraph => (<p>{paragraph}</p>))
+                : <Content />
+              }
             </div>
 
           </div>
@@ -443,6 +480,11 @@ const abilityLabels: Record<string, string> = {
     border-color: var(--border-default); color: var(--text-muted);
   }
   .btn-ghost:hover { border-color: var(--border-mist); color: var(--mist-bright); }
+  .btn-accent {
+    background: rgba(104,152,168,0.1);
+    border-color: var(--border-accent); color: var(--teal-bright);
+  }
+  .btn-accent:hover { background: rgba(104,152,168,0.18); }
 
   /* ── Tabs Bar ─────────────────────────────────────────────────────── */
   .tabs-bar {
@@ -554,6 +596,27 @@ const abilityLabels: Record<string, string> = {
   }
   .no-stats p { font-style: italic; color: var(--text-dim); }
   .no-stats a { color: var(--teal-mid); }
+
+  /* Inventory */
+  .inventory-list {
+    border: 1px solid var(--border-default);
+    background: var(--void-surface);
+    margin-bottom: 2rem;
+  }
+  .inventory-item {
+    display: flex; align-items: baseline; gap: 0.75rem;
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid rgba(74,72,69,0.4);
+    font-size: 13px;
+  }
+  .inventory-item:last-child { border-bottom: none; }
+  .inventory-qty {
+    font-family: monospace; color: var(--teal-mid); flex-shrink: 0;
+  }
+  .inventory-name { color: var(--mist-mid); }
+  .inventory-notes {
+    color: var(--text-dim); font-style: italic; font-size: 12px;
+  }
 
   /* ── Backstory Tab ────────────────────────────────────────────────── */
   .tab-backstory { padding: 3.5rem 0 5rem; }

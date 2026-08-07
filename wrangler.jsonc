@@ -12,6 +12,19 @@
   ],
   "assets": {
     "binding": "ASSETS",
-    "directory": "dist"
+    "directory": "dist",
+    "run_worker_first": ["/characters/*", "/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "emberfallkeep-db",
+      "database_id": "70aedfed-84af-477d-b1a6-5d7368ed9a1f",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "DISCORD_CLIENT_ID": "1535296931398557817",
+    "DISCORD_REDIRECT_URI": "https://emberfallkeep.com/api/auth/discord/callback"
   }
 }
