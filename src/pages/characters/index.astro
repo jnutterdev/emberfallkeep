@@ -1,11 +1,14 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 
 const allCharacters = await getCollection('characters');
-const active    = allCharacters.filter(c => c.data.active !== false);
-const inactive  = allCharacters.filter(c => c.data.active === false);
+const byName = (a: CollectionEntry<'characters'>, b: CollectionEntry<'characters'>) =>
+  a.data.name.localeCompare(b.data.name);
+const active    = allCharacters.filter(c => c.data.active !== false).sort(byName);
+const inactive  = allCharacters.filter(c => c.data.active === false).sort(byName);
 
 function classIcon(cls?: string): string {
   const map: Record<string, string> = {

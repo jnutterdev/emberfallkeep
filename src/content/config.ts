@@ -18,7 +18,6 @@ const campaigns = defineCollection({
     description: z.string().optional(),
     startDate: z.coerce.date().optional(),
     lastSession: z.coerce.date().optional(),
-    sessionCount: z.number().default(0),
     partySize: z.number().optional(),
     dungeonMaster: z.string().optional(),
     coverImage: z.string().optional(),

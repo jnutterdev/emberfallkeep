@@ -56,7 +56,6 @@ export default defineConfig({
           },
           { type: "string", name: "setting", label: "World / Setting" },
           { type: "string", name: "dungeonMaster", label: "Dungeon Master" },
-          { type: "number", name: "sessionCount", label: "Session Count" },
           { type: "number", name: "partySize", label: "Party Size" },
           { type: "datetime", name: "startDate", label: "Start Date" },
           { type: "datetime", name: "lastSession", label: "Last Session" },

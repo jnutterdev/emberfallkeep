@@ -52,7 +52,9 @@ const activeCampaign = campaigns.find(c => c.data.status === 'Active') ?? campai
 
 const allChars = await getCollection('characters');
 const characters: CollectionEntry<'characters'>[] = activeCampaign
-  ? allChars.filter(c => c.data.campaign === activeCampaign.slug && c.data.active)
+  ? allChars
+      .filter(c => c.data.campaign === activeCampaign.slug && c.data.active)
+      .sort((a, b) => a.data.name.localeCompare(b.data.name))
   : [];
 
 const allSessRaw = await getCollection('sessions');
@@ -144,7 +146,7 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
               &nbsp;
               {activeCampaign.data.setting ?? activeCampaign.data.system}
               &nbsp;&middot;&nbsp;
-              Session {toRoman(activeCampaign.data.sessionCount)}
+              Session {toRoman(allSessions.length)}
               &nbsp;&middot;&nbsp;
               {activeCampaign.data.system}
             </p>
@@ -166,7 +168,7 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
             <div class="campaign-stats">
               <div class="campaign-stat">
                 <span class="lbl">Sessions</span>
-                <span class="val">{toRoman(activeCampaign.data.sessionCount)}</span>
+                <span class="val">{toRoman(allSessions.length)}</span>
               </div>
               <div class="campaign-stat">
                 <span class="lbl">Last Played</span>
@@ -685,10 +687,15 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
   }
 
   .portraits {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    display: flex;
     gap: 6px;
     margin-bottom: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+  .portraits::-webkit-scrollbar {
+    display: none;
   }
 
   .portraits--empty {
@@ -698,6 +705,8 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
   .portrait {
     display: flex;
     flex-direction: column;
+    flex: 0 0 calc((100% - 30px) / 6);
+    scroll-snap-align: start;
     cursor: pointer;
     text-decoration: none;
   }
@@ -762,7 +771,7 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
   }
 
   .portraits-nav {
-    display: flex;
+    display: none;
     gap: 0.6rem;
     margin-top: 1rem;
   }
@@ -1028,8 +1037,8 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
       text-align: left;
       max-width: 100%;
     }
-    .portraits {
-      grid-template-columns: repeat(3, 1fr);
+    .portrait {
+      flex-basis: calc((100% - 12px) / 3);
     }
     .chronicles-inner {
       grid-template-columns: 1fr;
@@ -1043,15 +1052,12 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
   }
 
   @media (max-width: 500px) {
-    .portraits {
-      grid-template-columns: repeat(2, 1fr);
+    .portrait {
+      flex-basis: calc((100% - 6px) / 2);
     }
   }
 
-  /* Nav hidden on desktop — JS shows it on mobile when there are multiple pages */
-  @media (min-width: 801px) {
-    .portraits-nav { display: none; }
-  }
+  /* Base display: none above (JS sets it to 'flex' when there's scroll overflow) */
   .portraits-nav button:disabled {
     opacity: 0.3;
     cursor: default;
@@ -1067,57 +1073,27 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
 
     if (!grid || !prevBtn || !nextBtn || !nav) return;
 
-    const portraits = Array.from(grid.querySelectorAll('.portrait')) as HTMLElement[];
-    if (portraits.length === 0) return;
+    const OVERFLOW_TOLERANCE = 4; // px — avoids flicker from subpixel rounding
 
-    let currentPage = 0;
-
-    function getPerPage(): number {
-      if (window.innerWidth <= 500) return 2;
-      if (window.innerWidth <= 800) return 3;
-      return portraits.length; // desktop — show all
-    }
-
-    function render() {
-      const perPage    = getPerPage();
-      const isDesktop  = window.innerWidth > 800;
-      const totalPages = Math.ceil(portraits.length / perPage);
-
-      // Clamp page after resize
-      if (currentPage >= totalPages) currentPage = totalPages - 1;
-
-      portraits.forEach((p, i) => {
-        if (isDesktop) {
-          p.style.display = '';
-        } else {
-          const page = Math.floor(i / perPage);
-          p.style.display = page === currentPage ? '' : 'none';
-        }
-      });
-
-      // Only show nav on mobile when there's more than one page
-      nav.style.display = (!isDesktop && totalPages > 1) ? 'flex' : 'none';
-
-      prevBtn.disabled = currentPage === 0;
-      nextBtn.disabled = currentPage >= totalPages - 1;
+    function updateNav() {
+      const maxScroll = grid.scrollWidth - grid.clientWidth;
+      const hasOverflow = maxScroll > OVERFLOW_TOLERANCE;
+      nav.style.display = hasOverflow ? 'flex' : 'none';
+      prevBtn.disabled = grid.scrollLeft <= OVERFLOW_TOLERANCE;
+      nextBtn.disabled = grid.scrollLeft >= maxScroll - OVERFLOW_TOLERANCE;
     }
 
     prevBtn.addEventListener('click', () => {
-      if (currentPage > 0) { currentPage--; render(); }
+      grid.scrollBy({ left: -grid.clientWidth, behavior: 'smooth' });
     });
 
     nextBtn.addEventListener('click', () => {
-      const totalPages = Math.ceil(portraits.length / getPerPage());
-      if (currentPage < totalPages - 1) { currentPage++; render(); }
+      grid.scrollBy({ left: grid.clientWidth, behavior: 'smooth' });
     });
 
-    // Recalculate on resize (debounced)
-    let resizeTimer: ReturnType<typeof setTimeout>;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => { currentPage = 0; render(); }, 150);
-    });
+    grid.addEventListener('scroll', updateNav, { passive: true });
+    window.addEventListener('resize', updateNav);
 
-    render();
+    updateNav();
   })();
 </script>
