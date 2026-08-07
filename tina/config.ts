@@ -199,6 +199,13 @@ export default defineConfig({
             ui: { component: "textarea" },
           },
           {
+            type: "string",
+            name: "discordId",
+            label: "Discord User ID (player assignment)",
+            description:
+              "Paste the player's Discord numeric user ID to grant them self-service edit access to this sheet.",
+          },
+          {
             type: "rich-text",
             name: "body",
             label: "Backstory & Notes",
