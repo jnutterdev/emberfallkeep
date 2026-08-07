@@ -7,6 +7,7 @@ portrait: /uploads/IMG-20260224-WA00012.png
 race: Human
 characterClass: Pugelist
 level: 3
+discordId: '699607174913196122'
 dmNotes: ''
 ---
 
