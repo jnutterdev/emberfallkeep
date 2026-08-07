@@ -63,7 +63,7 @@ const allSessions: CollectionEntry<'sessions'>[] = activeCampaign
       .filter(s => s.data.campaign === activeCampaign.slug)
       .sort((a, b) => b.data.sessionNumber - a.data.sessionNumber)
   : [];
-const recentSessions = allSessions.slice(0, 5);
+const recentSessions = allSessions.slice(0, 3);
 const latestSession = allSessions[0];
 
 const allNpcs = await getCollection('npcs');
