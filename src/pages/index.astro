@@ -186,10 +186,12 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
               </div>
             </div>
 
-            <a href={`/sessions`} class="btn btn-primary">
-              <i class="fa-solid fa-scroll"></i> Latest Session
-            </a>
-            <a href={`/campaigns/${activeCampaign.slug}`} class="btn btn-ghost">
+            {latestSession && (
+              <a href={`/sessions/${latestSession.slug}`} class="btn btn-primary">
+                <i class="fa-solid fa-scroll"></i> Latest Session
+              </a>
+            )}
+            <a href={`/sessions`} class="btn btn-ghost">
               <i class="fa-solid fa-dungeon"></i> Full Campaign
             </a>
           </div>
