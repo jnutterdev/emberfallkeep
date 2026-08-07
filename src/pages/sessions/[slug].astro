@@ -107,11 +107,46 @@ const dateStr = session.data.date.toLocaleDateString('en-GB', {
     font-family: "Cinzel Decorative", serif; font-size: 20px;
     color: var(--mist-bright); margin: 2.5rem 0 1rem;
     padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-default);
+    clear: both;
   }
   .prose :global(h3) {
     font-family: "Cinzel", serif; font-size: 14px; font-weight: 600;
     letter-spacing: 0.06em; color: var(--mist-mid);
     margin: 2rem 0 0.75rem; text-transform: uppercase;
+    clear: both;
+  }
+
+  /* Images dropped inline in the recap markdown auto-alternate left/right
+     (see script below) so text wraps around them. Capping max-width AND
+     max-height (with width/height left auto) lets both portrait and
+     landscape images shrink to fit while keeping their own aspect ratio. */
+  .prose :global(img) {
+    border: 1px solid var(--border-default);
+    display: block;
+  }
+  .prose :global(img.float-left),
+  .prose :global(img.float-right) {
+    max-width: 42%;
+    max-height: 380px;
+    width: auto;
+    height: auto;
+  }
+  .prose :global(img.float-left) {
+    float: left;
+    margin: 0.3rem 1.5rem 1rem 0;
+  }
+  .prose :global(img.float-right) {
+    float: right;
+    margin: 0.3rem 0 1rem 1.5rem;
+  }
+  @media (max-width: 700px) {
+    .prose :global(img.float-left),
+    .prose :global(img.float-right) {
+      float: none;
+      max-width: 100%;
+      max-height: none;
+      margin: 1rem 0;
+    }
   }
   /* Sidebar */
   .sidebar { position: sticky; top: calc(var(--nav-height) + 2rem); }
@@ -151,3 +186,12 @@ const dateStr = session.data.date.toLocaleDateString('en-GB', {
     .sidebar { position: static; }
   }
 </style>
+
+<script>
+  // Images dropped inline in the recap markdown alternate left/right in
+  // document order, so authors just write plain ![alt](src) — no need to
+  // track which side is next.
+  document.querySelectorAll('.prose img').forEach((img, i) => {
+    img.classList.add(i % 2 === 0 ? 'float-left' : 'float-right');
+  });
+</script>
