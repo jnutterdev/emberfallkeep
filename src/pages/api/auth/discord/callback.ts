@@ -10,6 +10,7 @@ interface DiscordTokenResponse {
 interface DiscordUser {
   id: string;
   username: string;
+  global_name: string | null;
   avatar: string | null;
 }
 
@@ -44,6 +45,7 @@ export const GET: APIRoute = async ({ url, cookies, redirect, locals }) => {
   });
   if (!userRes.ok) return redirect('/characters?auth_error=user');
   const user = await userRes.json<DiscordUser>();
+  const displayName = user.global_name ?? user.username;
 
   await env.DB.prepare(
     `INSERT INTO players (discord_id, username, avatar, created_at, updated_at)
@@ -53,11 +55,11 @@ export const GET: APIRoute = async ({ url, cookies, redirect, locals }) => {
        avatar = excluded.avatar,
        updated_at = unixepoch()`,
   )
-    .bind(user.id, user.username, user.avatar)
+    .bind(user.id, displayName, user.avatar)
     .run();
 
   const token = await createSession(
-    { discordId: user.id, username: user.username, avatar: user.avatar },
+    { discordId: user.id, username: displayName, avatar: user.avatar },
     env.SESSION_SECRET,
   );
 
@@ -72,7 +74,7 @@ export const GET: APIRoute = async ({ url, cookies, redirect, locals }) => {
   // Non-HttpOnly, display-only — read client-side by Nav.astro on static pages.
   // Never used for authorization; the HttpOnly `session` cookie is always
   // re-verified server-side before granting edit access.
-  cookies.set('pd', user.username, { ...cookieOptions, httpOnly: false });
+  cookies.set('pd', displayName, { ...cookieOptions, httpOnly: false });
 
   return redirect('/characters');
 };

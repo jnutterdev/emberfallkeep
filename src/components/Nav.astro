@@ -69,8 +69,8 @@ const isActive = (href: string) =>
   const slot = document.getElementById('nav-auth-slot');
   if (slot) {
     slot.innerHTML = pd
-      ? `<span class="nav-player">${decodeURIComponent(pd)}</span> <a href="/api/auth/discord/logout">Logout</a>`
-      : `<a href="/api/auth/discord/login">Login with Discord</a>`;
+      ? `<span class="nav-player">${decodeURIComponent(pd)}</span> <a href="/api/auth/discord/logout" class="nav-logout">Logout</a>`
+      : `<a href="/api/auth/discord/login" class="nav-logout">Login with Discord</a>`;
   }
 </script>
 
@@ -131,6 +131,32 @@ const isActive = (href: string) =>
 
   .nav-links a:hover,
   .nav-links a.active {
+    color: var(--mist-bright);
+  }
+
+  /* Injected client-side via innerHTML in the <script> below, so these
+     can't rely on Astro's build-time scoped CSS — :global() bypasses that. */
+  :global(.nav-player) {
+    font-family: "Cinzel", serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 0.4rem 0 0.4rem 0.9rem;
+  }
+
+  :global(.nav-logout) {
+    font-family: "Cinzel", serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 0.4rem 0.9rem;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  :global(.nav-logout:hover) {
     color: var(--mist-bright);
   }
 
