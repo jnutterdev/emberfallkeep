@@ -25,6 +25,7 @@ combat:
   hitDice: 3d8
 xpTracking: XP
 xp: 900
+discordId: "455879573113012227"
 dmNotes: ''
 ---
 
