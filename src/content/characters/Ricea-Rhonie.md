@@ -7,6 +7,7 @@ portrait: /uploads/Ranger_and_dog_in_the_woodland.jpg
 race: Human
 characterClass: Ranger
 level: 3
+discordId: '247095173568397312'
 dmNotes: ''
 ---
 
