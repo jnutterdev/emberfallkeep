@@ -27,7 +27,12 @@ jobs:
         env:
           TINA_PUBLIC_CLIENT_ID: ${{ secrets.TINA_CLIENT_ID }}
           TINA_TOKEN: ${{ secrets.TINA_TOKEN }}
-        run: npm run tina:build
+        # --skip-cloud-checks: Tina Cloud's schema-diff check expects an
+        # interactive "yes, this is expected" confirmation on schema changes,
+        # which isn't possible in non-interactive CI. Skipping it only skips
+        # that validation — Astro still builds straight from the local
+        # markdown/schema either way.
+        run: npx tinacms build --skip-cloud-checks && npx astro build
 
       - name: Apply D1 migrations
         uses: cloudflare/wrangler-action@v3
