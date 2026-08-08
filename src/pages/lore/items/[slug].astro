@@ -1,0 +1,92 @@
+---
+import Base from '../../../layouts/Base.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const items = await getCollection('items');
+  return items.map(i => ({
+    params: { slug: i.slug },
+    props: { item: i },
+  }));
+}
+
+const { item } = Astro.props;
+const { Content } = await render(item);
+---
+
+<Base title={item.data.name} description={item.data.properties}>
+  <PageHeader
+    title={item.data.name}
+    subtitle={`${item.data.rarity} ${item.data.type}`}
+    backHref="/lore"
+    backLabel="Compendium"
+  />
+  <main class="main">
+    <div class="wrap">
+      <div class="detail-layout">
+        <article class="prose">
+          {item.data.properties && <p class="lead">{item.data.properties}</p>}
+          <Content />
+        </article>
+        <aside class="sidebar">
+          <div class="sidebar-block">
+            <h3 class="sidebar-heading">Details</h3>
+            <p class="detail-row"><span>Type</span><strong>{item.data.type}</strong></p>
+            <p class="detail-row"><span>Rarity</span><strong>{item.data.rarity}</strong></p>
+            <p class="detail-row"><span>Attunement</span><strong>{item.data.requiresAttunement ? 'Required' : 'Not required'}</strong></p>
+            {item.data.attunementNote && <p class="detail-row"><span>Attunement Note</span><strong>{item.data.attunementNote}</strong></p>}
+            {item.data.currentHolder && <p class="detail-row"><span>Current Holder</span><strong>{item.data.currentHolder}</strong></p>}
+            {item.data.foundIn && <p class="detail-row"><span>Found In</span><strong>{item.data.foundIn}</strong></p>}
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .main { padding: 3.5rem 0 5rem; }
+  .detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 3rem;
+    align-items: start;
+  }
+  .prose {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px; line-height: 1.8;
+    color: var(--text-body);
+  }
+  .prose :global(p) { margin-bottom: 1.25rem; }
+  .lead { font-size: 18px; color: var(--text-muted); font-style: italic; }
+  .sidebar { position: sticky; top: calc(var(--nav-height) + 2rem); }
+  .sidebar-block {
+    background: var(--void-surface);
+    border: 1px solid var(--border-default);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .sidebar-heading {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-default);
+  }
+  .detail-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 1rem; padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(74,72,69,0.4);
+    font-size: 13px;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row span {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
+  }
+  .detail-row strong { color: var(--mist-mid); font-weight: 500; text-align: right; }
+  @media (max-width: 800px) {
+    .detail-layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+</style>
