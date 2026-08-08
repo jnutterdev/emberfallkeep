@@ -204,7 +204,6 @@ a {
 .site-footer {
   padding: 3.5rem 2.5rem 2.5rem;
   text-align: center;
-  border-top: 1px solid var(--border-default);
 }
 .site-footer__brand {
   font-family: "Cinzel Decorative", serif;
