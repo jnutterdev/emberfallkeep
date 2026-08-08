@@ -24,7 +24,16 @@ const isActive = (href: string) =>
     </svg>
     Emberfall Keep
   </a>
-  <ul class="nav-links">
+  <button
+    type="button"
+    class="nav-toggle"
+    aria-expanded="false"
+    aria-controls="nav-links"
+    aria-label="Toggle navigation menu"
+  >
+    <i class="fa-solid fa-bars"></i>
+  </button>
+  <ul class="nav-links" id="nav-links">
     <li>
       <a href="/" class:list={[{ active: isActive('/') }]}>Campaign</a>
     </li>
@@ -69,6 +78,43 @@ const isActive = (href: string) =>
       ? `<span class="nav-player">${decodeURIComponent(pd)}</span> <a href="/api/auth/discord/logout" class="nav-logout">Logout</a>`
       : `<a href="/api/auth/discord/login" class="nav-logout">Login with Discord</a>`;
   }
+
+  const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle');
+  const links = document.getElementById('nav-links');
+  const toggleIcon = toggle?.querySelector('i');
+
+  const closeMenu = () => {
+    if (!toggle || !links) return;
+    toggle.setAttribute('aria-expanded', 'false');
+    links.classList.remove('open');
+    toggleIcon?.classList.replace('fa-xmark', 'fa-bars');
+  };
+
+  const openMenu = () => {
+    if (!toggle || !links) return;
+    toggle.setAttribute('aria-expanded', 'true');
+    links.classList.add('open');
+    toggleIcon?.classList.replace('fa-bars', 'fa-xmark');
+  };
+
+  toggle?.addEventListener('click', () => {
+    const isOpen = links?.classList.contains('open');
+    isOpen ? closeMenu() : openMenu();
+  });
+
+  links?.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).tagName === 'A') closeMenu();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!links?.classList.contains('open')) return;
+    if (links.contains(e.target as Node) || toggle?.contains(e.target as Node)) return;
+    closeMenu();
+  });
 </script>
 
 <style>
@@ -108,8 +154,24 @@ const isActive = (href: string) =>
     flex-shrink: 0;
   }
 
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--mist-mid);
+    font-size: 20px;
+    padding: 0.4rem;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .nav-toggle:hover {
+    color: var(--mist-bright);
+  }
+
   .nav-links {
     display: flex;
+    flex-shrink: 0;
     gap: 0;
     list-style: none;
   }
@@ -124,6 +186,7 @@ const isActive = (href: string) =>
     text-decoration: none;
     transition: color 0.2s;
     display: block;
+    white-space: nowrap;
   }
 
   .nav-links a:hover,
@@ -140,6 +203,12 @@ const isActive = (href: string) =>
     text-transform: uppercase;
     color: var(--text-dim);
     padding: 0.4rem 0 0.4rem 0.9rem;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
   }
 
   :global(.nav-logout) {
@@ -165,9 +234,50 @@ const isActive = (href: string) =>
     color: #99aaf0 !important;
   }
 
-  @media (max-width: 800px) {
+  @media (max-width: 1220px) {
+    .nav-toggle {
+      display: block;
+    }
+
     .nav-links {
-      display: none;
+      position: fixed;
+      top: var(--nav-height, 52px);
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      gap: 0;
+      max-height: calc(100vh - var(--nav-height, 52px));
+      overflow-y: auto;
+      background: rgba(39, 37, 36, 0.97);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(74, 72, 69, 0.5);
+      transform: translateY(-100%);
+      opacity: 0;
+      visibility: hidden;
+      transition: transform 0.25s ease, opacity 0.25s ease, visibility 0.25s;
+    }
+
+    .nav-links.open {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .nav-links li {
+      width: 100%;
+    }
+
+    .nav-links a {
+      padding: 0.9rem 2.5rem;
+      font-size: 12px;
+      border-bottom: 1px solid rgba(74, 72, 69, 0.3);
+    }
+
+    :global(.nav-player),
+    :global(.nav-logout) {
+      display: block;
+      padding: 0.9rem 2.5rem;
+      font-size: 12px;
     }
   }
 </style>
