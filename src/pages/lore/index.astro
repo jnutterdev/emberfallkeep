@@ -535,6 +535,26 @@ const factionNames = [...new Set(npcs.map(n => n.data.affiliation).filter(Boolea
     font-style: italic; letter-spacing: 0; text-transform: none; font-size: 13px;
   }
 
+  /* ── Pagination ──────────────────────────────────────────────────── */
+  .pagination {
+    display: flex; gap: 0.4rem; justify-content: center;
+    margin-bottom: 2rem;
+  }
+  .page-btn {
+    min-width: 28px; height: 28px; padding: 0 0.5rem;
+    border: 1px solid var(--border-default); border-radius: 2px;
+    background: transparent; color: var(--text-dim);
+    font-family: "Cinzel", serif; font-size: 10px; letter-spacing: 0.05em;
+    cursor: pointer; transition: color 0.2s, border-color 0.2s, background 0.2s;
+  }
+  .page-btn:hover:not(:disabled) { color: var(--mist-mid); border-color: var(--border-mist); }
+  .page-btn.active {
+    background: rgba(104,152,168,0.1);
+    border-color: var(--border-accent);
+    color: var(--teal-bright);
+  }
+  .page-btn:disabled { opacity: 0.3; cursor: default; }
+
   /* ── Empty states ────────────────────────────────────────────────── */
   .empty-panel {
     padding: 3rem; text-align: center;
@@ -567,18 +587,23 @@ const factionNames = [...new Set(npcs.map(n => n.data.affiliation).filter(Boolea
 </style>
 
 <script>
+  const VALID_PANELS = ['npcs', 'factions', 'items'];
+
+  function activatePanel(target: string) {
+    document.querySelectorAll('.count-item').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.left-nav-link[data-panel]').forEach(l => l.classList.remove('active'));
+    document.querySelectorAll(`[data-panel="${target}"]`).forEach(el => el.classList.add('active'));
+    document.getElementById(`panel-${target}`)?.classList.add('active');
+  }
+
   // Count strip tabs ↔ panel switching
   document.querySelectorAll('.count-item[data-panel]').forEach(item => {
     item.addEventListener('click', e => {
       e.preventDefault();
       const target = (item as HTMLElement).dataset.panel!;
-      document.querySelectorAll('.count-item').forEach(i => i.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.left-nav-link[data-panel]').forEach(l => l.classList.remove('active'));
-      item.classList.add('active');
-      document.getElementById(`panel-${target}`)?.classList.add('active');
-      document.querySelectorAll(`.left-nav-link[data-panel="${target}"]`)
-        .forEach(l => l.classList.add('active'));
+      activatePanel(target);
+      history.replaceState(null, '', `#${target}`);
     });
   });
 
@@ -586,14 +611,20 @@ const factionNames = [...new Set(npcs.map(n => n.data.affiliation).filter(Boolea
   document.querySelectorAll('.left-nav-link[data-panel]').forEach(link => {
     link.addEventListener('click', () => {
       const target = (link as HTMLElement).dataset.panel!;
-      document.querySelectorAll('.count-item').forEach(i => i.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.left-nav-link').forEach(l => l.classList.remove('active'));
-      document.querySelectorAll(`[data-panel="${target}"]`)
-        .forEach(el => el.classList.add('active'));
-      document.getElementById(`panel-${target}`)?.classList.add('active');
+      activatePanel(target);
+      history.replaceState(null, '', `#${target}`);
     });
   });
+
+  // Deep-link support: /lore#npcs, /lore#factions, /lore#items.
+  // hashchange also covers same-document navigation (e.g. already on
+  // /lore and the hash changes without a full page reload).
+  function activateFromHash() {
+    const target = window.location.hash.replace('#', '');
+    if (VALID_PANELS.includes(target)) activatePanel(target);
+  }
+  activateFromHash();
+  window.addEventListener('hashchange', activateFromHash);
 
   // Non-panel left nav links (status/disposition filters) — visual only
   document.querySelectorAll('.left-nav-link:not([data-panel])').forEach(link => {
@@ -603,5 +634,53 @@ const factionNames = [...new Set(npcs.map(n => n.data.affiliation).filter(Boolea
       section?.querySelectorAll('.left-nav-link').forEach(l => l.classList.remove('active'));
       link.classList.add('active');
     });
+  });
+
+  // ── Pagination — 10 entries per page, per panel ──────────────────────
+  const PAGE_SIZE = 10;
+  document.querySelectorAll('.entry-grid, .faction-grid').forEach(grid => {
+    const cards = Array.from(grid.children) as HTMLElement[];
+    if (cards.length <= PAGE_SIZE) return;
+
+    const totalPages = Math.ceil(cards.length / PAGE_SIZE);
+    let page = 0;
+
+    const nav = document.createElement('div');
+    nav.className = 'pagination';
+    grid.insertAdjacentElement('afterend', nav);
+
+    function renderPage() {
+      cards.forEach((card, i) => {
+        card.style.display = Math.floor(i / PAGE_SIZE) === page ? '' : 'none';
+      });
+
+      nav.innerHTML = '';
+
+      const prev = document.createElement('button');
+      prev.className = 'page-btn';
+      prev.setAttribute('aria-label', 'Previous page');
+      prev.textContent = '‹';
+      prev.disabled = page === 0;
+      prev.addEventListener('click', () => { page--; renderPage(); });
+      nav.appendChild(prev);
+
+      for (let i = 0; i < totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'page-btn' + (i === page ? ' active' : '');
+        btn.textContent = String(i + 1);
+        btn.addEventListener('click', () => { page = i; renderPage(); });
+        nav.appendChild(btn);
+      }
+
+      const next = document.createElement('button');
+      next.className = 'page-btn';
+      next.setAttribute('aria-label', 'Next page');
+      next.textContent = '›';
+      next.disabled = page === totalPages - 1;
+      next.addEventListener('click', () => { page++; renderPage(); });
+      nav.appendChild(next);
+    }
+
+    renderPage();
   });
 </script>

@@ -319,7 +319,7 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
         </div>
 
         <div class="compendium-entries">
-          <div class="comp-entry">
+          <a class="comp-entry" href="/lore#npcs">
             <div class="comp-entry-icon">
               <i class="fa-solid fa-person-walking"></i>
             </div>
@@ -332,9 +332,9 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
                 {npcs.length} {npcs.length === 1 ? 'entry' : 'entries'}
               </p>
             </div>
-          </div>
+          </a>
 
-          <div class="comp-entry">
+          <a class="comp-entry" href="/lore#factions">
             <div class="comp-entry-icon">
               <i class="fa-solid fa-flag"></i>
             </div>
@@ -347,9 +347,9 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
                 {factions.length} {factions.length === 1 ? 'faction' : 'factions'}
               </p>
             </div>
-          </div>
+          </a>
 
-          <div class="comp-entry">
+          <a class="comp-entry" href="/lore#items">
             <div class="comp-entry-icon">
               <i class="fa-solid fa-gem"></i>
             </div>
@@ -362,7 +362,7 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
                 {items.length} {items.length === 1 ? 'entry' : 'entries'}
               </p>
             </div>
-          </div>
+          </a>
 
           <div class="comp-entry">
             <div class="comp-entry-icon">
@@ -966,6 +966,8 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
     border-bottom: 1px solid var(--border-default);
     cursor: pointer;
     transition: color 0.2s;
+    text-decoration: none;
+    color: inherit;
   }
 
   .comp-entry:first-child {
