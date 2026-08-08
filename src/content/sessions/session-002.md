@@ -3,7 +3,7 @@ title: Out of the Wombs, Into the Cage
 sessionNumber: 2
 campaign: a-veil-of-secrecy
 date: 2026-04-24T00:00:00.000Z
-podcastUrl: https://archive.org/download/tentacle-legs-and-rent-in-sigil/Tentacle_Legs_and_Rent_in_Sigil.m4a
+podcastUrl: https://archive.org/download/mutated-lab-rats-pay-rent-in-sigil/Mutated_Lab_Rats_Pay_Rent_in_Sigil.m4a
 summary: >-
   The party fought free of the corpse-lab, fled a sword-wielding fiend, and
   stumbled into the impossible city of Sigil.
@@ -12,7 +12,7 @@ partyPresent:
   - character: src/content/characters/Harlan-Stone.md
   - character: src/content/characters/Pierre-Devereux.md
   - character: src/content/characters/Mays.md
-dmNotes: ''
+dmNotes: ""
 ---
 
 The lab fight resumed with the party barely armed and surrounded by plague-masked attendants and pox-covered hulks — Harlan smashed a gurney into one from bear form, Ricea impaled another with a stolen surgical blade, and Maze picked apart the rest with sneak attacks and fire. Pierre took the worst of it: pox-fluid exposure left him with a hypnotic third eye, tangled "migratory" fingers, and a tentacled leg.
