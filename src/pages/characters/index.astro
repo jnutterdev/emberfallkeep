@@ -159,7 +159,7 @@ function classIcon(cls?: string): string {
   /* ── Roster Grid ──────────────────────────────────────────────────── */
   .roster-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 6px;
     margin-bottom: 3rem;
   }
@@ -303,12 +303,12 @@ function classIcon(cls?: string): string {
 
   /* ── Responsive ───────────────────────────────────────────────────── */
   @media (max-width: 900px) {
-    .roster-grid { grid-template-columns: repeat(4, 1fr); }
+    .roster-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   }
   @media (max-width: 650px) {
-    .roster-grid { grid-template-columns: repeat(3, 1fr); }
+    .roster-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
   @media (max-width: 420px) {
-    .roster-grid { grid-template-columns: repeat(2, 1fr); }
+    .roster-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 </style>
