@@ -86,52 +86,96 @@ function stripPrefix(title: string): string {
   <!-- ── MAIN ────────────────────────────────────────────────────────────── -->
   <main class="main">
     <div class="wrap">
-      <!-- Session list -->
-      <div class="session-list-col">
-          {allSessions.length > 0 ? (
-            <ul class="session-list">
-              {allSessions.map((s, i) => (
-                <li>
-                  <a
-                    href={`/sessions/${s.slug}`}
-                    class:list={['session-entry', { latest: i === 0 }]}
-                  >
-                    <div class="se-num-col">
-                      <span class="se-num">{toRoman(s.data.sessionNumber)}</span>
-                      <span class="se-num-label">Session</span>
-                    </div>
-                    <div class="se-body">
-                      <div class="se-header">
-                        <span class="se-title-group">
-                          <span class="se-title">{stripPrefix(s.data.title)}</span>
-                          {i === 0 && <span class="se-tag highlight">Latest</span>}
-                        </span>
-                        <span class="se-date">{fmtDate(s.data.date)}</span>
+      <div class="chronicles-layout">
+        <!-- Session list -->
+        <div class="session-list-col">
+            {allSessions.length > 0 ? (
+              <ul class="session-list">
+                {allSessions.map((s, i) => (
+                  <li>
+                    <a
+                      href={`/sessions/${s.slug}`}
+                      class:list={['session-entry', { latest: i === 0 }]}
+                    >
+                      <div class="se-num-col">
+                        <span class="se-num">{toRoman(s.data.sessionNumber)}</span>
+                        <span class="se-num-label">Session</span>
                       </div>
-                      {s.data.summary && (
-                        <p class="se-desc">{s.data.summary}</p>
-                      )}
-                      {s.data.rewards?.xp && (
-                        <div class="se-footer">
-                          <span class="se-meta">
-                            {s.data.rewards.xp.toLocaleString()} XP
-                            {s.data.partyPresent?.length
-                              ? <>&nbsp;&middot;&nbsp;{s.data.partyPresent.length} present</>
-                              : ''}
+                      <div class="se-body">
+                        <div class="se-header">
+                          <span class="se-title-group">
+                            <span class="se-title">{stripPrefix(s.data.title)}</span>
+                            {i === 0 && <span class="se-tag highlight">Latest</span>}
                           </span>
+                          <span class="se-date">{fmtDate(s.data.date)}</span>
                         </div>
-                      )}
-                    </div>
-                  </a>
-                </li>
-              ))}
-            </ul>
+                        {s.data.summary && (
+                          <p class="se-desc">{s.data.summary}</p>
+                        )}
+                        {s.data.rewards?.xp && (
+                          <div class="se-footer">
+                            <span class="se-meta">
+                              {s.data.rewards.xp.toLocaleString()} XP
+                              {s.data.partyPresent?.length
+                                ? <>&nbsp;&middot;&nbsp;{s.data.partyPresent.length} present</>
+                                : ''}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div class="empty-state">
+                <i class="fa-solid fa-book-open"></i>
+                <p>The chronicles are empty. Your story has yet to be written.</p>
+              </div>
+            )}
+        </div>
+
+        <!-- Podcast playlist -->
+        <aside class="podcast-sidebar">
+          <div class="ps-header">
+            <i class="fa-solid fa-podcast"></i>
+            <span>Deep Dive Podcast</span>
+          </div>
+
+          {allSessions.some(s => s.data.podcastUrl) ? (
+            <>
+              <div class="pp" id="playlist-player">
+                <button type="button" class="pp-toggle" aria-label="Play episode" disabled>
+                  <i class="fa-solid fa-play"></i>
+                </button>
+                <span class="pp-time pp-current">0:00</span>
+                <input type="range" class="pp-scrubber" min="0" max="0" value="0" step="0.1" aria-label="Seek" />
+                <span class="pp-time pp-duration">0:00</span>
+                <audio class="pp-audio" preload="none"></audio>
+              </div>
+              <p class="ps-now-playing" id="ps-now-playing">Select an episode to play</p>
+
+              <ul class="ps-list">
+                {allSessions.filter(s => s.data.podcastUrl).map(s => (
+                  <li>
+                    <button
+                      type="button"
+                      class="ps-item"
+                      data-src={s.data.podcastUrl}
+                      data-title={stripPrefix(s.data.title)}
+                    >
+                      <span class="ps-num">{toRoman(s.data.sessionNumber)}</span>
+                      <span class="ps-title">{stripPrefix(s.data.title)}</span>
+                      <i class="fa-solid fa-play ps-play-icon"></i>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
           ) : (
-            <div class="empty-state">
-              <i class="fa-solid fa-book-open"></i>
-              <p>The chronicles are empty. Your story has yet to be written.</p>
-            </div>
+            <p class="ps-empty">No episodes yet.</p>
           )}
+        </aside>
       </div>
     </div>
   </main>
@@ -199,7 +243,129 @@ function stripPrefix(title: string): string {
 
   /* ── Main Layout ──────────────────────────────────────────────────── */
   .main { padding: 3.5rem 0 5rem; }
+  .chronicles-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 3rem;
+    align-items: start;
+  }
   .session-list-col { max-width: 760px; }
+
+  /* ── Podcast Playlist Sidebar ────────────────────────────────────── */
+  .podcast-sidebar {
+    position: sticky;
+    top: calc(var(--nav-height, 52px) + 2rem);
+    background: var(--void-surface);
+    border: 1px solid var(--border-default);
+    border-left: 2px solid var(--teal-deep);
+    border-radius: 2px;
+    padding: 1.25rem;
+  }
+  .ps-header {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 1rem;
+  }
+  .ps-header i { color: var(--teal-mid); font-size: 12px; }
+  .ps-now-playing {
+    font-style: italic; font-size: 12px;
+    color: var(--text-dim); margin: 0.6rem 0 1rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ps-now-playing.playing { color: var(--teal-mid); font-style: normal; }
+  .ps-empty {
+    font-style: italic; font-size: 13px; color: var(--text-dim);
+  }
+
+  .ps-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+  .ps-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    width: 100%; padding: 0.55rem 0.6rem;
+    background: none; border: none; border-radius: 2px;
+    cursor: pointer; text-align: left;
+    transition: background 0.15s;
+  }
+  .ps-item:hover { background: var(--void-raised); }
+  .ps-item.active { background: rgba(104,152,168,0.1); }
+  .ps-num {
+    font-family: "Cinzel Decorative", serif; font-size: 13px;
+    color: var(--teal-deep); flex-shrink: 0; width: 1.5rem;
+  }
+  .ps-item.active .ps-num { color: var(--teal-bright); }
+  .ps-title {
+    flex: 1; min-width: 0;
+    font-family: "Cinzel", serif; font-size: 11px; letter-spacing: 0.02em;
+    color: var(--text-muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ps-item.active .ps-title { color: var(--mist-bright); }
+  .ps-play-icon {
+    flex-shrink: 0; font-size: 9px; color: var(--text-dim);
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .ps-item:hover .ps-play-icon,
+  .ps-item.active .ps-play-icon { opacity: 1; color: var(--teal-mid); }
+  .ps-item.active .ps-play-icon.fa-pause { color: var(--teal-bright); }
+
+  /* Custom player — same pattern as the session detail page (native
+     <audio controls> renders inconsistently across platforms). */
+  .pp {
+    display: flex; align-items: center; gap: 0.6rem;
+    margin-bottom: 0.5rem;
+  }
+  .pp-toggle {
+    flex-shrink: 0; width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--void-raised);
+    border: 1px solid var(--border-accent);
+    border-radius: 50%;
+    color: var(--teal-bright);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .pp-toggle:hover:not(:disabled) {
+    background: rgba(104,152,168,0.12);
+    border-color: var(--teal-mid);
+  }
+  .pp-toggle:disabled { opacity: 0.4; cursor: default; }
+  .pp-toggle .fa-play { margin-left: 2px; }
+  .pp-time {
+    font-family: monospace; font-size: 10px;
+    color: var(--text-dim); flex-shrink: 0;
+    min-width: 28px;
+  }
+  .pp-time.pp-current { text-align: right; }
+  .pp-scrubber {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1; min-width: 0;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(to right,
+      var(--teal-mid) 0%, var(--teal-mid) var(--pp-progress, 0%),
+      var(--void-raised) var(--pp-progress, 0%), var(--void-raised) 100%);
+    outline: none;
+    cursor: pointer;
+  }
+  .pp-scrubber::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--mist-bright);
+    cursor: pointer;
+  }
+  .pp-scrubber::-moz-range-thumb {
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--mist-bright); border: none; cursor: pointer;
+  }
+  .pp-scrubber::-moz-range-track {
+    height: 4px; border-radius: 2px; background: var(--void-raised);
+  }
+  .pp-scrubber::-moz-range-progress {
+    height: 4px; border-radius: 2px; background: var(--teal-mid);
+  }
+  .pp-audio { display: none; }
 
   /* ── Session List ─────────────────────────────────────────────────── */
   .session-list { list-style: none; }
@@ -292,6 +458,9 @@ function stripPrefix(title: string): string {
   /* ── Responsive ───────────────────────────────────────────────────── */
   @media (max-width: 900px) {
     .page-header-inner { flex-direction: column; align-items: flex-start; }
+    .chronicles-layout { grid-template-columns: 1fr; }
+    .session-list-col { max-width: none; }
+    .podcast-sidebar { position: static; }
   }
   @media (max-width: 600px) {
     .stat-strip-inner { flex-wrap: wrap; gap: 1.25rem 0; padding: 1rem 1.5rem; }
@@ -299,3 +468,109 @@ function stripPrefix(title: string): string {
     .se-header { flex-direction: column; gap: 0.15rem; }
   }
 </style>
+
+<script>
+  function fmtTime(seconds: number): string {
+    if (!Number.isFinite(seconds)) return '0:00';
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${String(s).padStart(2, '0')}`;
+  }
+
+  const player = document.getElementById('playlist-player');
+  const audio = player?.querySelector<HTMLAudioElement>('.pp-audio');
+  const toggle = player?.querySelector<HTMLButtonElement>('.pp-toggle');
+  const toggleIcon = toggle?.querySelector('i');
+  const scrubber = player?.querySelector<HTMLInputElement>('.pp-scrubber');
+  const currentEl = player?.querySelector<HTMLSpanElement>('.pp-current');
+  const durationEl = player?.querySelector<HTMLSpanElement>('.pp-duration');
+  const nowPlaying = document.getElementById('ps-now-playing');
+  const items = Array.from(document.querySelectorAll<HTMLButtonElement>('.ps-item'));
+
+  if (audio && toggle && toggleIcon && scrubber && currentEl && durationEl && nowPlaying && items.length > 0) {
+    let activeItem: HTMLButtonElement | null = null;
+
+    const setProgress = (current: number, duration: number) => {
+      const pct = duration > 0 ? (current / duration) * 100 : 0;
+      scrubber.style.setProperty('--pp-progress', `${pct}%`);
+    };
+
+    const setItemIcon = (item: HTMLButtonElement, playing: boolean) => {
+      const icon = item.querySelector('.ps-play-icon');
+      icon?.classList.toggle('fa-play', !playing);
+      icon?.classList.toggle('fa-pause', playing);
+    };
+
+    function loadAndPlay(item: HTMLButtonElement) {
+      if (activeItem) {
+        activeItem.classList.remove('active');
+        setItemIcon(activeItem, false);
+      }
+      activeItem = item;
+      item.classList.add('active');
+      nowPlaying!.textContent = item.dataset.title ?? '';
+      nowPlaying!.classList.add('playing');
+      toggle!.disabled = false;
+
+      audio!.src = item.dataset.src ?? '';
+      audio!.play();
+    }
+
+    items.forEach((item) => {
+      item.addEventListener('click', () => {
+        if (item === activeItem) {
+          if (audio.paused) audio.play();
+          else audio.pause();
+        } else {
+          loadAndPlay(item);
+        }
+      });
+    });
+
+    toggle.addEventListener('click', () => {
+      if (!activeItem) return;
+      if (audio.paused) audio.play();
+      else audio.pause();
+    });
+
+    audio.addEventListener('play', () => {
+      toggleIcon.classList.replace('fa-play', 'fa-pause');
+      toggle.setAttribute('aria-label', 'Pause episode');
+      if (activeItem) setItemIcon(activeItem, true);
+    });
+
+    audio.addEventListener('pause', () => {
+      toggleIcon.classList.replace('fa-pause', 'fa-play');
+      toggle.setAttribute('aria-label', 'Play episode');
+      if (activeItem) setItemIcon(activeItem, false);
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+      scrubber.max = String(audio.duration);
+      durationEl.textContent = fmtTime(audio.duration);
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      if (document.activeElement !== scrubber) {
+        scrubber.value = String(audio.currentTime);
+      }
+      currentEl.textContent = fmtTime(audio.currentTime);
+      setProgress(audio.currentTime, audio.duration);
+    });
+
+    audio.addEventListener('ended', () => {
+      if (activeItem) setItemIcon(activeItem, false);
+      toggleIcon.classList.replace('fa-pause', 'fa-play');
+      const currentIndex = activeItem ? items.indexOf(activeItem) : -1;
+      const next = currentIndex >= 0 ? items[currentIndex + 1] : undefined;
+      if (next) loadAndPlay(next);
+    });
+
+    scrubber.addEventListener('input', () => {
+      const value = scrubber.valueAsNumber;
+      audio.currentTime = value;
+      currentEl.textContent = fmtTime(value);
+      setProgress(value, audio.duration);
+    });
+  }
+</script>
