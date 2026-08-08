@@ -60,9 +60,17 @@ const partyPresentNames = session.data.partyPresent
         <div class="podcast-body">
           <span class="podcast-label">Deep Dive Podcast</span>
           {session.data.podcastUrl ? (
-            <audio class="podcast-audio" controls preload="none" src={session.data.podcastUrl}>
-              Your browser doesn't support inline audio — <a href={session.data.podcastUrl}>download the episode</a> instead.
-            </audio>
+            <div class="pp">
+              <button type="button" class="pp-toggle" aria-label="Play episode">
+                <i class="fa-solid fa-play"></i>
+              </button>
+              <span class="pp-time pp-current">0:00</span>
+              <input type="range" class="pp-scrubber" min="0" max="0" value="0" step="0.1" aria-label="Seek" />
+              <span class="pp-time pp-duration">0:00</span>
+              <audio class="pp-audio" preload="metadata" src={session.data.podcastUrl}>
+                Your browser doesn't support inline audio — <a href={session.data.podcastUrl}>download the episode</a> instead.
+              </audio>
+            </div>
           ) : (
             <span class="podcast-placeholder">Coming soon</span>
           )}
@@ -140,13 +148,69 @@ const partyPresentNames = session.data.partyPresent
   .podcast-placeholder {
     font-style: italic; font-size: 14px; color: var(--text-dim);
   }
-  .podcast-audio {
+
+  /* Custom player — native <audio controls> renders wildly differently
+     per platform (iOS Safari/Chrome collapse to a bare play button with
+     no scrubber, no CSS fix possible), so we drive a hidden <audio>
+     element with our own UI instead. */
+  .pp {
+    display: flex; align-items: center; gap: 0.9rem;
     flex: 1; min-width: 240px; max-width: 100%;
-    height: 36px;
   }
+  .pp-toggle {
+    flex-shrink: 0; width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--void-raised);
+    border: 1px solid var(--border-accent);
+    border-radius: 50%;
+    color: var(--teal-bright);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .pp-toggle:hover {
+    background: rgba(104,152,168,0.12);
+    border-color: var(--teal-mid);
+  }
+  .pp-toggle .fa-play { margin-left: 2px; }
+  .pp-time {
+    font-family: monospace; font-size: 11px;
+    color: var(--text-dim); flex-shrink: 0;
+    min-width: 32px;
+  }
+  .pp-time.pp-current { text-align: right; }
+  .pp-scrubber {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1; min-width: 0;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(to right,
+      var(--teal-mid) 0%, var(--teal-mid) var(--pp-progress, 0%),
+      var(--void-raised) var(--pp-progress, 0%), var(--void-raised) 100%);
+    outline: none;
+    cursor: pointer;
+  }
+  .pp-scrubber::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--mist-bright);
+    cursor: pointer;
+  }
+  .pp-scrubber::-moz-range-thumb {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--mist-bright); border: none; cursor: pointer;
+  }
+  .pp-scrubber::-moz-range-track {
+    height: 4px; border-radius: 2px; background: var(--void-raised);
+  }
+  .pp-scrubber::-moz-range-progress {
+    height: 4px; border-radius: 2px; background: var(--teal-mid);
+  }
+  .pp-audio { display: none; }
   @media (max-width: 500px) {
     .podcast-bar { flex-direction: column; align-items: flex-start; }
-    .podcast-audio { width: 100%; }
+    .pp { width: 100%; }
   }
 
   .session-layout {
@@ -253,5 +317,67 @@ const partyPresentNames = session.data.partyPresent
   // track which side is next.
   document.querySelectorAll('.prose img').forEach((img, i) => {
     img.classList.add(i % 2 === 0 ? 'float-left' : 'float-right');
+  });
+
+  function fmtTime(seconds: number): string {
+    if (!Number.isFinite(seconds)) return '0:00';
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${String(s).padStart(2, '0')}`;
+  }
+
+  document.querySelectorAll<HTMLDivElement>('.pp').forEach((player) => {
+    const audio = player.querySelector<HTMLAudioElement>('.pp-audio');
+    const toggle = player.querySelector<HTMLButtonElement>('.pp-toggle');
+    const icon = toggle?.querySelector('i');
+    const scrubber = player.querySelector<HTMLInputElement>('.pp-scrubber');
+    const currentEl = player.querySelector<HTMLSpanElement>('.pp-current');
+    const durationEl = player.querySelector<HTMLSpanElement>('.pp-duration');
+    if (!audio || !toggle || !icon || !scrubber || !currentEl || !durationEl) return;
+
+    const setProgress = (current: number, duration: number) => {
+      const pct = duration > 0 ? (current / duration) * 100 : 0;
+      scrubber.style.setProperty('--pp-progress', `${pct}%`);
+    };
+
+    toggle.addEventListener('click', () => {
+      if (audio.paused) audio.play();
+      else audio.pause();
+    });
+
+    audio.addEventListener('play', () => {
+      icon.classList.replace('fa-play', 'fa-pause');
+      toggle.setAttribute('aria-label', 'Pause episode');
+    });
+
+    audio.addEventListener('pause', () => {
+      icon.classList.replace('fa-pause', 'fa-play');
+      toggle.setAttribute('aria-label', 'Play episode');
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+      scrubber.max = String(audio.duration);
+      durationEl.textContent = fmtTime(audio.duration);
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      if (document.activeElement !== scrubber) {
+        scrubber.value = String(audio.currentTime);
+      }
+      currentEl.textContent = fmtTime(audio.currentTime);
+      setProgress(audio.currentTime, audio.duration);
+    });
+
+    audio.addEventListener('ended', () => {
+      icon.classList.replace('fa-pause', 'fa-play');
+      toggle.setAttribute('aria-label', 'Play episode');
+    });
+
+    scrubber.addEventListener('input', () => {
+      const value = scrubber.valueAsNumber;
+      audio.currentTime = value;
+      currentEl.textContent = fmtTime(value);
+      setProgress(value, audio.duration);
+    });
   });
 </script>
