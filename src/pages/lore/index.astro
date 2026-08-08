@@ -536,24 +536,46 @@ const factionNames = [...new Set(npcs.map(n => n.data.affiliation).filter(Boolea
   }
 
   /* ── Pagination ──────────────────────────────────────────────────── */
-  .pagination {
-    display: flex; gap: 0.4rem; justify-content: center;
-    margin-bottom: 2rem;
+  /* Created via document.createElement() in the script below, so these
+     can't rely on Astro's build-time scoped CSS — :global() bypasses that
+     (same fix as the Nav login/logout links). */
+  :global(.pagination) {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+    margin: 0 0 2.5rem;
+    padding-top: 1.5rem;
   }
-  .page-btn {
-    min-width: 28px; height: 28px; padding: 0 0.5rem;
-    border: 1px solid var(--border-default); border-radius: 2px;
-    background: transparent; color: var(--text-dim);
-    font-family: "Cinzel", serif; font-size: 10px; letter-spacing: 0.05em;
-    cursor: pointer; transition: color 0.2s, border-color 0.2s, background 0.2s;
+  :global(.page-btn) {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 0.65rem;
+    border: 1px solid var(--border-default);
+    border-radius: 2px;
+    background: var(--void-surface);
+    color: var(--text-dim);
+    font-family: "Cinzel", serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
   }
-  .page-btn:hover:not(:disabled) { color: var(--mist-mid); border-color: var(--border-mist); }
-  .page-btn.active {
-    background: rgba(104,152,168,0.1);
+  :global(.page-btn:hover:not(:disabled)) {
+    color: var(--mist-bright);
+    border-color: var(--border-mist);
+    background: var(--void-raised);
+  }
+  :global(.page-btn.active) {
+    background: rgba(104,152,168,0.12);
     border-color: var(--border-accent);
     color: var(--teal-bright);
   }
-  .page-btn:disabled { opacity: 0.3; cursor: default; }
+  :global(.page-btn:disabled) {
+    opacity: 0.3;
+    cursor: default;
+  }
 
   /* ── Empty states ────────────────────────────────────────────────── */
   .empty-panel {

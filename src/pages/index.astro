@@ -73,11 +73,6 @@ const npcs: CollectionEntry<'npcs'>[] = activeCampaign
 const factions = await getCollection('factions');
 const items    = await getCollection('items');
 
-const allMapsRaw = await getCollection('maps');
-const allMaps: CollectionEntry<'maps'>[] = activeCampaign
-  ? allMapsRaw.filter(m => m.data.campaign === activeCampaign.slug)
-  : allMapsRaw;
-const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length ?? 0), 0);
 ---
 
 <Base title="Emberfall Keep" description="A campaign management site for Dungeons & Dragons.">
@@ -311,10 +306,6 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
               <p class="n">{items.length || 0}</p>
               <p class="lbl">Items &amp; Artifacts</p>
             </div>
-            <div class="comp-count-item">
-              <p class="n">{totalPins || 0}</p>
-              <p class="lbl">Named Locations</p>
-            </div>
           </div>
         </div>
 
@@ -363,22 +354,6 @@ const totalPins  = allMaps.reduce((sum: number, m) => sum + (m.data.pins?.length
               </p>
             </div>
           </a>
-
-          <div class="comp-entry">
-            <div class="comp-entry-icon">
-              <i class="fa-solid fa-map"></i>
-            </div>
-            <div class="comp-entry-body">
-              <p class="comp-entry-title">Maps</p>
-              <p class="comp-entry-desc">
-                World maps, regional charts, and dungeon layouts — with named pins and lore annotations.
-              </p>
-              <p class="comp-entry-count">
-                {allMaps.length} {allMaps.length === 1 ? 'map' : 'maps'}
-                {totalPins > 0 ? <>&nbsp;&middot;&nbsp;{totalPins} pinned {totalPins === 1 ? 'location' : 'locations'}</> : ''}
-              </p>
-            </div>
-          </div>
         </div>
 
       </div>
