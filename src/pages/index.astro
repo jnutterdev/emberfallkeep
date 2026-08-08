@@ -702,7 +702,7 @@ const items    = await getCollection('items');
     color: rgba(104, 152, 168, 0.2);
     position: relative;
     overflow: hidden;
-    transition: border-color 0.25s;
+    transition: border-color 0.25s, box-shadow 0.25s;
   }
 
   .portrait-img::after {
@@ -711,12 +711,22 @@ const items    = await getCollection('items');
     inset: 0;
     background: var(--teal-tint);
     mix-blend-mode: multiply;
-    opacity: 0.55;
+    opacity: 0.32;
     pointer-events: none;
+    transition: opacity 0.25s;
   }
 
   .portrait:hover .portrait-img {
-    border-color: rgba(104, 152, 168, 0.5);
+    border-color: rgba(104, 152, 168, 0.6);
+    box-shadow: 0 0 0 1px rgba(104,152,168,0.3), 0 6px 20px rgba(104,152,168,0.18);
+  }
+
+  .portrait:hover .portrait-img::after {
+    opacity: 0.15;
+  }
+
+  .portrait:hover .portrait-photo {
+    filter: brightness(1.08);
   }
 
   .portrait-photo {
@@ -726,6 +736,7 @@ const items    = await getCollection('items');
     height: 100%;
     object-fit: cover;
     object-position: top center;
+    transition: filter 0.25s;
   }
 
   .portrait-caption {
