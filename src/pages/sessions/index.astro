@@ -86,10 +86,8 @@ function stripPrefix(title: string): string {
   <!-- ── MAIN ────────────────────────────────────────────────────────────── -->
   <main class="main">
     <div class="wrap">
-      <div class="main-layout">
-
-        <!-- Session list -->
-        <div>
+      <!-- Session list -->
+      <div class="session-list-col">
           {allSessions.length > 0 ? (
             <ul class="session-list">
               {allSessions.map((s, i) => (
@@ -134,69 +132,6 @@ function stripPrefix(title: string): string {
               <p>The chronicles are empty. Your story has yet to be written.</p>
             </div>
           )}
-        </div>
-
-        <!-- Sidebar -->
-        <aside class="sidebar">
-          {latest && (
-            <div class="latest-card">
-              <span class="latest-label">
-                <i class="fa-solid fa-scroll"></i>&nbsp; Latest Session
-              </span>
-              <span class="latest-num">Session {toRoman(latest.data.sessionNumber)}</span>
-              <p class="latest-title">{stripPrefix(latest.data.title)}</p>
-              {latest.data.summary && (
-                <p class="latest-desc">{latest.data.summary}</p>
-              )}
-              <a
-                href={`/sessions/${latest.slug}`}
-                class="btn btn-primary"
-                style="width:100%;justify-content:center"
-              >
-                <i class="fa-solid fa-book-open"></i> Read Full
-              </a>
-            </div>
-          )}
-
-          <div class="sidebar-block">
-            <p class="sidebar-block-title">Chronicle Stats</p>
-            <div class="sidebar-row">
-              <span class="k">Sessions</span>
-              <span class="v mono">{allSessions.length}</span>
-            </div>
-            {totalXP > 0 && (
-              <div class="sidebar-row">
-                <span class="k">Total XP</span>
-                <span class="v mono">{totalXP.toLocaleString()}</span>
-              </div>
-            )}
-            {oldest && (
-              <div class="sidebar-row">
-                <span class="k">First played</span>
-                <span class="v">{fmtDate(oldest.data.date)}</span>
-              </div>
-            )}
-            {latest && (
-              <div class="sidebar-row">
-                <span class="k">Last played</span>
-                <span class="v">{fmtDate(latest.data.date)}</span>
-              </div>
-            )}
-          </div>
-
-          {allSessions.length > 0 && (
-            <div class="sidebar-block">
-              <p class="sidebar-block-title">All Sessions</p>
-              {allSessions.slice(0, 8).map(s => (
-                <div class="sidebar-row">
-                  <span class="k">Session {toRoman(s.data.sessionNumber)}</span>
-                  <span class="v">{stripPrefix(s.data.title).slice(0, 22)}{stripPrefix(s.data.title).length > 22 ? '…' : ''}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </aside>
-
       </div>
     </div>
   </main>
@@ -264,12 +199,7 @@ function stripPrefix(title: string): string {
 
   /* ── Main Layout ──────────────────────────────────────────────────── */
   .main { padding: 3.5rem 0 5rem; }
-  .main-layout {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 4rem;
-    align-items: start;
-  }
+  .session-list-col { max-width: 760px; }
 
   /* ── Session List ─────────────────────────────────────────────────── */
   .session-list { list-style: none; }
@@ -357,62 +287,8 @@ function stripPrefix(title: string): string {
   .empty-state i { font-size: 2rem; color: var(--teal-deep); margin-bottom: 1rem; display: block; }
   .empty-state p { font-style: italic; color: var(--text-dim); }
 
-  /* ── Sidebar ──────────────────────────────────────────────────────── */
-  .sidebar { position: sticky; top: calc(52px + 2rem); }
-
-  .latest-card {
-    background: var(--void-surface);
-    border: 1px solid var(--border-default);
-    border-top: 2px solid var(--teal-deep);
-    padding: 1.25rem; margin-bottom: 1.25rem;
-  }
-  .latest-label {
-    font-family: "Cinzel", serif; font-size: 9px;
-    letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--teal-mid); margin-bottom: 0.6rem; display: block;
-  }
-  .latest-num {
-    font-family: "Cinzel Decorative", serif; font-size: 11px;
-    color: var(--text-dim); display: block; margin-bottom: 0.2rem;
-  }
-  .latest-title {
-    font-family: "Cinzel", serif; font-size: 16px; font-weight: 600;
-    color: var(--mist-mid); margin-bottom: 0.5rem;
-  }
-  .latest-desc {
-    font-style: italic; font-size: 15px;
-    color: var(--text-muted); line-height: 1.6; margin-bottom: 0.9rem;
-  }
-
-  .sidebar-block {
-    background: var(--void-surface);
-    border: 1px solid var(--border-default);
-    padding: 1.25rem; margin-bottom: 1.25rem;
-  }
-  .sidebar-block-title {
-    font-family: "Cinzel", serif; font-size: 9px;
-    letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--text-dim); margin-bottom: 0.9rem;
-    padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-default);
-  }
-  .sidebar-row {
-    display: flex; justify-content: space-between; align-items: baseline;
-    padding: 0.35rem 0; border-bottom: 1px solid rgba(74,72,69,0.4); font-size: 13px;
-  }
-  .sidebar-row:last-child { border-bottom: none; }
-  .sidebar-row .k {
-    font-family: "Cinzel", serif; font-size: 9px;
-    letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
-  }
-  .sidebar-row .v { color: var(--mist-mid); font-style: italic; }
-  .sidebar-row .v.mono {
-    font-family: monospace; font-style: normal; color: var(--teal-mid);
-  }
-
   /* ── Responsive ───────────────────────────────────────────────────── */
   @media (max-width: 900px) {
-    .main-layout { grid-template-columns: 1fr; }
-    .sidebar { display: none; }
     .page-header-inner { flex-direction: column; align-items: flex-start; }
   }
   @media (max-width: 600px) {
