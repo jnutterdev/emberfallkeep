@@ -109,26 +109,26 @@ const factionNames = [...new Set(npcs.map(n => n.data.affiliation).filter(Boolea
 
           <div class="left-nav-section">
             <span class="left-nav-heading">NPC Status</span>
-            <button class="left-nav-link">
+            <button class="left-nav-link" data-filter="status" data-value="Alive">
               Alive <span class="left-nav-count">{npcs.filter(n => n.data.status === 'Alive').length}</span>
             </button>
-            <button class="left-nav-link">
+            <button class="left-nav-link" data-filter="status" data-value="Deceased">
               Deceased <span class="left-nav-count">{npcs.filter(n => n.data.status === 'Deceased').length}</span>
             </button>
-            <button class="left-nav-link">
+            <button class="left-nav-link" data-filter="status" data-value="Unknown">
               Unknown <span class="left-nav-count">{npcs.filter(n => n.data.status === 'Unknown' || !n.data.status).length}</span>
             </button>
           </div>
 
           <div class="left-nav-section">
             <span class="left-nav-heading">Disposition</span>
-            <button class="left-nav-link">
+            <button class="left-nav-link" data-filter="disposition" data-value="Friendly">
               Friendly <span class="left-nav-count">{npcs.filter(n => n.data.disposition === 'Friendly').length}</span>
             </button>
-            <button class="left-nav-link">
+            <button class="left-nav-link" data-filter="disposition" data-value="Hostile">
               Hostile <span class="left-nav-count">{npcs.filter(n => n.data.disposition === 'Hostile').length}</span>
             </button>
-            <button class="left-nav-link">
+            <button class="left-nav-link" data-filter="disposition" data-value="Neutral">
               Neutral <span class="left-nav-count">{npcs.filter(n => n.data.disposition === 'Neutral').length}</span>
             </button>
           </div>
@@ -137,7 +137,7 @@ const factionNames = [...new Set(npcs.map(n => n.data.affiliation).filter(Boolea
             <div class="left-nav-section">
               <span class="left-nav-heading">Faction</span>
               {factionNames.map(f => (
-                <button class="left-nav-link">
+                <button class="left-nav-link" data-filter="affiliation" data-value={f}>
                   {f}
                 </button>
               ))}
@@ -156,7 +156,13 @@ const factionNames = [...new Set(npcs.map(n => n.data.affiliation).filter(Boolea
             </div>
             <div class="entry-grid">
               {npcs.map(npc => (
-                <a class="entry-card" href={`/lore/npcs/${npc.slug}`}>
+                <a
+                  class="entry-card"
+                  href={`/lore/npcs/${npc.slug}`}
+                  data-status={npc.data.status ?? 'Unknown'}
+                  data-disposition={npc.data.disposition ?? 'Unknown'}
+                  data-affiliation={npc.data.affiliation ?? ''}
+                >
                   <div class="entry-portrait">
                     <i class="fa-solid fa-user"></i>
                   </div>
@@ -648,61 +654,135 @@ const factionNames = [...new Set(npcs.map(n => n.data.affiliation).filter(Boolea
   activateFromHash();
   window.addEventListener('hashchange', activateFromHash);
 
-  // Non-panel left nav links (status/disposition filters) — visual only
-  document.querySelectorAll('.left-nav-link:not([data-panel])').forEach(link => {
-    link.addEventListener('click', () => {
-      // Only toggle within its sibling group
-      const section = link.closest('.left-nav-section');
-      section?.querySelectorAll('.left-nav-link').forEach(l => l.classList.remove('active'));
-      link.classList.add('active');
-    });
-  });
-
-  // ── Pagination — 10 entries per page, per panel ──────────────────────
+  // ── Search + status/disposition/affiliation filters + pagination ──────
+  // All of these toggle the same cards' visibility, so they share one
+  // controller per grid (and one filterState) rather than fighting over
+  // card.style.display.
   const PAGE_SIZE = 10;
-  document.querySelectorAll('.entry-grid, .faction-grid').forEach(grid => {
-    const cards = Array.from(grid.children) as HTMLElement[];
-    if (cards.length <= PAGE_SIZE) return;
+  const filterState: { query: string; status: string | null; disposition: string | null; affiliation: string | null } = {
+    query: '', status: null, disposition: null, affiliation: null,
+  };
 
-    const totalPages = Math.ceil(cards.length / PAGE_SIZE);
-    let page = 0;
+  const gridControllers = Array.from(document.querySelectorAll<HTMLElement>('.entry-grid, .faction-grid'))
+    .map(grid => {
+      // Server-rendered "No … recorded yet." message is a grid child when
+      // the collection is empty — exclude it, it isn't a searchable card.
+      const allCards = Array.from(grid.children)
+        .filter(el => !el.classList.contains('empty-panel')) as HTMLElement[];
+      if (allCards.length === 0) return null;
 
-    const nav = document.createElement('div');
-    nav.className = 'pagination';
-    grid.insertAdjacentElement('afterend', nav);
+      // Status/disposition only exist on NPC cards — scope those criteria
+      // to the NPCs grid so a leftover filter doesn't blank out Factions/Items.
+      const isNpcGrid = grid.closest('#panel-npcs') !== null;
 
-    function renderPage() {
-      cards.forEach((card, i) => {
-        card.style.display = Math.floor(i / PAGE_SIZE) === page ? '' : 'none';
-      });
+      let visibleCards = allCards;
+      let page = 0;
 
-      nav.innerHTML = '';
+      const nav = document.createElement('div');
+      nav.className = 'pagination';
+      grid.insertAdjacentElement('afterend', nav);
 
-      const prev = document.createElement('button');
-      prev.className = 'page-btn';
-      prev.setAttribute('aria-label', 'Previous page');
-      prev.textContent = '‹';
-      prev.disabled = page === 0;
-      prev.addEventListener('click', () => { page--; renderPage(); });
-      nav.appendChild(prev);
+      const noResults = document.createElement('p');
+      noResults.className = 'empty-panel';
+      noResults.textContent = 'No entries match your search.';
+      noResults.style.display = 'none';
+      nav.insertAdjacentElement('afterend', noResults);
 
-      for (let i = 0; i < totalPages; i++) {
-        const btn = document.createElement('button');
-        btn.className = 'page-btn' + (i === page ? ' active' : '');
-        btn.textContent = String(i + 1);
-        btn.addEventListener('click', () => { page = i; renderPage(); });
-        nav.appendChild(btn);
+      function render() {
+        allCards.forEach(card => { card.style.display = 'none'; });
+
+        if (visibleCards.length === 0) {
+          noResults.style.display = '';
+          nav.style.display = 'none';
+          nav.innerHTML = '';
+          return;
+        }
+        noResults.style.display = 'none';
+
+        const start = page * PAGE_SIZE;
+        visibleCards.slice(start, start + PAGE_SIZE).forEach(card => { card.style.display = ''; });
+
+        const totalPages = Math.ceil(visibleCards.length / PAGE_SIZE);
+        if (totalPages <= 1) {
+          nav.style.display = 'none';
+          nav.innerHTML = '';
+          return;
+        }
+        nav.style.display = '';
+        nav.innerHTML = '';
+
+        const prev = document.createElement('button');
+        prev.className = 'page-btn';
+        prev.setAttribute('aria-label', 'Previous page');
+        prev.textContent = '‹';
+        prev.disabled = page === 0;
+        prev.addEventListener('click', () => { page--; render(); });
+        nav.appendChild(prev);
+
+        for (let i = 0; i < totalPages; i++) {
+          const btn = document.createElement('button');
+          btn.className = 'page-btn' + (i === page ? ' active' : '');
+          btn.textContent = String(i + 1);
+          btn.addEventListener('click', () => { page = i; render(); });
+          nav.appendChild(btn);
+        }
+
+        const next = document.createElement('button');
+        next.className = 'page-btn';
+        next.setAttribute('aria-label', 'Next page');
+        next.textContent = '›';
+        next.disabled = page === totalPages - 1;
+        next.addEventListener('click', () => { page++; render(); });
+        nav.appendChild(next);
       }
 
-      const next = document.createElement('button');
-      next.className = 'page-btn';
-      next.setAttribute('aria-label', 'Next page');
-      next.textContent = '›';
-      next.disabled = page === totalPages - 1;
-      next.addEventListener('click', () => { page++; renderPage(); });
-      nav.appendChild(next);
-    }
+      function matches(card: HTMLElement): boolean {
+        const q = filterState.query.trim().toLowerCase();
+        if (q && !(card.textContent ?? '').toLowerCase().includes(q)) return false;
+        if (isNpcGrid) {
+          if (filterState.status && card.dataset.status !== filterState.status) return false;
+          if (filterState.disposition && card.dataset.disposition !== filterState.disposition) return false;
+          if (filterState.affiliation && card.dataset.affiliation !== filterState.affiliation) return false;
+        }
+        return true;
+      }
 
-    renderPage();
+      function refresh() {
+        visibleCards = allCards.filter(matches);
+        page = 0;
+        render();
+      }
+
+      render();
+      return { refresh };
+    })
+    .filter((c): c is { refresh: () => void } => c !== null);
+
+  function refreshAllGrids() {
+    gridControllers.forEach(c => c.refresh());
+  }
+
+  const searchInput = document.querySelector<HTMLInputElement>('.search-input');
+  searchInput?.addEventListener('input', () => {
+    filterState.query = searchInput.value;
+    refreshAllGrids();
+  });
+
+  // NPC Status / Disposition / Faction — single-select per group, click again to clear
+  document.querySelectorAll<HTMLButtonElement>('.left-nav-link[data-filter]').forEach(link => {
+    link.addEventListener('click', () => {
+      const key = link.dataset.filter as 'status' | 'disposition' | 'affiliation';
+      const value = link.dataset.value!;
+      const section = link.closest('.left-nav-section');
+      const alreadyActive = link.classList.contains('active');
+
+      section?.querySelectorAll('.left-nav-link').forEach(l => l.classList.remove('active'));
+      filterState[key] = alreadyActive ? null : value;
+      if (!alreadyActive) link.classList.add('active');
+
+      activatePanel('npcs');
+      history.replaceState(null, '', '#npcs');
+      refreshAllGrids();
+    });
   });
 </script>
