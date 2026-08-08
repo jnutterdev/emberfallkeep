@@ -261,8 +261,8 @@ export default defineConfig({
           {
             type: "string",
             name: "podcastUrl",
-            label: "Podcast Recap URL",
-            description: "Link to the audio recap for this session (e.g. an archive.org URL).",
+            label: "Deep Dive Podcast URL",
+            description: "Link to the deep-dive audio episode for this session (e.g. an archive.org URL).",
           },
           {
             type: "object",
