@@ -83,6 +83,7 @@ const sessions = defineCollection({
       .array(z.union([z.string(), z.object({ character: z.string() })]))
       .default([]),
     summary: z.string().optional(),
+    podcastUrl: z.string().optional(),
     rewards: z
       .object({
         xp: z.number().optional(),

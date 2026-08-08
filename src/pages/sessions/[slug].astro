@@ -51,6 +51,19 @@ const dateStr = session.data.date.toLocaleDateString('en-GB', {
   />
   <main class="main">
     <div class="wrap">
+      <div class="podcast-bar">
+        <div class="podcast-icon"><i class="fa-solid fa-podcast"></i></div>
+        <div class="podcast-body">
+          <span class="podcast-label">Podcast Recap</span>
+          {session.data.podcastUrl ? (
+            <audio class="podcast-audio" controls preload="none" src={session.data.podcastUrl}>
+              Your browser doesn't support inline audio — <a href={session.data.podcastUrl}>download the episode</a> instead.
+            </audio>
+          ) : (
+            <span class="podcast-placeholder">Coming soon</span>
+          )}
+        </div>
+      </div>
       <div class="session-layout">
         <article class="prose">
           <Content />
@@ -89,6 +102,49 @@ const dateStr = session.data.date.toLocaleDateString('en-GB', {
 
 <style>
   .main { padding: 3.5rem 0 5rem; }
+
+  /* ── Podcast Bar ─────────────────────────────────────────────────── */
+  .podcast-bar {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    background: var(--void-surface);
+    border: 1px solid var(--border-default);
+    border-left: 2px solid var(--teal-deep);
+    border-radius: 2px;
+    padding: 1.1rem 1.4rem;
+    margin-bottom: 2.5rem;
+  }
+  .podcast-icon {
+    width: 40px; height: 40px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--void-raised);
+    border: 1px solid var(--border-default);
+    border-radius: 50%;
+    color: var(--teal-mid); font-size: 15px;
+  }
+  .podcast-body {
+    display: flex; flex-wrap: wrap;
+    align-items: center; gap: 0.4rem 1.25rem;
+    flex: 1; min-width: 0;
+  }
+  .podcast-label {
+    font-family: "Cinzel", serif; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); flex-shrink: 0;
+  }
+  .podcast-placeholder {
+    font-style: italic; font-size: 14px; color: var(--text-dim);
+  }
+  .podcast-audio {
+    flex: 1; min-width: 240px; max-width: 100%;
+    height: 36px;
+  }
+  @media (max-width: 500px) {
+    .podcast-bar { flex-direction: column; align-items: flex-start; }
+    .podcast-audio { width: 100%; }
+  }
+
   .session-layout {
     display: grid;
     grid-template-columns: 1fr 280px;

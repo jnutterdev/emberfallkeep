@@ -259,6 +259,12 @@ export default defineConfig({
             ui: { component: "textarea" },
           },
           {
+            type: "string",
+            name: "podcastUrl",
+            label: "Podcast Recap URL",
+            description: "Link to the audio recap for this session (e.g. an archive.org URL).",
+          },
+          {
             type: "object",
             name: "partyPresent",
             label: "Party Present",
