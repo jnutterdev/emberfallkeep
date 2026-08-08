@@ -38,7 +38,7 @@ function resolvePartyMember(ref: string | { character: string }): string {
 }
 
 const dateStr = session.data.date.toLocaleDateString('en-GB', {
-  day: 'numeric', month: 'long', year: 'numeric',
+  day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
 });
 
 const partyPresentNames = session.data.partyPresent

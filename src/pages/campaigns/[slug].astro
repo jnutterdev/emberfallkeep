@@ -39,7 +39,7 @@ function toRoman(num: number): string {
 
 function fmtDate(d?: Date): string {
   if (!d) return '—';
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
 function stripPrefix(title: string): string {
