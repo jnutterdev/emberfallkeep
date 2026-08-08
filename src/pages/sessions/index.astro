@@ -28,7 +28,7 @@ function toRoman(num: number): string {
 
 function fmtDate(d?: Date): string {
   if (!d) return '—';
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
 function stripPrefix(title: string): string {
@@ -294,8 +294,8 @@ function stripPrefix(title: string): string {
     .page-header-inner { flex-direction: column; align-items: flex-start; }
   }
   @media (max-width: 600px) {
-    .stat-strip-inner { flex-wrap: wrap; }
-    .strip-stat { flex: 1 1 33%; border-bottom: 1px solid var(--border-default); }
+    .stat-strip-inner { flex-wrap: wrap; gap: 1.25rem 0; padding: 1rem 1.5rem; }
+    .strip-stat { flex: 1 1 33%; border-right: none; }
     .se-header { flex-direction: column; gap: 0.15rem; }
   }
 </style>
