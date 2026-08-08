@@ -40,6 +40,10 @@ function resolvePartyMember(ref: string | { character: string }): string {
 const dateStr = session.data.date.toLocaleDateString('en-GB', {
   day: 'numeric', month: 'long', year: 'numeric',
 });
+
+const partyPresentNames = session.data.partyPresent
+  .map(resolvePartyMember)
+  .sort((a, b) => a.localeCompare(b));
 ---
 
 <Base title={session.data.title}>
@@ -69,12 +73,12 @@ const dateStr = session.data.date.toLocaleDateString('en-GB', {
           <Content />
         </article>
         <aside class="sidebar">
-          {session.data.partyPresent.length > 0 && (
+          {partyPresentNames.length > 0 && (
             <div class="sidebar-block">
               <h3 class="sidebar-heading">Party Present</h3>
               <ul class="party-list">
-                {session.data.partyPresent.map((ref: string | { character: string }) => (
-                  <li><i class="fa-solid fa-user"></i> {resolvePartyMember(ref)}</li>
+                {partyPresentNames.map((name: string) => (
+                  <li><i class="fa-solid fa-user"></i> {name}</li>
                 ))}
               </ul>
             </div>
