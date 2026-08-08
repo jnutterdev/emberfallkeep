@@ -18,13 +18,19 @@ rewards:
 dmNotes: ''
 ---
 
+![The Fellowship: Pierre, Jamrick, Harlan, Maze, and Ricea](/uploads/session_1/image3.png)
+
 Ricea Rhonie (ranger) fled a hobgoblin ambush in the wilds with her dog Fern and companion Gary, only to be cut off by a massive winged predator bursting from the mountainside — her last clear memory was molten copper and the words "Castle Greyhawk."
 
 Harlan Stone (druid) died after being soul-drained by a shapeshifter disguised as a girl named Maren Sable. The creature had a monocle and appeared on an altar.
 
+![Propaganda poster: "To Victory — Bearforce One," Harlan riding a winged bear](/uploads/session_1/image2.png)
+
 Jamrick Fizzlebang (artificer) was killed by acorns — a surprisingly lethal hazard.
 
 Pierre Devereux (pugilist) was knocked unconscious by a hammer after winning an unexpected fight against a half-ogre (he was supposed to throw it, but didn't).
+
+![Pierre's knuckle tattoos read "SMOL LEGS"](/uploads/session_1/image1.png)
 
 Mays "Maze" (rogue) was seized by winged devils on a rooftop after refusing an iron shackle meant to drag her back into old infernal servitude.
 
