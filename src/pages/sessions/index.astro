@@ -1,9 +1,14 @@
 ---
+export const prerender = false;
+
 import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 
 const allSessions = (await getCollection('sessions'))
   .sort((a, b) => b.data.sessionNumber - a.data.sessionNumber);
+
+const dmDiscordIds = (Astro.locals.runtime.env.DM_DISCORD_IDS ?? '').split(',').map(id => id.trim());
+const isDM = Astro.locals.player?.discordId != null && dmDiscordIds.includes(Astro.locals.player.discordId);
 
 const latest = allSessions[0];
 const oldest = allSessions[allSessions.length - 1];
@@ -44,9 +49,11 @@ function stripPrefix(title: string): string {
         <h1 class="page-title">Chronicles</h1>
         <p class="page-subtitle">A record of every session, in the order they were lived.</p>
       </div>
-      <div class="page-header-right">
-        <a href="/admin/index.html#/chronicles/new" class="btn btn-ghost"><i class="fa-solid fa-scroll"></i> New Entry</a>
-      </div>
+      {isDM && (
+        <div class="page-header-right">
+          <a href="/admin/index.html#/chronicles/new" class="btn btn-ghost"><i class="fa-solid fa-scroll"></i> New Entry</a>
+        </div>
+      )}
     </div>
 
     <!-- Stat strip -->
