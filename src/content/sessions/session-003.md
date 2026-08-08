@@ -3,6 +3,7 @@ title: Concert Chaos at the Splintered Drum
 sessionNumber: 3
 campaign: a-veil-of-secrecy
 date: 2026-05-29T00:00:00.000Z
+podcastUrl: https://archive.org/download/dead-partners-at-the-splintered-drum/Dead_Partners_at_the_Splintered_Drum.m4a
 summary: >-
   Security work at a Hive concert spiraled into biker gangs, a live bomb, and
   a shocking reveal when Cinder's helmet came off.

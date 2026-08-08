@@ -3,6 +3,7 @@ title: Terminate the Subjects
 sessionNumber: 1
 campaign: a-veil-of-secrecy
 date: 2026-03-28T00:00:00.000Z
+podcastUrl: https://archive.org/download/waking-up-in-a-surgical-nightmare/Waking_up_in_a_surgical_nightmare.m4a
 summary: >-
   The fellowship experienced a chaotic and deadly session that ended in a
   dramatic mass resurrection.

@@ -3,6 +3,7 @@ title: Out of the Wombs, Into the Cage
 sessionNumber: 2
 campaign: a-veil-of-secrecy
 date: 2026-04-24T00:00:00.000Z
+podcastUrl: https://archive.org/download/tentacle-legs-and-rent-in-sigil/Tentacle_Legs_and_Rent_in_Sigil.m4a
 summary: >-
   The party fought free of the corpse-lab, fled a sword-wielding fiend, and
   stumbled into the impossible city of Sigil.

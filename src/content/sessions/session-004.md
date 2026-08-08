@@ -3,6 +3,7 @@ title: The Wrong Chord Home
 sessionNumber: 4
 campaign: a-veil-of-secrecy
 date: 2026-06-26T00:00:00.000Z
+podcastUrl: https://archive.org/download/weaponizing-cognitive-load-in-the-hive/Weaponizing_cognitive_load_in_the_Hive.m4a
 summary: >-
   A new bard named Clover joined the party, played a chord that made
   everyone glow, and the night ended in an ambush on the way home.
