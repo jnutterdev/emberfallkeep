@@ -44,6 +44,17 @@ const dateStr = session.data.date.toLocaleDateString('en-GB', {
 const partyPresentNames = session.data.partyPresent
   .map(resolvePartyMember)
   .sort((a, b) => a.localeCompare(b));
+
+const allSessions = (await getCollection('sessions'))
+  .sort((a, b) => a.data.sessionNumber - b.data.sessionNumber);
+const currentIndex = allSessions.findIndex(s => s.slug === session.slug);
+const prevSession = currentIndex > 0 ? allSessions[currentIndex - 1] : null;
+const nextSession = currentIndex < allSessions.length - 1 ? allSessions[currentIndex + 1] : null;
+
+function stripTitlePrefix(title: string): string {
+  const idx = title.indexOf('—');
+  return idx !== -1 ? title.slice(idx + 1).trim() : title;
+}
 ---
 
 <Base title={session.data.title}>
@@ -108,6 +119,27 @@ const partyPresentNames = session.data.partyPresent
           )}
         </aside>
       </div>
+
+      <nav class="session-nav">
+        {prevSession ? (
+          <a href={`/sessions/${prevSession.slug}`} class="session-nav-link session-nav-prev">
+            <i class="fa-solid fa-chevron-left"></i>
+            <span class="session-nav-text">
+              <span class="session-nav-label">Previous</span>
+              <span class="session-nav-title">{stripTitlePrefix(prevSession.data.title)}</span>
+            </span>
+          </a>
+        ) : <span class="session-nav-spacer" />}
+        {nextSession ? (
+          <a href={`/sessions/${nextSession.slug}`} class="session-nav-link session-nav-next">
+            <span class="session-nav-text">
+              <span class="session-nav-label">Next</span>
+              <span class="session-nav-title">{stripTitlePrefix(nextSession.data.title)}</span>
+            </span>
+            <i class="fa-solid fa-chevron-right"></i>
+          </a>
+        ) : <span class="session-nav-spacer" />}
+      </nav>
     </div>
   </main>
 </Base>
@@ -305,9 +337,72 @@ const partyPresentNames = session.data.partyPresent
     color: var(--text-dim); margin-bottom: 0.4rem;
   }
   .reward-row strong { color: var(--mist-mid); font-family: "Cinzel Decorative", serif; font-size: 14px; text-transform: none; letter-spacing: 0; }
+
+  /* ── Session Nav (prev/next) ─────────────────────────────────────── */
+  .session-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-default);
+  }
+  .session-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1rem 1.25rem;
+    background: var(--void-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 2px;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .session-nav-link:hover {
+    background: var(--void-raised);
+    border-color: var(--border-mist);
+  }
+  .session-nav-link:hover .session-nav-title { color: var(--mist-bright); }
+  .session-nav-link i {
+    flex-shrink: 0;
+    color: var(--teal-mid);
+    font-size: 14px;
+    transition: color 0.15s;
+  }
+  .session-nav-link:hover i { color: var(--teal-bright); }
+  .session-nav-next { grid-column: 2; justify-self: end; }
+  .session-nav-next .session-nav-text { text-align: right; }
+  .session-nav-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+  .session-nav-label {
+    font-family: "Cinzel", serif; font-size: 8px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .session-nav-title {
+    font-family: "Cinzel", serif; font-size: 13px; font-weight: 600;
+    letter-spacing: 0.03em; color: var(--mist-mid);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    transition: color 0.2s;
+  }
+  .session-nav-spacer { grid-column: auto; }
+
   @media (max-width: 800px) {
     .session-layout { grid-template-columns: 1fr; }
     .sidebar { position: static; }
+  }
+  @media (max-width: 560px) {
+    .session-nav { grid-template-columns: 1fr; }
+    .session-nav-next {
+      grid-column: 1;
+      justify-self: stretch;
+      flex-direction: row-reverse;
+    }
+    .session-nav-next .session-nav-text { text-align: left; }
   }
 </style>
 
