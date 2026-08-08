@@ -4,6 +4,7 @@ export const prerender = false;
 import Base from '../../../layouts/Base.astro';
 import { getEntry } from 'astro:content';
 import { mergeCharacterState, type CharacterStateRow } from '../../../lib/characterState';
+import { isDmForCampaign } from '../../../lib/permissions';
 
 const slug = Astro.params.slug!;
 const player = Astro.locals.player;
@@ -11,7 +12,10 @@ if (!player) return Astro.redirect(`/api/auth/discord/login`);
 
 const c = await getEntry('characters', slug);
 if (!c) return Astro.redirect('/characters');
-if (!c.data.discordId || c.data.discordId !== player.discordId) {
+
+const isOwner = c.data.discordId != null && c.data.discordId === player.discordId;
+const isDM = isDmForCampaign(Astro.locals.runtime.env.DM_DISCORD_IDS, player.discordId, c.data.campaign);
+if (!isOwner && !isDM) {
   return Astro.redirect(`/characters/${slug}`);
 }
 

@@ -4,6 +4,7 @@ import type { APIRoute } from 'astro';
 import { getEntry } from 'astro:content';
 import { z } from 'zod';
 import type { CharacterStateRow } from '../../../lib/characterState';
+import { isDmForCampaign } from '../../../lib/permissions';
 
 const abilityScore = z.number().int().min(1).max(30);
 
@@ -63,7 +64,9 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
   if (!entry) {
     return new Response(JSON.stringify({ error: 'not_found' }), { status: 404 });
   }
-  if (!entry.data.discordId || entry.data.discordId !== player.discordId) {
+  const isOwner = entry.data.discordId != null && entry.data.discordId === player.discordId;
+  const isDM = isDmForCampaign(locals.runtime.env.DM_DISCORD_IDS, player.discordId, entry.data.campaign);
+  if (!isOwner && !isDM) {
     return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403 });
   }
 

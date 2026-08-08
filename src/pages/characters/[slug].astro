@@ -5,6 +5,7 @@ import Base from '../../layouts/Base.astro';
 import { getEntry, render } from 'astro:content';
 import { Image } from 'astro:assets';
 import { mergeCharacterState, type CharacterStateRow } from '../../lib/characterState';
+import { isDmForCampaign } from '../../lib/permissions';
 
 const slug = Astro.params.slug!;
 const c = await getEntry('characters', slug);
@@ -19,9 +20,9 @@ const row = await Astro.locals.runtime.env.DB.prepare(
   .first<CharacterStateRow>();
 
 const live = mergeCharacterState(c.data, row);
-const canEdit = Astro.locals.player?.discordId != null && Astro.locals.player.discordId === c.data.discordId;
-const dmDiscordIds = (Astro.locals.runtime.env.DM_DISCORD_IDS ?? '').split(',').map(id => id.trim());
-const isDM = Astro.locals.player?.discordId != null && dmDiscordIds.includes(Astro.locals.player.discordId);
+const isOwner = Astro.locals.player?.discordId != null && Astro.locals.player.discordId === c.data.discordId;
+const isDM = isDmForCampaign(Astro.locals.runtime.env.DM_DISCORD_IDS, Astro.locals.player?.discordId, c.data.campaign);
+const canEdit = isOwner || isDM;
 const backstoryParagraphs = live.backstory !== null ? live.backstory.split(/\n{2,}/) : null;
 
 function mod(score: number | undefined): string {

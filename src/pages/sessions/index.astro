@@ -3,12 +3,12 @@ export const prerender = false;
 
 import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
+import { isDmForAnyCampaign } from '../../lib/permissions';
 
 const allSessions = (await getCollection('sessions'))
   .sort((a, b) => b.data.sessionNumber - a.data.sessionNumber);
 
-const dmDiscordIds = (Astro.locals.runtime.env.DM_DISCORD_IDS ?? '').split(',').map(id => id.trim());
-const isDM = Astro.locals.player?.discordId != null && dmDiscordIds.includes(Astro.locals.player.discordId);
+const isDM = isDmForAnyCampaign(Astro.locals.runtime.env.DM_DISCORD_IDS, Astro.locals.player?.discordId);
 
 const latest = allSessions[0];
 const oldest = allSessions[allSessions.length - 1];
