@@ -74,7 +74,7 @@ const hasCombat = Object.values(combat).some(v => v !== undefined);
       <div class="banner-portrait-wrap">
         <div class="banner-portrait">
           {c.data.portrait
-            ? <Image src={c.data.portrait} alt={c.data.name} width={400} height={600} class="banner-portrait-img" loading="eager" fetchpriority="high" />
+            ? <Image src={c.data.portrait} alt={c.data.name} width={400} height={600} class:list={['banner-portrait-img', { inactive: c.data.active === false }]} loading="eager" fetchpriority="high" />
             : <i class={`fa-solid ${classIcon(c.data.characterClass)}`}></i>
           }
         </div>
@@ -409,7 +409,7 @@ const hasCombat = Object.values(combat).some(v => v !== undefined);
     position: absolute; inset: 0;
     background: var(--teal-tint);
     mix-blend-mode: multiply;
-    opacity: 0.55;
+    opacity: 0.15;
     pointer-events: none;
   }
   .banner-portrait-img {
@@ -417,6 +417,10 @@ const hasCombat = Object.values(combat).some(v => v !== undefined);
     width: 100%; height: 100%;
     object-fit: cover;
     object-position: top center;
+    filter: brightness(1.08);
+  }
+  .banner-portrait-img.inactive {
+    filter: brightness(1.08) grayscale(0.85);
   }
 
   /* Meta */
