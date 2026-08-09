@@ -186,6 +186,9 @@ function classIcon(cls?: string): string {
   }
   .roster-card:hover .roster-name { color: var(--mist-bright); }
 
+  .roster-card--inactive .roster-img { filter: grayscale(0.85); }
+  .roster-card--inactive:hover .roster-img { filter: brightness(1.08) grayscale(0.85); }
+
   /* Portrait */
   .roster-portrait {
     aspect-ratio: 2/3;
