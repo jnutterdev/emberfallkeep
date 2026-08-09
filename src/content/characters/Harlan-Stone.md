@@ -2,7 +2,7 @@
 name: Harlan Stone
 player: John
 campaign: a-veil-of-secrecy
-active: true
+active: false
 portrait: /uploads/IMG-20260224-WA00031.png
 race: Human
 characterClass: Druid
@@ -25,7 +25,7 @@ combat:
   hitDice: 3d8
 xpTracking: XP
 xp: 900
-discordId: "455879573113012227"
+discordId: '455879573113012227'
 dmNotes: ''
 ---
 
