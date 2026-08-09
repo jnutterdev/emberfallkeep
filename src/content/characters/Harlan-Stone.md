@@ -2,7 +2,7 @@
 name: Harlan Stone
 player: John
 campaign: a-veil-of-secrecy
-active: false
+active: true
 portrait: /uploads/IMG-20260224-WA00031.png
 race: Human
 characterClass: Druid
