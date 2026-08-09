@@ -26,6 +26,7 @@
   "vars": {
     "DISCORD_CLIENT_ID": "1535296931398557817",
     "DISCORD_REDIRECT_URI": "https://emberfallkeep.com/api/auth/discord/callback",
+    "DISCORD_GUILD_ID": "1483900382869454998",
     "DM_DISCORD_IDS": "455879573113012227,300403455971819521:a-veil-of-secrecy"
   }
 }

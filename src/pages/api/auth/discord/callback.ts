@@ -14,6 +14,22 @@ interface DiscordUser {
   avatar: string | null;
 }
 
+interface DiscordGuildMember {
+  nick: string | null;
+}
+
+// The nickname a player set specifically in the Emberfall Keep server takes
+// priority over their account-wide Discord display name, since that's the
+// name the rest of the table actually knows them by.
+async function fetchGuildNick(accessToken: string, guildId: string): Promise<string | null> {
+  const res = await fetch(`https://discord.com/api/users/@me/guilds/${guildId}/member`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) return null;
+  const member = await res.json<DiscordGuildMember>();
+  return member.nick;
+}
+
 export const GET: APIRoute = async ({ url, cookies, redirect, locals }) => {
   const env = locals.runtime.env;
 
@@ -45,7 +61,8 @@ export const GET: APIRoute = async ({ url, cookies, redirect, locals }) => {
   });
   if (!userRes.ok) return redirect('/characters?auth_error=user');
   const user = await userRes.json<DiscordUser>();
-  const displayName = user.global_name ?? user.username;
+  const guildNick = await fetchGuildNick(accessToken, env.DISCORD_GUILD_ID);
+  const displayName = guildNick ?? user.global_name ?? user.username;
 
   await env.DB.prepare(
     `INSERT INTO players (discord_id, username, avatar, created_at, updated_at)

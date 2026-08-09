@@ -18,7 +18,7 @@ export const GET: APIRoute = ({ cookies, redirect, locals }) => {
     client_id: env.DISCORD_CLIENT_ID,
     redirect_uri: env.DISCORD_REDIRECT_URI,
     response_type: 'code',
-    scope: 'identify',
+    scope: 'identify guilds.members.read',
     state,
   });
 

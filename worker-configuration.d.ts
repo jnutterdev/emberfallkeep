@@ -7,6 +7,7 @@ interface __BaseEnv_Env {
 	DISCORD_CLIENT_ID: string;
 	DISCORD_CLIENT_SECRET: string;
 	DISCORD_REDIRECT_URI: string;
+	DISCORD_GUILD_ID: string;
 	SESSION_SECRET: string;
 	CLOUDFLARE_ACCOUNT_ID: string;
 	CLOUDFLARE_API_TOKEN: string;
@@ -23,7 +24,7 @@ type StringifyValues<EnvType extends Record<string, unknown>> = {
 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
 };
 declare namespace NodeJS {
-	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "DISCORD_CLIENT_ID" | "DISCORD_CLIENT_SECRET" | "DISCORD_REDIRECT_URI" | "SESSION_SECRET" | "CLOUDFLARE_ACCOUNT_ID" | "CLOUDFLARE_API_TOKEN" | "DM_DISCORD_IDS">> {}
+	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "DISCORD_CLIENT_ID" | "DISCORD_CLIENT_SECRET" | "DISCORD_REDIRECT_URI" | "DISCORD_GUILD_ID" | "SESSION_SECRET" | "CLOUDFLARE_ACCOUNT_ID" | "CLOUDFLARE_API_TOKEN" | "DM_DISCORD_IDS">> {}
 }
 
 // Begin runtime types
