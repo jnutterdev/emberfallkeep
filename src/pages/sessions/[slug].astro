@@ -142,6 +142,13 @@ function stripTitlePrefix(title: string): string {
       </nav>
     </div>
   </main>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <button type="button" class="lightbox-close" aria-label="Close image">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <img class="lightbox-img" src="" alt="" />
+  </div>
 </Base>
 
 <style>
@@ -279,6 +286,11 @@ function stripTitlePrefix(title: string): string {
   .prose :global(img) {
     border: 1px solid var(--border-default);
     display: block;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .prose :global(img:hover) {
+    border-color: var(--border-mist);
   }
   .prose :global(img.float-left),
   .prose :global(img.float-right) {
@@ -404,6 +416,64 @@ function stripTitlePrefix(title: string): string {
     }
     .session-nav-next .session-nav-text { text-align: left; }
   }
+
+  /* ── Lightbox ─────────────────────────────────────────────────────── */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    background: rgba(20, 18, 17, 0.92);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s;
+  }
+  .lightbox.open {
+    opacity: 1;
+    visibility: visible;
+  }
+  .lightbox-img {
+    max-width: 90vw;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
+    border: 1px solid var(--border-mist);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    transform: scale(0.97);
+    transition: transform 0.25s ease;
+  }
+  .lightbox.open .lightbox-img {
+    transform: scale(1);
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--void-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 50%;
+    color: var(--mist-mid);
+    font-size: 16px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .lightbox-close:hover {
+    color: var(--mist-bright);
+    border-color: var(--border-mist);
+  }
+  @media (max-width: 600px) {
+    .lightbox { padding: 1.5rem; }
+    .lightbox-close { top: 1rem; right: 1rem; }
+  }
 </style>
 
 <script>
@@ -413,6 +483,40 @@ function stripTitlePrefix(title: string): string {
   document.querySelectorAll('.prose img').forEach((img, i) => {
     img.classList.add(i % 2 === 0 ? 'float-left' : 'float-right');
   });
+
+  // Lightbox — click any recap image to view it full-size
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = lightbox?.querySelector<HTMLImageElement>('.lightbox-img');
+  const lightboxClose = lightbox?.querySelector<HTMLButtonElement>('.lightbox-close');
+
+  if (lightbox && lightboxImg && lightboxClose) {
+    const openLightbox = (src: string, alt: string) => {
+      lightboxImg.src = src;
+      lightboxImg.alt = alt;
+      lightbox.hidden = false;
+      requestAnimationFrame(() => lightbox.classList.add('open'));
+    };
+
+    const closeLightbox = () => {
+      lightbox.classList.remove('open');
+      lightbox.addEventListener('transitionend', () => {
+        lightbox.hidden = true;
+        lightboxImg.src = '';
+      }, { once: true });
+    };
+
+    document.querySelectorAll<HTMLImageElement>('.prose img').forEach((img) => {
+      img.addEventListener('click', () => openLightbox(img.src, img.alt));
+    });
+
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) closeLightbox();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+    });
+  }
 
   function fmtTime(seconds: number): string {
     if (!Number.isFinite(seconds)) return '0:00';
