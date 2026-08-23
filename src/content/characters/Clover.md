@@ -2,7 +2,7 @@
 name: Clover
 player: Dee
 campaign: a-veil-of-secrecy
-active: true
+active: false
 portrait: /uploads/Clover-Portrait_3.png
 race: Tabaxi
 characterClass: Bard
@@ -16,4 +16,3 @@ A small tabaxi bard from Waterdeep, teaching at a bardic college when a letter f
 A hooded figure appeared in the back of her classroom, spoke her name as though from right beside her, and vanished after a vision of vast, wrong-shaped cubes floating in darkness. When it returned, it seized her wrists and said one word: REMEMBER. The ceiling came down.
 
 She woke in a pod-lab far from home, beside a scarred stranger named Cinder. A tiefling shopkeeper named Pock hauled them both through a scrap-metal portal into Sigil, the City of Doors — and straight into the party's story.
-
